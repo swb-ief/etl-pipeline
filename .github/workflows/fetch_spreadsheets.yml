@@ -31,7 +31,8 @@ jobs:
       env:
         SPREADSHEET_API_KEY: ${{ secrets.SPREADSHEET_API_KEY }}
         SPREADSHEET_IDS: ${{ secrets.SPREADSHEET_IDS }}
-      run: python -m spreadsheets_fetcher $SPREADSHEET_IDS ${{ github.event.inputs.spreadsheet_path }}
+        OUTPUT_DIR: ${{ github.event.inputs.spreadsheet_path }}
+      run: python -m spreadsheets_fetcher $SPREADSHEET_IDS $OUTPUT_DIR
     - uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: Pushing csv files.
