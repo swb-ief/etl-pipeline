@@ -1,6 +1,6 @@
 name: FetchSpreadsheets
 
-on: respository_dispatch
+on: [workflow_dispatch]
 
 jobs:
   fetch:
