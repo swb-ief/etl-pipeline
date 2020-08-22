@@ -90,4 +90,9 @@ don't have anything on stage.
 
 Fetch the spreadsheets using the `spreadsheets_fetch` module.
 
+This requires two secrets:
+
+- SPREADSHEET_API_KEY: Which should be the spreadsheet api key.
+- SPREADSHEET_IDS: The list of spreadsheets to fetch, separated by one space eg. `id1 id2 id3 id4` 
+
 TODO: This is still a work in progress, since we don't know what to do with the data.  
