@@ -1,9 +1,6 @@
 name: Fetch spreadsheets
 
-# we still don't want to run this on a schedule
-#on:
-#  schedule:
-#    - cron:  '0 10 * * *'
+on: respository_dispatch
 
 jobs:
   fetch:
