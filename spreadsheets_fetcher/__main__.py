@@ -4,7 +4,7 @@ from spreadsheets_fetcher import fetcher
 
 
 @click.command()
-@click.argument("spreadsheets_ids", nargs=-1)
+@click.argument("spreadsheets_ids", nargs=-1, required=True)
 def fetch_spreadsheets_and_echo(spreadsheets_ids):
     """
     Download each id of SPREADSHEET_IDS
