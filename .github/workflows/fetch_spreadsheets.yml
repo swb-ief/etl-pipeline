@@ -3,6 +3,23 @@ name: FetchSpreadsheets
 on:
   pull_request:
   workflow_dispatch:
+    inputs:
+      api_key:
+        description: 'Spreadsheet API Key'
+        required: true
+        default: ${{ secrets.SPREADSHEET_API_KEY }}
+      spreadsheet_ids:
+        description: 'Spreadsheets IDs separated by commas'
+        required: true
+        default: ${{ secrets.SPREADSHEET_IDS }}
+      spreadsheet_path:
+        description: 'The path where to save the csv'
+        required: true
+        default: './csv/spreadsheets/'
+  schedule:
+    - cron:  '0 10 * * *'
+
+
 
 jobs:
   fetch:
@@ -19,6 +36,6 @@ jobs:
         pip install -r requirements.txt
     - name: Run spreadsheet fetch
       env:
-        SPREADSHEET_API_KEY: ${{ secrets.SPREADSHEET_API_KEY }}
-        SPREADSHEET_IDS: ${{ secrets.SPREADSHEET_IDS }}
-      run: python -m spreadsheets_fetcher $SPREADSHEET_IDS
+        SPREADSHEET_API_KEY: ${{ github.event.inputs.api_key }}
+        SPREADSHEET_IDS: ${{ github.event.inputs.spreadsheet_ids }}
+      run: python -m spreadsheets_fetcher $SPREADSHEET_IDS ${{ github.event.inputs.spreadsheet_path }}
