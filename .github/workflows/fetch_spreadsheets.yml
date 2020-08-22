@@ -1,7 +1,9 @@
 name: FetchSpreadsheets
 
 on:
+  push:
   pull_request:
+  pull_request_target:
   workflow_dispatch:
     inputs:
       api_key:
@@ -18,7 +20,6 @@ on:
         default: './csv/spreadsheets/'
   schedule:
     - cron:  '0 10 * * *'
-
 
 
 jobs:
@@ -39,3 +40,6 @@ jobs:
         SPREADSHEET_API_KEY: ${{ github.event.inputs.api_key }}
         SPREADSHEET_IDS: ${{ github.event.inputs.spreadsheet_ids }}
       run: python -m spreadsheets_fetcher $SPREADSHEET_IDS ${{ github.event.inputs.spreadsheet_path }}
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: Pushing csv files.
