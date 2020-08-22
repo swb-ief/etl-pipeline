@@ -6,7 +6,7 @@ name: Fetch spreadsheets
 #    - cron:  '0 10 * * *'
 
 jobs:
-  scheduled:
+  fetch:
     runs-on: ubuntu-latest
     steps:
     - name: Check out this repo
