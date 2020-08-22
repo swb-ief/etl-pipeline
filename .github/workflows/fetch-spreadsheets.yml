@@ -1,4 +1,4 @@
-name: Fetch spreadsheets
+name: FetchSpreadsheets
 
 on: respository_dispatch
 
