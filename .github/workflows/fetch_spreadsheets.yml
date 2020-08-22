@@ -9,11 +9,11 @@ on:
       api_key:
         description: 'Spreadsheet API Key'
         required: true
-        default: ${{ secrets.SPREADSHEET_API_KEY }}
+        default: '${{ secrets.SPREADSHEET_API_KEY }}'
       spreadsheet_ids:
         description: 'Spreadsheets IDs separated by commas'
         required: true
-        default: ${{ secrets.SPREADSHEET_IDS }}
+        default: '${{ secrets.SPREADSHEET_IDS }}'
       spreadsheet_path:
         description: 'The path where to save the csv'
         required: true
