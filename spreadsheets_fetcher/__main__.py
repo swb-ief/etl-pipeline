@@ -23,7 +23,9 @@ def fetch_spreadsheets_and_echo(spreadsheets_ids, output_dir):
     values = [
         fetcher.fetch_spreadsheet(spreadsheet_id) for spreadsheet_id in spreadsheets_ids
     ]
-    results = [sheets_to_csv.spreadsheet_values_to_csv(output_dir, value) for value in values]
+    results = [
+        sheets_to_csv.spreadsheet_values_to_csv(output_dir, value) for value in values
+    ]
     click.echo(results)
 
 
