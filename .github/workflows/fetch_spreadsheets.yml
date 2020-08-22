@@ -6,10 +6,6 @@ on:
   pull_request_target:
   workflow_dispatch:
     inputs:
-      api_key:
-        description: 'Spreadsheet API Key'
-      spreadsheet_ids:
-        description: 'Spreadsheets IDs separated by commas'
       spreadsheet_path:
         description: 'The path where to save the csv'
         required: true
@@ -33,8 +29,8 @@ jobs:
         pip install -r requirements.txt
     - name: Run spreadsheet fetch
       env:
-        SPREADSHEET_API_KEY: ${{ github.event.inputs.api_key || secrets.SPREADSHEET_API_KEY }}
-        SPREADSHEET_IDS: ${{ github.event.inputs.spreadsheet_ids || secrets.SPREADSHEET_IDS }}
+        SPREADSHEET_API_KEY: ${{ secrets.SPREADSHEET_API_KEY }}
+        SPREADSHEET_IDS: ${{ secrets.SPREADSHEET_IDS }}
       run: python -m spreadsheets_fetcher $SPREADSHEET_IDS ${{ github.event.inputs.spreadsheet_path }}
     - uses: stefanzweifel/git-auto-commit-action@v4
       with:
