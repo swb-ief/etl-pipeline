@@ -1,0 +1,32 @@
+name: FetchSpreadsheets
+
+on:
+  push:
+  pull_request:
+  pull_request_target:
+  schedule:
+    - cron:  '0 10 * * *'
+
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out this repo
+      uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install Python dependencies
+      run: |
+        pip install -r requirements.txt
+    - name: Run spreadsheet fetch
+      env:
+        SPREADSHEET_API_KEY: ${{ secrets.SPREADSHEET_API_KEY }}
+        SPREADSHEET_IDS: ${{ secrets.SPREADSHEET_IDS }}
+        OUTPUT_DIR: './csv/spreadsheets/'
+      run: python -m spreadsheets_fetcher $SPREADSHEET_IDS $OUTPUT_DIR
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: Pushing csv files.
