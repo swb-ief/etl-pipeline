@@ -1,0 +1,8 @@
+history_json_url: "https://raw.githubusercontent.com/covid19india/api/gh-pages/v4/data-all.json"
+output_file: "output/city_stats.csv"
+states_and_districts:
+  - "MH":
+    - "Mumbai"
+    #- "Pune"
+  #- "UP":
+   # - "Agra"
