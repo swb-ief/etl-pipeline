@@ -34,8 +34,8 @@ jobs:
             git stash save -u -a
             git fetch origin gh-pages
             git checkout gh-pages
-            git stash show -p | git apply && git stash drop
-            git add csv/*
+            git stash apply
+            git add v1/*
             git commit -m "pushing result csv"
             git push
   
@@ -72,7 +72,7 @@ jobs:
           git stash save -u -a
           git fetch origin gh-pages
           git checkout gh-pages
-          git stash show -p | git apply && git stash drop
-          git add csv/*
+          git stash apply
+          git add v1/*
           git commit -m "pushing result csv"
           git push
