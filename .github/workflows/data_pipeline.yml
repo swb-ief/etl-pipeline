@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Check out this repo
         uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -28,6 +30,7 @@ jobs:
         run: python -m pdf_scrapper scrap-pdf $PDF_FILE_PATH csv/positive-wards
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
+          ref: ${{ github.head_ref }}
           branch: gh-pages
           commit_message: pushing csv files for stopcoronavirus.mcgm.gov.in pdf dashboard.
           file_pattern: ./csv/**/*.csv ./csv/positive-wards/*.csv
@@ -41,6 +44,8 @@ jobs:
       run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
     - name: Check out this repo
       uses: actions/checkout@v2
+      with:
+        ref: ${{ github.head_ref }}
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
