@@ -44,6 +44,7 @@ def extract_wards_data_from_page(positive_cases_page):
     ]
     return result
 
+
 def extract_ward_data_from_pdf_line(ward_pdf_line):
     return {
         "Ward_Name": ward_pdf_line[0],

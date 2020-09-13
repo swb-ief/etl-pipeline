@@ -5,8 +5,13 @@ import click
 
 from .stop_covid_dashboard_scrapper import scrap_pdf_to_csv
 
+
 @click.command()
-@click.option("--dashboard-pdf-url", default="http://stopcoronavirus.mcgm.gov.in/assets/docs/Dashboard.pdf", show_default=True)
+@click.option(
+    "--dashboard-pdf-url",
+    default="http://stopcoronavirus.mcgm.gov.in/assets/docs/Dashboard.pdf",
+    show_default=True,
+)
 @click.option("--output", default="stopcovid-dashboard.pdf", show_default=True)
 def download_pdf(dashboard_pdf_url, output):
     click.echo(f"Fetching {dashboard_pdf_url} into {output}")
@@ -20,7 +25,7 @@ def download_pdf(dashboard_pdf_url, output):
     "--page-with-positive-breakdown",
     default=22,
     help="The page containing the ward-wise breakdown of positive cases.",
-    show_default=True
+    show_default=True,
 )
 def scrap_pdf(pdf_files, output_dir, page_with_positive_breakdown):
     """Given a PDF_FILE tries to fetch the data from all wards.
@@ -35,16 +40,20 @@ def scrap_pdf(pdf_files, output_dir, page_with_positive_breakdown):
 
     paths = []
     for pdf_file in pdf_files:
-        date, csv_path = scrap_pdf_to_csv(pdf_file, output_dir, page_with_positive_breakdown)
+        date, csv_path = scrap_pdf_to_csv(
+            pdf_file, output_dir, page_with_positive_breakdown
+        )
         paths.append(csv_path)
         click.echo(f"Data from {date} has been downloaded to {csv_path}")
 
     click.echo(f"Saved the following files {paths}")
     return paths
 
+
 @click.group()
 def cli():
     pass
+
 
 cli.add_command(download_pdf)
 cli.add_command(scrap_pdf)
