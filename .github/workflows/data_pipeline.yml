@@ -28,6 +28,7 @@ jobs:
         run: python -m pdf_scrapper scrap-pdf $PDF_FILE_PATH csv/positive-wards
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
+          branch: gh-pages
           commit_message: pushing csv files for stopcoronavirus.mcgm.gov.in pdf dashboard.
           file_pattern: ./csv/**/*.csv ./csv/positive-wards/*.csv
   
@@ -58,4 +59,5 @@ jobs:
       run: python data_pipeline/calculate_metrics.py --input-path $INPUT_PATH --output-path $OUTPUT_PATH
     - uses: stefanzweifel/git-auto-commit-action@v4
       with:
+        branch: gh-pages
         commit_message: Pushing csv files.

@@ -27,4 +27,5 @@ jobs:
       run: python -m spreadsheets_fetcher $SPREADSHEET_IDS $OUTPUT_DIR
     - uses: stefanzweifel/git-auto-commit-action@v4
       with:
+        branch: gh-pages
         commit_message: Pushing csv files.
