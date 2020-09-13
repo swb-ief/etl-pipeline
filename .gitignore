@@ -139,5 +139,4 @@ cython_debug/
 
 .idea
 
-v1/**/*
-v1
+v1/**/*.csv
