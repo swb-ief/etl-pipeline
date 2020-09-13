@@ -4,10 +4,11 @@ on:
   workflow_dispatch:
   schedule:
     - cron:  '0 10 * * *'
+  push:
 
 
 jobs:
-  fetch:
+  fetch_spreadsheets:
     runs-on: ubuntu-latest
     steps:
     - name: Check out this repo

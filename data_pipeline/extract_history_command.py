@@ -14,6 +14,7 @@ from pandas.io.json import json_normalize
     "--history-json-url",
     default="https://raw.githubusercontent.com/covid19india/api/gh-pages/v4/data-all.json",
     help="The URL for the covid19india v4 json",
+    show_default=True
 )
 @click.option(
     "--states-and-districts",
@@ -27,6 +28,7 @@ from pandas.io.json import json_normalize
     "--output-file",
     default="city_stats.csv",
     help="The path of the new csv containing the cities stats from the v4 history json.",
+    show_default=True
 )
 def extract_history_command(history_json_url, states_and_districts, output_file):
     """Extracts history records from the covid19india v4 data all API which should be defined by the --history-json-url argument.
