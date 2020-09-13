@@ -6,8 +6,8 @@ from .stop_covid_dashboard_scrapper import scrap_pdf_to_csv
 
 
 @click.command()
-@click.argument("pdf_files", nargs=-1, required=True)
-@click.argument("output_dir", nargs=1, required=True)
+@click.argument("pdf-files", nargs=-1, required=True)
+@click.argument("output-dir", nargs=1, required=True)
 def scrap_pdf(pdf_files, output_dir):
     """Given a PDF_FILE tries to fetch the data from all wards.
 
@@ -28,6 +28,7 @@ def scrap_pdf(pdf_files, output_dir):
 
     click.echo(f"Saved the following files {paths}")
     return paths
+
 
 if __name__ == "__main__":
     scrap_pdf()
