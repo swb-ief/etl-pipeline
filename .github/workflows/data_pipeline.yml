@@ -4,14 +4,13 @@ on:
   workflow_dispatch: 
   schedule:
     - cron:  '0 10 * * *'
-  push:  
 
 jobs:
   scrape_pdf:
     runs-on: ubuntu-latest
     env:
       PDF_SOURCE: 'http://stopcoronavirus.mcgm.gov.in/assets/docs/Dashboard.pdf'
-      PDF_FILE_PATH: 'stopcovid-dashboard.pdf'
+      PDF_FILE_PATH: '/tmp/stopcovid-dashboard.pdf'
     steps:
       - name: Check out this repo
         uses: actions/checkout@v2
