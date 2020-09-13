@@ -28,12 +28,13 @@ jobs:
           python -m pdf_scrapper download-pdf --dashboard-pdf-url $PDF_SOURCE --output $PDF_FILE_PATH
       - name: Exact data from pdf file
         run: python -m pdf_scrapper scrap-pdf $PDF_FILE_PATH csv/positive-wards
-      - uses: stefanzweifel/git-auto-commit-action@master
-        with:
-          ref: ${{ github.head_ref }}
-          branch: gh-pages
-          commit_message: pushing csv files for stopcoronavirus.mcgm.gov.in pdf dashboard.
-          file_pattern: ./csv/**/*.csv ./csv/positive-wards/*.csv
+      - uses: actions/checkout@v2
+        run: |
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            git add csv/*
+            git commit -m "pushing result csv"
+            git push origin gh-pages
   
         
   covid19india_metrics:
@@ -62,7 +63,10 @@ jobs:
         INPUT_PATH: './csv/data/city-stats-${{steps.date.outputs.date}}.csv'
         OUTPUT_PATH: './csv/data/metrics-${{steps.date.outputs.date}}.csv'
       run: python data_pipeline/calculate_metrics.py --input-path $INPUT_PATH --output-path $OUTPUT_PATH
-    - uses: stefanzweifel/git-auto-commit-action@master
-      with:
-        branch: gh-pages
-        commit_message: Pushing csv files.
+    - uses: actions/checkout@v2
+      run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add csv/*
+          git commit -m "pushing result csv"
+          git push origin gh-pages
