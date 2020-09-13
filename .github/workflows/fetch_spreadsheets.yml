@@ -14,8 +14,6 @@ jobs:
       uses: actions/checkout@v2
       with:
         ref: ${{ github.head_ref }}
-    - name: Prepare repository
-      run: git checkout "${GITHUB_REF:11}"
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
@@ -29,7 +27,7 @@ jobs:
         SPREADSHEET_IDS: ${{ secrets.SPREADSHEET_IDS }}
         OUTPUT_DIR: './csv/spreadsheets/'
       run: python -m spreadsheets_fetcher $SPREADSHEET_IDS $OUTPUT_DIR
-    - uses: stefanzweifel/git-auto-commit-action@v4
+    - uses: stefanzweifel/git-auto-commit-action@master
       with:
         branch: gh-pages
         commit_message: Pushing csv files.

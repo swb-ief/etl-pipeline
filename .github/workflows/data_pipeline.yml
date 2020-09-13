@@ -16,8 +16,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: ${{ github.head_ref }}
-      - name: Prepare repository
-        run: git checkout "${GITHUB_REF:11}"
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -30,7 +28,7 @@ jobs:
           python -m pdf_scrapper download-pdf --dashboard-pdf-url $PDF_SOURCE --output $PDF_FILE_PATH
       - name: Exact data from pdf file
         run: python -m pdf_scrapper scrap-pdf $PDF_FILE_PATH csv/positive-wards
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - uses: stefanzweifel/git-auto-commit-action@master
         with:
           ref: ${{ github.head_ref }}
           branch: gh-pages
@@ -48,8 +46,6 @@ jobs:
       uses: actions/checkout@v2
       with:
         ref: ${{ github.head_ref }}
-    - name: Prepare repository
-      run: git checkout "${GITHUB_REF:11}"
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
@@ -66,7 +62,7 @@ jobs:
         INPUT_PATH: './csv/data/city-stats-${{steps.date.outputs.date}}.csv'
         OUTPUT_PATH: './csv/data/metrics-${{steps.date.outputs.date}}.csv'
       run: python data_pipeline/calculate_metrics.py --input-path $INPUT_PATH --output-path $OUTPUT_PATH
-    - uses: stefanzweifel/git-auto-commit-action@v4
+    - uses: stefanzweifel/git-auto-commit-action@master
       with:
         branch: gh-pages
         commit_message: Pushing csv files.
