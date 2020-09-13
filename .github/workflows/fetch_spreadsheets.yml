@@ -27,7 +27,6 @@ jobs:
         SPREADSHEET_IDS: ${{ secrets.SPREADSHEET_IDS }}
         OUTPUT_DIR: './csv/spreadsheets/'
       run: python -m spreadsheets_fetcher $SPREADSHEET_IDS $OUTPUT_DIR
-    - uses: actions/checkout@v2
     - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
