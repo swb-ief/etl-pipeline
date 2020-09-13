@@ -16,6 +16,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: ${{ github.head_ref }}
+      - name: Prepare repository
+        run: git checkout "${GITHUB_REF:11}"
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -46,6 +48,8 @@ jobs:
       uses: actions/checkout@v2
       with:
         ref: ${{ github.head_ref }}
+    - name: Prepare repository
+      run: git checkout "${GITHUB_REF:11}"
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
