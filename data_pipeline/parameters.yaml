@@ -3,6 +3,6 @@ output_file: "output/city_stats.csv"
 states_and_districts:
   - "MH":
     - "Mumbai"
-    #- "Pune"
+    - "Pune"
   #- "UP":
    # - "Agra"
