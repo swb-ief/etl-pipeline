@@ -31,8 +31,7 @@ from pandas.io.json import json_normalize
     show_default=True,
 )
 def extract_history_command(history_json_url, states_and_districts, output_file):
-    """Extracts history records from the covid19india v4 data all API which should be defined by the --history-json-url argument.
-    """
+    """Extracts history records from the covid19india v4 data all API which should be defined by the --history-json-url argument."""
     click.echo(f"Fetching json from {history_json_url}")
     df = pd.read_json(history_json_url)
     df = df.T
