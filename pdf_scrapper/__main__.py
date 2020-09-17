@@ -2,6 +2,7 @@ import os
 from urllib.request import urlretrieve
 
 import click
+import pandas as pd
 
 from .stop_covid_dashboard_scrapper import scrap_pdf_to_csv
 
@@ -14,8 +15,10 @@ from .stop_covid_dashboard_scrapper import scrap_pdf_to_csv
 )
 @click.option("--output", default="stopcovid-dashboard.pdf", show_default=True)
 def download_pdf(dashboard_pdf_url, output):
+    datetime_suffix = pd.Timestamp.utcnow().isoformat()
+    output_result = f"{datetime_suffix}-{output}"
     click.echo(f"Fetching {dashboard_pdf_url} into {output}")
-    return urlretrieve(dashboard_pdf_url, output)
+    return urlretrieve(dashboard_pdf_url, output_result)
 
 
 @click.command()

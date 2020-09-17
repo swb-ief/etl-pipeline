@@ -25,11 +25,17 @@ jobs:
       env:
         SPREADSHEET_API_KEY: ${{ secrets.SPREADSHEET_API_KEY }}
         SPREADSHEET_IDS: ${{ secrets.SPREADSHEET_IDS }}
-        OUTPUT_DIR: './csv/spreadsheets/'
+        OUTPUT_DIR: './v1/spreadsheets/'
       run: python -m spreadsheets_fetcher $SPREADSHEET_IDS $OUTPUT_DIR
+    - uses: actions/upload-artifact@v2
+      with:
+        name: csv
+        path: v1/spreadsheets
     - run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add csv/*
+          git checkout gh-pages
+          git pull --no-edit origin gh-pages
+          git add v1/*
           git commit -m "pushing result csv"
           git push origin gh-pages
