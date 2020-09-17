@@ -80,7 +80,7 @@ def scrap_pdf_to_csv(source_file_path, output_path, page=22):
     ward_pdf_data = extract_wards_data_from_page(positive_cases_page)
     ward_positive_df = pdf_data_to_pandas_df(ward_pdf_data)
     date_from_pdf = re.sub("[^0-9A-z]|\s", "-", date.lower().strip())
-    datetime_suffix = pd.Timestamp.utcnow().isoformat()
+    datetime_suffix = pd.Timestamp.utcnow().timestamp()
     csv_path = f"{output_path}/ward-positive_{date_from_pdf}_{datetime_suffix}.csv"
     export_df_to_file(ward_positive_df, csv_path)
     return date, csv_path
