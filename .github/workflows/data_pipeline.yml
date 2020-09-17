@@ -10,8 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PDF_SOURCE: 'http://stopcoronavirus.mcgm.gov.in/assets/docs/Dashboard.pdf'
-      PDF_FILE_PATH: '/tmp/stopcovid-dashboard.pdf'
+      PDF_FILE_PATH: '/tmp/stopcovid-dashboard'
+
     steps:
+      - name: Set env
+        run: echo ::set-env name=PDF_FILE_PATH::$(echo $PDF_FILE_PATH-$(date +%s).pdf)
       - name: Check out this repo
         uses: actions/checkout@v2
         with:
@@ -89,5 +92,5 @@ jobs:
           git stash apply
           git add v1/*
           git commit -m "pushing result csv"
-          git pull --no-edit origin master
+          git pull --no-edit origin gh-pages
           git push
