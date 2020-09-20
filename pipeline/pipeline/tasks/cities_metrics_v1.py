@@ -9,8 +9,8 @@ import luigi
 import requests
 import pandas as pd
 
-from pipeline.extract_history import extract_history_command
-from pipeline.calculate_metrics import (
+from pipeline.extract_history_v1 import extract_history_command
+from pipeline.calculate_metrics_v1 import (
     calculate_city_states_without_hospitalizations,
     calculate_city_states_hospitalizations,
     reset_hospitalization_percentages,
