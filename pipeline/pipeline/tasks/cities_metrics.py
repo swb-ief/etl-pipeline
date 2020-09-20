@@ -44,7 +44,7 @@ class ExtractHistoryTask(luigi.Task):
         return FetchCovid19IndiaDataTask(date=self.date)
 
     def output(self):
-        return dropbox_target(f"/data/history{self.date}.csv")
+        return dropbox_target(f"/data/history/{self.date}.csv")
 
     def run(self):
         with self.input().open('r') as input_file, self.output().open('w') as output_file:

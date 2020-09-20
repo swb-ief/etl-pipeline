@@ -85,6 +85,7 @@ def scrap_positive_wards_to_csv(source_file_path, output_path, page=22):
     ward_positive_df = pdf_data_to_pandas_df(ward_pdf_data)
     breakdown_date = datetime.strptime(breakdown_date_string, 'As of %b %d, %Y')
     ward_positive_df['as_of'] = breakdown_date
+    ward_positive_df['imputed'] = False
     ward_positive_df.to_csv(output_path, index=False)
 
 # scrapping case growth

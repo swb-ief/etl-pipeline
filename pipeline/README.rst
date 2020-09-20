@@ -1,1 +1,0 @@
-# SWB covid pipeline
