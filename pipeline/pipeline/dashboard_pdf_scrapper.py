@@ -17,6 +17,7 @@ An ilustration on the are we scrapping can be seen in the image: ./section-to-sc
 
 import re
 import logging
+from datetime import datetime
 
 import pandas as pd
 import numpy as np
@@ -79,10 +80,11 @@ def export_df_to_file(df, output_ward_path):
 def scrap_positive_wards_to_csv(source_file_path, output_path, page=22):
     pdf = read_pdf(source_file_path)
     positive_cases_page = pdf.pages[page]
-    date = extract_breakdown_positive_cases_date(positive_cases_page)
+    breakdown_date_string = extract_breakdown_positive_cases_date(positive_cases_page)
     ward_pdf_data = extract_wards_data_from_page(positive_cases_page)
     ward_positive_df = pdf_data_to_pandas_df(ward_pdf_data)
-    date_from_pdf = re.sub("[^0-9A-z]|\s", "-", date.lower().strip())
+    breakdown_date = datetime.strptime(breakdown_date_string, 'As of %b %d, %Y')
+    ward_positive_df['as_of'] = breakdown_date
     ward_positive_df.to_csv(output_path, index=False)
 
 # scrapping case growth
