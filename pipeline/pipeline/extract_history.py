@@ -5,8 +5,6 @@ import pandas as pd
 from pandas import isnull
 
 
-
-
 def extract_history_command(history_json_url, states_and_districts, output_file):
     """Extracts history records from the covid19india v4 data all API which should be defined by the --history-json-url argument."""
     logging.info(f"Fetching json")

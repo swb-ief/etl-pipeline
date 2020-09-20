@@ -23,7 +23,8 @@ import pandas as pd
 import numpy as np
 import pdfplumber as pdfplumber
 import tabula
-from tabula.io import read_pdf as tabula_read_pdf 
+from tabula.io import read_pdf as tabula_read_pdf
+
 
 def read_pdf(source_file_path):
     return pdfplumber.open(source_file_path)
@@ -83,33 +84,65 @@ def scrap_positive_wards_to_csv(source_file_path, output_path, page=22):
     breakdown_date_string = extract_breakdown_positive_cases_date(positive_cases_page)
     ward_pdf_data = extract_wards_data_from_page(positive_cases_page)
     ward_positive_df = pdf_data_to_pandas_df(ward_pdf_data)
-    breakdown_date = datetime.strptime(breakdown_date_string, 'As of %b %d, %Y')
-    ward_positive_df['as_of'] = breakdown_date
-    ward_positive_df['imputed'] = False
+    breakdown_date = datetime.strptime(breakdown_date_string, "As of %b %d, %Y")
+    ward_positive_df["as_of"] = breakdown_date
+    ward_positive_df["imputed"] = False
     ward_positive_df.to_csv(output_path, index=False)
+
 
 # scrapping case growth
 def scrape_case_growth_to_csv(source_file_path, output_path, page=25):
-    new_case_growth = tabula_read_pdf(source_file_path, pages=page, multiple_tables=False)
+    new_case_growth = tabula_read_pdf(
+        source_file_path, pages=page, multiple_tables=False
+    )
     new_cases = new_case_growth[0]
 
     # check that correct table was scraped
-    nc_expected_header = ['Date of report', 'RC', 'HW', 'RS', 'RN', 'PS', 'A', 'C', 'D', 'KW', 'T', 'PN', 'N', 'FN', 'FS', 'MW', 'ME', 'B', 'E', 'GS', 'KE', 'GN', 'S', 'HE', 'L', 'Grand Total']
+    nc_expected_header = [
+        "Date of report",
+        "RC",
+        "HW",
+        "RS",
+        "RN",
+        "PS",
+        "A",
+        "C",
+        "D",
+        "KW",
+        "T",
+        "PN",
+        "N",
+        "FN",
+        "FS",
+        "MW",
+        "ME",
+        "B",
+        "E",
+        "GS",
+        "KE",
+        "GN",
+        "S",
+        "HE",
+        "L",
+        "Grand Total",
+    ]
 
     if not (new_cases.columns == nc_expected_header).all():
         logging.error(f"Incorrect columns in ward cases table page={page}")
-        
+
     row_11_values = new_cases.loc[11, nc_expected_header[1:]]
-    if not row_11_values.isnull().all(): # value for each ward should be null
+    if not row_11_values.isnull().all():  # value for each ward should be null
         logging.error(f"Unexpected values in row 11 page={page}")
-        
-    for row in range(1,11):
-        if not np.array_equal(new_cases.loc[row, nc_expected_header[1:-1]], new_cases.loc[row, nc_expected_header[1:-1]].astype(str)): # value for each ward should be a str
+
+    for row in range(1, 11):
+        if not np.array_equal(
+            new_cases.loc[row, nc_expected_header[1:-1]],
+            new_cases.loc[row, nc_expected_header[1:-1]].astype(str),
+        ):  # value for each ward should be a str
             logging.error(f"Unexpected values in rows 1-10 page={page}")
-            
+
     # clean table
     new_cases.drop(labels=11, inplace=True)
-
 
     # save ward identifier with corresponding ward name in a dictionary
     # wards = new_cases.iloc[0][1:] # series of ward names, index is identifiers
@@ -131,34 +164,53 @@ def scrape_case_growth_to_csv(source_file_path, output_path, page=25):
 
     new_cases.to_csv(output_path)
 
+
 def scrape_elderly_table(source_file_path, output_path, page=23):
     # elderly screening data
-    elderly_screening = tabula_read_pdf(source_file_path, pages=page, multiple_tables=False)
+    elderly_screening = tabula_read_pdf(
+        source_file_path, pages=page, multiple_tables=False
+    )
     elderly = elderly_screening[0]
 
     # check that correct table was scraped
-    e_expected_header = ['Wards', 'Total No. of Houses', 'Population', 'Total No. of', 'Sr Citizen', '* Sr Citizen', 'Unnamed: 6', 'Unnamed: 7']
+    e_expected_header = [
+        "Wards",
+        "Total No. of Houses",
+        "Population",
+        "Total No. of",
+        "Sr Citizen",
+        "* Sr Citizen",
+        "Unnamed: 6",
+        "Unnamed: 7",
+    ]
     if not (elderly.columns == e_expected_header).all():
         logging.error(f"Incorrect columns in elderly table elderly_page={page}")
-        
+
     row_1_values = elderly.loc[1, e_expected_header[1:]]
-    if not row_1_values.isnull().all(): # value for each ward should be null
+    if not row_1_values.isnull().all():  # value for each ward should be null
         logging.error(f"Unexpected values in row 1 elderly_page={page}")
-        
+
     for column in e_expected_header[:4]:
         if not np.array_equal(elderly[column][2:], elderly[column][2:].astype(str)):
             logging.error(f"Unexpected values in f{column} elderly_page={page}")
-        
-    if not np.array_equal(elderly['Unnamed: 6'][2:], elderly['Unnamed: 6'][2:].astype(float)):
+
+    if not np.array_equal(
+        elderly["Unnamed: 6"][2:], elderly["Unnamed: 6"][2:].astype(float)
+    ):
         logging.error(f"Unexpected values in {column}")
-        
+
     # clean table
-    elderly.loc[2, 'Wards'] = 'Daily Totals'
-    elderly.drop(labels=[0,1], inplace=True)
-    elderly.drop(columns=['* Sr Citizen','Unnamed: 7'], inplace=True)
+    elderly.loc[2, "Wards"] = "Daily Totals"
+    elderly.drop(labels=[0, 1], inplace=True)
+    elderly.drop(columns=["* Sr Citizen", "Unnamed: 7"], inplace=True)
     elderly.columns = [
-        'Wards', 'Total No. of Houses Surveyed', 'Population Covered', 'Total No. of Senior Citizens', 'Sr Citizen SPO2>95','Sr Citizen SPO2<95'
+        "Wards",
+        "Total No. of Houses Surveyed",
+        "Population Covered",
+        "Total No. of Senior Citizens",
+        "Sr Citizen SPO2>95",
+        "Sr Citizen SPO2<95",
     ]
-    elderly.index = elderly['Wards']
-    elderly.drop(columns=['Wards'], inplace=True)
+    elderly.index = elderly["Wards"]
+    elderly.drop(columns=["Wards"], inplace=True)
     elderly.to_csv(output_path)

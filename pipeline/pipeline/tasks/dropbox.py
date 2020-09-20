@@ -3,8 +3,10 @@ from io import StringIO
 from luigi.contrib.dropbox import DropboxTarget
 from pipeline.config import DROPBOX_TOKEN
 
+
 def dropbox_target(path):
     return DropboxTarget(path, DROPBOX_TOKEN)
+
 
 def textio2stringio(text_io_wrapper):
     """Converts the contents of a text io wrapper to a StringIO instance
@@ -15,6 +17,7 @@ def textio2stringio(text_io_wrapper):
     however pandas accepts an StringIO instances.
     """
     return StringIO(text_io_wrapper.read())
+
 
 def textio2binary(text_io_wrapper):
     return text_io_wrapper.buffer.read()
