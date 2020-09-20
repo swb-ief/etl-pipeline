@@ -1,8 +1,13 @@
 history_json_url: "https://raw.githubusercontent.com/covid19india/api/gh-pages/v4/data-all.json"
 output_file: "output/city_stats.csv"
+metrics_file: "output/city_metrics.csv"
+start_date: "2020-04-20"
+hospitalizations: "output/percentages_for_hospitalizations.csv"
 states_and_districts:
   - "MH":
     - "Mumbai"
     - "Pune"
-  #- "UP":
-   # - "Agra"
+    - "Nanded"
+    - "Raigad"
+  - "UP":
+    - "Agra"

@@ -8,9 +8,10 @@ import itertools
 import yaml
 import logging
 import os
+import calculate_metrics
 
 # file path info
-logging.basicConfig(format='%(levelname)s - %(message)s', level=logging.WARN)
+logging.basicConfig(format='%(levelname)s - %(message)s', level=logging.INFO)
 full_path = os.path.realpath(__file__)
 path, filename = os.path.split(full_path)
 
@@ -26,6 +27,9 @@ try:
     states_and_districts = yaml_file.get(
         "states_and_districts", [{'MH': ['Mumbai']}])
     output_file = os.path.join(path, yaml_file.get("output_file", "output/city_stats.csv"))
+    hospitalizations = os.path.join(path, yaml_file.get("hospitalizations", "percentages_for_hospitalizations.csv"))
+    start_date = yaml_file.get("start_date", "2020-04-20")
+    metrics_file = os.path.join(path, yaml_file.get("metrics_file", "output/city_metrics.csv"))
 
     logging.info("Fetching JSON from URL")
 
@@ -35,7 +39,7 @@ try:
 
     logging.info("Parsed JSON")
 
-    all_df = None
+    header = True
 
     logging.info("Reading states and districts")
     # 2. Now, filter the entries that are in the YAML
@@ -64,22 +68,21 @@ try:
             dist_df.insert(2, "state", state)
 
             # 2.5 set index for easy concat
-            dist_df.index = [df.index, dist_df.pop('district'), dist_df.pop('state')]
-            dist_df.index.set_names(["date", "district", "state"], inplace=True)
+            dist_df.index = df.index
+            dist_df.index.set_names(["date"], inplace=True)
             
             # 2.6 add genenric col names
             new_col = [col.replace("{}.".format(district), "") for col in list(dist_df.columns)]
             dist_df.rename(dict(zip(list(dist_df.columns), new_col)), axis=1, inplace=True)
 
-            # 2.7 Append to a global DF
-            if all_df is None:
-                all_df = dist_df.copy()
-            else:
-                all_df = pd.concat([all_df, dist_df])
+            # 2.7 Output to CSV
+            logging.info("Writing data to output file")
+            dist_df.to_csv(output_file, mode="w" if header else "a" , header=header)
 
-    logging.info("Writing data to output file")
-    all_df.to_csv(output_file)
-    logging.info("Output file created: {}".format(output_file))
-    logging.info(all_df.columns)
+            # Calculate metrics
+            logging.info("calculating metrics for {}".format(district))
+            calculate_metrics.calculate_metrics(dist_df, header=header, hospitalizations=hospitalizations, output=metrics_file)
+
+            header = False
 except Exception as e:
     logging.exception("Error Occurred")
