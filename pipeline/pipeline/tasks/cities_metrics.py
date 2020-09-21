@@ -77,14 +77,15 @@ class CalculateCityMetricsTask(luigi.Task):
         tmp_hospitalization.seek(0)
         with (city_metrics.open("w")) as city_metrics_file, (
             history.open("r")
-        ) as history_input_csv, (hospitalizations.open("w")) as hosptialization_output:
+        ) as history_input_csv:
             calculate_metrics_input(
                 textio2stringio(history_input_csv),
                 start_datetime,
                 tmp_hospitalization.name,
                 city_metrics_file,
             )
-            # assuming you want utf-8
+        # assuming you want utf-8
+        with (hospitalizations.open("w")) as hosptialization_output:
             hosptialization_output.write((tmp_hospitalization.read().decode("utf-8")))
         tmp_hospitalization.close()
 
