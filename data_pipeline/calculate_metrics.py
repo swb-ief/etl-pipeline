@@ -1,64 +1,112 @@
-import click
 import pandas as pd
-from functools import partial
+import numpy as np
+from numpy import random
+from scipy.interpolate import CubicSpline
 
 
-def city_field_column(city_name, field):
-    return f"{city_name}.{field}"
+def imputeCols(col):
+    col = pd.Series(np.where(col < 0, np.NaN, col))
+    preNaNs = col.isnull().astype(int).groupby(
+        col.notnull().astype(int).cumsum()).cumsum().shift(1) + 1
+    avgs = np.round(col/preNaNs)
+    avgs = avgs.bfill()
+    avgs = np.where(np.logical_or(np.isnan(col), avgs < col), avgs, col)
+    avgs = pd.Series(avgs)
+    avgs.fillna(np.round(avgs.mean()), inplace=True)
+    return avgs.to_numpy()
 
 
-@click.command()
-@click.option(
-    "--input-path",
-    default="output/city_stats.csv",
-    help="The path of the city stats csv file",
-)
-@click.option(
-    "--output-path",
-    default="output/metrics.csv",
-    help="The path of the metrics result csv file",
-)
-@click.option(
-    "--city-name",
-    default="Mumbai",
-    help="The name of the city to extract data from the input file",
-)
-def calculate_city_stats_metrics(input_path, output_path, city_name):
-    """
-    Accepts an INPUT_PATH to which makes calculations about the states of the CITY_NAME, writes the calculations metrics to the OUTPUT_PATH file.
+def generate_hospitalizations(df, hospitalizations):
 
-    INPUT_PATH A string with path of the city states file.
-    OUTPUT_PATH A string with the path to which the csv will be written.
-    CITY_NAME A string with the name of the city in the INPUT_PATH columns.
-    """
-    click.echo(f"Calculating metrics of city {city_name} from file {input_path} ")
-    df = pd.read_csv(input_path)
-    df.index = df["Unnamed: 0"]
-    df.index = pd.to_datetime(df.index)
-    df.drop("Unnamed: 0", axis=1, inplace=True)
-    field_column = partial(city_field_column, city_name)
-
-    df[field_column("total.deceased.shift")] = df[field_column("total.deceased")].shift(
-        1
-    )
-    df[field_column("Levitt.Metric")] = (
-        df[field_column("total.deceased")] / df[field_column("total.deceased.shift")]
-    )
-    df[field_column("MA.daily.tests")] = (
-        df[field_column("delta.tested")].rolling(window=21).mean()
-    )
-    df[field_column("MA.daily.positivity")] = (
-        df[field_column("delta.confirmed")] / df[field_column("delta.tested")]
-    )
-    df[field_column("percent.case.growth")] = df[
-        field_column("delta.confirmed")
-    ].pct_change()
-    click.echo(
-        f"Wrote metrics of {city_name} for {df.shape} records to file {output_path}."
-    )
-    df.to_csv(output_path)
+    try:
+        df_bck = pd.read_csv(hospitalizations, index_col=["date"])
+    except Exception as e:
+        print("Unable to find hospitalizatons file. Re-generating data")
+        df["percentages"] = random.uniform(0.12, 0.16, size=df.shape[0])
+        df_bck = pd.DataFrame(df.pop("percentages"), index=df.index)
+        df_bck.to_csv(hospitalizations)
+    df = df.join(df_bck)
+    if sum(np.isnan(df["percentages"])) > 0:
+        imp = pd.Series(random.uniform(
+            0.12, 0.16, size=sum(np.isnan(df["percentages"]))))
+        df.loc[np.isnan(df["percentages"]), ["percentages"]] = imp[0]
+        df_bck = pd.DataFrame(df["percentages"], index=df.index)
+        df_bck.to_csv(hospitalizations)
+    return df.pop("percentages") * df["delta.confirmed"]
 
 
-if __name__ == "__main__":
-    # execute only if run as a script
-    calculate_city_stats_metrics()
+def cubic_spline(col):
+    cs = CubicSpline(range(len(col)), col)
+    return cs(range(len(col)))
+
+
+def calculate_metrics(df, start_date="2020-04-20", hospitalizations="output/percentages_for_hospitalizations.csv", output="output/city_metrics.csv", header=True):
+    # add "other" columns
+    if not "delta.other" in df.columns:
+        df["delta.other"] = 0
+    if not "total.other" in df.columns:
+        df["total.other"] = 0
+
+    df.loc[df["delta.other"] < 0, ["delta.other"]] = np.nan
+    
+
+    # we start all the data from this date as a baseline date
+    drop_rows = df[df.index < start_date]
+    #print(drop_rows.index[0:5])
+    df.drop(drop_rows.index, axis=0, inplace=True)
+
+    # impute data
+    df["delta.tested"] = imputeCols(df["delta.tested"])
+    df["delta.confirmed"] = imputeCols(df["delta.confirmed"])
+    df["delta.deceased"] = imputeCols(df["delta.deceased"])
+    df["delta.recovered"] = imputeCols(df["delta.recovered"])
+    df["delta.other"] = imputeCols(df["delta.other"])
+
+    # generate new "total" columns
+    df["total.confirmed"] = df["delta.confirmed"].cumsum()
+    df["total.tested"] = df["delta.tested"].cumsum()
+    df["total.recovered"] = df["delta.recovered"].cumsum()
+    df["total.deceased"] = df["delta.deceased"].cumsum()
+    df["total.other"] = df["delta.other"].cumsum()
+
+    # generate Levitt Metric
+    df["total.deceased.shift"] = df["total.deceased"].shift(1)
+    df["levitt.Metric"] = np.log(
+        df["total.deceased"]/df.pop("total.deceased.shift"))
+
+    # 21-Day MA of daily tests
+    df["MA.21.daily.tests"] = df["delta.tested"].rolling(window=21).mean()
+
+    # TPR% per day
+    df["delta.positivity"] = (df["delta.confirmed"]/df["delta.tested"]) * 100.0
+
+    # 21-Day MA of TPR%
+    df["MA.21.delta.positivity"] = df["delta.positivity"].rolling(
+        window=21).mean()
+
+    # daily percent case growth
+    df["delta.percent.case.growth"] = df["delta.confirmed"].pct_change()
+
+    # Impute hospitalization data
+    df["delta.hospitalized"] = generate_hospitalizations(df, hospitalizations)
+
+    # total hospitalizations
+    df["total.hospitalized"] = df["delta.hospitalized"].cumsum()
+
+    # active cases by day
+    df["delta.active"] = df["total.confirmed"] - \
+        df["total.deceased"] - df["total.recovered"] - df["delta.other"]
+
+    # cubic splines
+    df["spline.active"] = cubic_spline(df["delta.active"])
+    df["spline.deceased"] = cubic_spline(df["delta.deceased"])
+    df["spline.hospitalizated"] = cubic_spline(df["delta.hospitalized"])
+    df["spline.recovered"] = cubic_spline(df["delta.recovered"])
+
+    df.to_csv(output, mode="w" if header else "a", header=header)
+
+
+#df = pd.read_csv("output/city_stats.csv", index_col=["date"])
+#df.index = pd.to_datetime(df.index)
+##df = df[df.district == "Mumbai"]
+#calculate_metrics(df=df)
