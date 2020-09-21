@@ -6,9 +6,15 @@ from scipy.interpolate import CubicSpline
 
 def imputeCols(col):
     col = pd.Series(np.where(col < 0, np.NaN, col))
-    preNaNs = col.isnull().astype(int).groupby(
-        col.notnull().astype(int).cumsum()).cumsum().shift(1) + 1
-    avgs = np.round(col/preNaNs)
+    preNaNs = (
+        col.isnull()
+        .astype(int)
+        .groupby(col.notnull().astype(int).cumsum())
+        .cumsum()
+        .shift(1)
+        + 1
+    )
+    avgs = np.round(col / preNaNs)
     avgs = avgs.bfill()
     avgs = np.where(np.logical_or(np.isnan(col), avgs < col), avgs, col)
     avgs = pd.Series(avgs)
@@ -27,8 +33,9 @@ def generate_hospitalizations(df, hospitalizations):
         df_bck.to_csv(hospitalizations)
     df = df.join(df_bck)
     if sum(np.isnan(df["percentages"])) > 0:
-        imp = pd.Series(random.uniform(
-            0.12, 0.16, size=sum(np.isnan(df["percentages"]))))
+        imp = pd.Series(
+            random.uniform(0.12, 0.16, size=sum(np.isnan(df["percentages"])))
+        )
         df.loc[np.isnan(df["percentages"]), ["percentages"]] = imp[0]
         df_bck = pd.DataFrame(df["percentages"], index=df.index)
         df_bck.to_csv(hospitalizations)
@@ -40,7 +47,13 @@ def cubic_spline(col):
     return cs(range(len(col)))
 
 
-def calculate_metrics(df, start_date="2020-04-20", hospitalizations="output/percentages_for_hospitalizations.csv", output="output/city_metrics.csv", header=True):
+def calculate_metrics(
+    df,
+    start_date="2020-04-20",
+    hospitalizations="output/percentages_for_hospitalizations.csv",
+    output="output/city_metrics.csv",
+    header=True,
+):
     # add "other" columns
     if not "delta.other" in df.columns:
         df["delta.other"] = 0
@@ -48,11 +61,10 @@ def calculate_metrics(df, start_date="2020-04-20", hospitalizations="output/perc
         df["total.other"] = 0
 
     df.loc[df["delta.other"] < 0, ["delta.other"]] = np.nan
-    
 
     # we start all the data from this date as a baseline date
     drop_rows = df[df.index < start_date]
-    #print(drop_rows.index[0:5])
+    # print(drop_rows.index[0:5])
     df.drop(drop_rows.index, axis=0, inplace=True)
 
     # impute data
@@ -71,18 +83,16 @@ def calculate_metrics(df, start_date="2020-04-20", hospitalizations="output/perc
 
     # generate Levitt Metric
     df["total.deceased.shift"] = df["total.deceased"].shift(1)
-    df["levitt.Metric"] = np.log(
-        df["total.deceased"]/df.pop("total.deceased.shift"))
+    df["levitt.Metric"] = np.log(df["total.deceased"] / df.pop("total.deceased.shift"))
 
     # 21-Day MA of daily tests
     df["MA.21.daily.tests"] = df["delta.tested"].rolling(window=21).mean()
 
     # TPR% per day
-    df["delta.positivity"] = (df["delta.confirmed"]/df["delta.tested"]) * 100.0
+    df["delta.positivity"] = (df["delta.confirmed"] / df["delta.tested"]) * 100.0
 
     # 21-Day MA of TPR%
-    df["MA.21.delta.positivity"] = df["delta.positivity"].rolling(
-        window=21).mean()
+    df["MA.21.delta.positivity"] = df["delta.positivity"].rolling(window=21).mean()
 
     # daily percent case growth
     df["delta.percent.case.growth"] = df["delta.confirmed"].pct_change()
@@ -94,8 +104,12 @@ def calculate_metrics(df, start_date="2020-04-20", hospitalizations="output/perc
     df["total.hospitalized"] = df["delta.hospitalized"].cumsum()
 
     # active cases by day
-    df["delta.active"] = df["total.confirmed"] - \
-        df["total.deceased"] - df["total.recovered"] - df["delta.other"]
+    df["delta.active"] = (
+        df["total.confirmed"]
+        - df["total.deceased"]
+        - df["total.recovered"]
+        - df["delta.other"]
+    )
 
     # cubic splines
     df["spline.active"] = cubic_spline(df["delta.active"])
@@ -106,7 +120,7 @@ def calculate_metrics(df, start_date="2020-04-20", hospitalizations="output/perc
     df.to_csv(output, mode="w" if header else "a", header=header)
 
 
-#df = pd.read_csv("output/city_stats.csv", index_col=["date"])
-#df.index = pd.to_datetime(df.index)
+# df = pd.read_csv("output/city_stats.csv", index_col=["date"])
+# df.index = pd.to_datetime(df.index)
 ##df = df[df.district == "Mumbai"]
-#calculate_metrics(df=df)
+# calculate_metrics(df=df)

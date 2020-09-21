@@ -1,19 +1,53 @@
-import itertools
-import logging
-
+import requests
+import json
 import pandas as pd
+from collections import defaultdict
 from pandas import isnull
+from pandas.io.json import json_normalize
+import itertools
 
+# import yaml
+import logging
+import os
 
+# import calculate_metrics
+
+# file path info
+logging.basicConfig(format="%(levelname)s - %(message)s", level=logging.INFO)
+# full_path = os.path.realpath(__file__)
+# path, filename = os.path.split(full_path)
+
+# try:
+
+#    logging.info("Reading YAML")
+#    with open(os.path.join(path, "parameters.yaml"), "r") as f:
+#        yaml_file = yaml.load(f, Loader=yaml.FullLoader)
+
+# assign defult values to fields.
+#   json_url = yaml_file.get(
+#       "history_json_url", "https://raw.githubusercontent.com/covid19india/api/gh-pages/v4/data-all.json")
+#    states_and_districts = yaml_file.get(
+#        "states_and_districts", [{'MH': ['Mumbai']}])
+#    output_file = os.path.join(path, yaml_file.get("output_file", "output/city_stats.csv"))
+#    hospitalizations = os.path.join(path, yaml_file.get("hospitalizations", "percentages_for_hospitalizations.csv"))
+#    start_date = yaml_file.get("start_date", "2020-04-20")
+#    metrics_file = os.path.join(path, yaml_file.get("metrics_file", "output/city_metrics.csv"))
+
+# except Exception as e:
+#    logging.exception("Error Occurred")
 
 
 def extract_history_command(history_json_url, states_and_districts, output_file):
-    """Extracts history records from the covid19india v4 data all API which should be defined by the --history-json-url argument."""
-    logging.info(f"Fetching json")
+    logging.info("Fetching JSON from URL")
+
+    # 1. Convert the JSON to a DF
     df = pd.read_json(history_json_url)
     df = df.T
+
     logging.info("Parsed JSON")
-    all_df = None
+
+    header = True
+
     logging.info("Reading states and districts")
     # 2. Now, filter the entries that are in the YAML
     for state, districts in states_and_districts.items():
@@ -39,8 +73,8 @@ def extract_history_command(history_json_url, states_and_districts, output_file)
             dist_df.insert(2, "state", state)
 
             # 2.5 set index for easy concat
-            dist_df.index = [df.index, dist_df.pop("district"), dist_df.pop("state")]
-            dist_df.index.set_names(["date", "district", "state"], inplace=True)
+            dist_df.index = df.index
+            dist_df.index.set_names(["date"], inplace=True)
 
             # 2.6 add genenric col names
             new_col = [
@@ -50,12 +84,7 @@ def extract_history_command(history_json_url, states_and_districts, output_file)
                 dict(zip(list(dist_df.columns), new_col)), axis=1, inplace=True
             )
 
-            # 2.7 Append to a global DF
-            if all_df is None:
-                all_df = dist_df.copy()
-            else:
-                all_df = pd.concat([all_df, dist_df])
-
-    logging.info("Writing data to output file")
-    all_df.to_csv(output_file)
-    logging.info("Output file created: {}".format(output_file))
+            # 2.7 Output to CSV
+            logging.info("Writing data to output file")
+            dist_df.to_csv(output_file, mode="w" if header else "a", header=header)
+            header = False

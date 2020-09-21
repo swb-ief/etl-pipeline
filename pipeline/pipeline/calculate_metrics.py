@@ -1,92 +1,145 @@
-import random
-import logging
-from functools import partial
+"""Calculate metrics of covid19india.org data.
+
+Author: saurabhmj <https://github.com/saurabhmj>
+"""
 
 import pandas as pd
 import numpy as np
 from numpy import random
-from sklearn.impute import KNNImputer
+from scipy.interpolate import CubicSpline
 
-def calculate_city_states_without_hospitalizations(input_path, output_path, city_name):
-    df = pd.read_csv(input_path, index_col=["date"])
-    df.index = pd.to_datetime(df.index)
-    # The cities would be iterated over in the actual case
-    df = df[df.district == city_name]
-    # We check if there are any other columns
-    df.dropna(subset=["total.confirmed"], inplace=True)
-    # We check if there are any other columns
+
+def imputeCols(col):
+    col = pd.Series(np.where(col < 0, np.NaN, col))
+    preNaNs = (
+        col.isnull()
+        .astype(int)
+        .groupby(col.notnull().astype(int).cumsum())
+        .cumsum()
+        .shift(1)
+        + 1
+    )
+    avgs = np.round(col / preNaNs)
+    avgs = avgs.bfill()
+    avgs = np.where(np.logical_or(np.isnan(col), avgs < col), avgs, col)
+    avgs = pd.Series(avgs)
+    avgs.fillna(np.round(avgs.mean()), inplace=True)
+    return avgs.to_numpy()
+
+
+def generate_hospitalizations(df, hospitalizations):
+    try:
+        df_bck = pd.read_csv(hospitalizations, index_col=["date"])
+    except Exception as e:
+        print("Unable to find hospitalizatons file. Re-generating data")
+        df["percentages"] = random.uniform(0.12, 0.16, size=df.shape[0])
+        df_bck = pd.DataFrame(df.pop("percentages"), index=df.index)
+        df_bck.to_csv(hospitalizations)
+    df = df.join(df_bck)
+    if sum(np.isnan(df["percentages"])) > 0:
+        imp = pd.Series(
+            random.uniform(0.12, 0.16, size=sum(np.isnan(df["percentages"])))
+        )
+        df.loc[np.isnan(df["percentages"]), ["percentages"]] = imp[0]
+        df_bck = pd.DataFrame(df["percentages"], index=df.index)
+        df_bck.to_csv(hospitalizations)
+    return df.pop("percentages") * df["delta.confirmed"]
+
+
+def cubic_spline(col):
+    cs = CubicSpline(range(len(col)), col)
+    return cs(range(len(col)))
+
+
+def calculate_metrics(
+    df,
+    start_date="2020-04-20",
+    hospitalizations="output/percentages_for_hospitalizations.csv",
+    output="output/city_metrics.csv",
+    header=True,
+):
+    # add "other" columns
     if not "delta.other" in df.columns:
         df["delta.other"] = 0
     if not "total.other" in df.columns:
         df["total.other"] = 0
-    # Open Question: Impute NaN for daily tests
-    # What is a good strategy to impute NaN for delta tests? We need to ensure that the imputations match the total tests.
-    # Currently, we drop the rows that have empty delta tests.
-    df.dropna(subset=["delta.tested"], inplace=True)
-    df.loc[df["delta.tested"] < 0, ["delta.tested"]] = np.nan
-    df.loc[df["delta.confirmed"] < 0, ["delta.confirmed"]] = np.nan
-    imputer = KNNImputer(n_neighbors=7)
-    df.loc[:,['delta.confirmed', 'delta.tested']] = np.round(imputer.fit_transform(df.loc[:,['delta.confirmed', 'delta.tested']]))
-    # Find Levitt metric¶
-    # We first shift the deceased cases and apply log
+
+    df.loc[df["delta.other"] < 0, ["delta.other"]] = np.nan
+
+    # we start all the data from this date as a baseline date
+    drop_rows = df[df.index < start_date]
+    # print(drop_rows.index[0:5])
+    df.drop(drop_rows.index, axis=0, inplace=True)
+
+    # impute data
+    df["delta.tested"] = imputeCols(df["delta.tested"])
+    df["delta.confirmed"] = imputeCols(df["delta.confirmed"])
+    df["delta.deceased"] = imputeCols(df["delta.deceased"])
+    df["delta.recovered"] = imputeCols(df["delta.recovered"])
+    df["delta.other"] = imputeCols(df["delta.other"])
+
+    # generate new "total" columns
+    df["total.confirmed"] = df["delta.confirmed"].cumsum()
+    df["total.tested"] = df["delta.tested"].cumsum()
+    df["total.recovered"] = df["delta.recovered"].cumsum()
+    df["total.deceased"] = df["delta.deceased"].cumsum()
+    df["total.other"] = df["delta.other"].cumsum()
+
+    # generate Levitt Metric
     df["total.deceased.shift"] = df["total.deceased"].shift(1)
-    df["levitt.Metric"] = np.log(df["total.deceased"]/df.pop("total.deceased.shift"))
-    # 21-day moving averages
-    # MA of daily tests
+    df["levitt.Metric"] = np.log(df["total.deceased"] / df.pop("total.deceased.shift"))
+
+    # 21-Day MA of daily tests
     df["MA.21.daily.tests"] = df["delta.tested"].rolling(window=21).mean()
-    df["delta.positivity"] = (df["delta.confirmed"]/df["delta.tested"] ) * 100.0
+
+    # TPR% per day
+    df["delta.positivity"] = (df["delta.confirmed"] / df["delta.tested"]) * 100.0
+
+    # 21-Day MA of TPR%
     df["MA.21.delta.positivity"] = df["delta.positivity"].rolling(window=21).mean()
+
+    # daily percent case growth
     df["delta.percent.case.growth"] = df["delta.confirmed"].pct_change()
-    df["MA.21.delta.percent.case.growth"] = df["delta.percent.case.growth"].rolling(window=21).mean()
-    # Daily case positivity¶
-    # We find daily positivity by dividing daily confirmed cases by the number of tests
-    df["delta.positivity"] = (df["delta.confirmed"]/df["delta.tested"] ) * 100.0
-    df["MA.21.delta.positivity"] = df["delta.positivity"].rolling(window=21).mean()
-    # Percent case growth
-    df["delta.percent.case.growth"] = df["delta.confirmed"].pct_change()
-    df["MA.21.delta.percent.case.growth"] = df["delta.percent.case.growth"].rolling(window=21).mean()
-    df.to_csv(output_path)
 
-def reset_hospitalization_percentages(input_path, output_path, city_name):
-    df = pd.read_csv(input_path, index_col=["date"])
-    df.index = pd.to_datetime(df.index)
-    # The cities would be iterated over in the actual case
-    df = df[df.district == city_name]
-    df["percentages"] = random.uniform(0.12,0.16,size=df.shape[0])
-    df_bck = pd.DataFrame(df["percentages"], index=df.index)
-    df_bck.to_csv(output_path)
+    # Impute hospitalization data
+    hospitalizations_df = generate_hospitalizations(df, hospitalizations)
+    # df = df[~df.index.duplicated()]
+    hospitalizations_df = hospitalizations_df[~hospitalizations_df.index.duplicated()]
+    df["delta.hospitalized"] = hospitalizations_df
 
-
-def calculate_city_states_hospitalizations(previous_hospitalization_path, input_path, output_path, city_name):
-    df = pd.read_csv(input_path, index_col=["date"])
-    df.index = pd.to_datetime(df.index)
-    # The cities would be iterated over in the actual case
-    df = df[df.district == city_name]
-
-    df_bck = pd.read_csv(previous_hospitalization_path, index_col=["date"])
-    df = df.join(df_bck)
-
-    percentages_sum = sum(np.isnan(df["percentages"]))
-    if sum(np.isnan(df["percentages"])) > 0:
-        imp = pd.Series(random.uniform(0.12,0.16,size=sum(np.isnan(df["percentages"]))))
-        df.loc[np.isnan(df["percentages"]),["percentages"]] = imp[0]
-        df_bck = pd.DataFrame(df["percentages"], index=df.index)
-    df_bck.to_csv(output_path)
-
-def calculate_city_stats_with_hospitalizations(input_path, hospitalization_path, output_path, city_name):
-    df = pd.read_csv(input_path, index_col=["date"])
-    df.index = pd.to_datetime(df.index)
-    # The cities would be iterated over in the actual case
-    df = df[df.district == city_name]
-    # Impute Hospitalization data
-    # We calculate values from 12% to 16% uniformly and store them in a file for persistence and consistency
-    df_bck = pd.read_csv(hospitalization_path, index_col=["date"])
-    df = df.join(df_bck)
-    df["delta.hospitalized"] = df.pop("percentages") * df["delta.confirmed"]
+    # total hospitalizations
     df["total.hospitalized"] = df["delta.hospitalized"].cumsum()
-    df["delta.active"] = df["total.confirmed"] - df["total.deceased"] - df["total.recovered"]
 
-    # Total active cases
-    # We find active cases by:
-    # Active = Confirmed - deceased - recovered
-    df.to_csv(output_path)
+    # active cases by day
+    df["delta.active"] = (
+        df["total.confirmed"]
+        - df["total.deceased"]
+        - df["total.recovered"]
+        - df["delta.other"]
+    )
+
+    # cubic splines
+    df["spline.active"] = cubic_spline(df["delta.active"])
+    df["spline.deceased"] = cubic_spline(df["delta.deceased"])
+    df["spline.hospitalizated"] = cubic_spline(df["delta.hospitalized"])
+    df["spline.recovered"] = cubic_spline(df["delta.recovered"])
+
+    df.to_csv(output, mode="w" if header else "a", header=header)
+
+
+def calculate_metrics_input(
+    input_file="input/city_stats.csv",
+    start_date="2020-04-20",
+    hospitalizations="output/percentages_for_hospitalizations.csv",
+    output="output/city_metrics.csv",
+    header=True,
+):
+    df = pd.read_csv(input_file, index_col=["date"])
+    df.index = pd.to_datetime(df.index)
+    return calculate_metrics(df, start_date, hospitalizations, output, header)
+
+
+# df = pd.read_csv("output/city_stats.csv", index_col=["date"])
+# df.index = pd.to_datetime(df.index)
+##df = df[df.district == "Mumbai"]
+# calculate_metrics(df=df)

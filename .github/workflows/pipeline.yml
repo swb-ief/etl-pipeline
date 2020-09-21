@@ -1,0 +1,40 @@
+name: LuigiPipeline 
+
+inputs:
+  statesDistricts:
+    description: 'states and districts json configuration'
+    required: true
+    default: '{ "MH": ["Mumbai", "Pune", "Nanded", "Raigad"], "UP": ["Agra"]  }'
+  startDate:
+    description: 'start date for metrics'
+    required: true
+    default: '2020-04-20'
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron:  '0 12 * * *'
+
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out this repo
+      uses: actions/checkout@v2
+    - uses: actions/setup-java@v1
+      with:
+        java-version: '11' # necessary for tabula-py
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install Python dependencies
+      working-directory: ./pipeline
+      run: |
+        pip install -r requirements.txt
+    - name: Run spreadsheet fetch
+      env:
+        SWB_DROPBOX_TOKEN: ${{ secrets.SWB_DROPBOX_TOKEN }}
+      working-directory: ./pipeline
+      run: python -m luigi --module pipeline.tasks SWBPipelineWrapper  --states-and-districts $INPUT_STATESDISTRICTS --start-date $INPUT_STARTDATE
