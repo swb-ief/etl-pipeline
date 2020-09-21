@@ -10,7 +10,7 @@ on:
       startDate:
         description: 'start date for metrics'
         required: true
-        default: 
+        default: '2020-04-20'
 
 jobs:
   pipelineManual:
@@ -33,4 +33,5 @@ jobs:
       env:
         SWB_DROPBOX_TOKEN: ${{ secrets.SWB_DROPBOX_TOKEN }}
       working-directory: ./pipeline
-      run: python -m luigi --module pipeline.tasks SWBPipelineWrapper  --states-and-districts ${{ github.event.inputs.statesDistricts }} --start-date ${{ github.event.inputs.startDate }} --local-scheduler
+      run: |
+        python -m luigi --module pipeline.tasks SWBPipelineWrapper  --states-and-districts ${{ github.event.inputs.statesDistricts }} --start-date ${{ github.event.inputs.startDate }} --local-scheduler

@@ -26,4 +26,5 @@ jobs:
       env:
         SWB_DROPBOX_TOKEN: ${{ secrets.SWB_DROPBOX_TOKEN }}
       working-directory: ./pipeline
-      run: python -m luigi --module pipeline.tasks SWBPipelineWrapper  --states-and-districts '{ "MH": ["Mumbai", "Pune", "Nanded", "Raigad"], "UP": ["Agra"]  }' --start-date '2020-04-20' --local-scheduler
+      run: |
+        python -m luigi --module pipeline.tasks SWBPipelineWrapper  --states-and-districts '{ "MH": ["Mumbai", "Pune", "Nanded", "Raigad"], "UP": ["Agra"]  }' --start-date '2020-04-20' --local-scheduler
