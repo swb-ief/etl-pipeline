@@ -95,9 +95,13 @@ class ExtractDataFromPdfDashboardWrapper(luigi.WrapperTask):
     positive_breakdown_index = luigi.IntParameter(default=22)
 
     def requires(self):
-        yield ExtractWardPositiveBreakdownTask(date=self.date, page_index=self.positive_breakdown_index)
-        yield ExtractCaseGrowthTableTask(date=self.date, page=self.daily_case_growth_page)
-        yield ExtractElderlyTableTask(date=self.date, page = self.elderly_page)
+        yield ExtractWardPositiveBreakdownTask(
+            date=self.date, page_index=self.positive_breakdown_index
+        )
+        yield ExtractCaseGrowthTableTask(
+            date=self.date, page=self.daily_case_growth_page
+        )
+        yield ExtractElderlyTableTask(date=self.date, page=self.elderly_page)
 
 
 if __name__ == "__main__":
