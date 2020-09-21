@@ -29,9 +29,15 @@ jobs:
       working-directory: ./pipeline
       run: |
         pip install -r requirements.txt
-    - name: Run spreadsheet fetch
+    - uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    - name: luigi pipeline
       env:
         SWB_DROPBOX_TOKEN: ${{ secrets.SWB_DROPBOX_TOKEN }}
       working-directory: ./pipeline
       run: |
-        python -m luigi --module pipeline.tasks SWBPipelineWrapper  --states-and-districts ${{ github.event.inputs.statesDistricts }} --start-date ${{ github.event.inputs.startDate }} --local-scheduler
+        python -m luigi --module pipeline.tasks SWBPipelineWrapper  --states-and-districts '${{ github.event.inputs.statesDistricts }}' --start-date ${{ github.event.inputs.startDate }} --local-scheduler
