@@ -1,3 +1,5 @@
+import datetime
+
 import luigi
 
 from .cities_metrics import CalculateCityMetricsTask
@@ -5,7 +7,7 @@ from .stopcoronavirus_mcgm_scrapping import ExtractDataFromPdfDashboardWrapper
 
 
 class SWBPipelineWrapper(luigi.WrapperTask):
-    date = luigi.DateParameter()
+    date = luigi.DateParameter(default=datetime.date.today())
     start_date = luigi.DateParameter()
     states_and_districts = luigi.DictParameter()
     elderly_page = luigi.IntParameter(default=22)
