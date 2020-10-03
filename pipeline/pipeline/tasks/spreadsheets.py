@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Tuple
 import tempfile
-
+import datetime
 
 import luigi
 import pandas
@@ -15,11 +15,14 @@ from pipeline.dashboard_pdf_scrapper import (
     scrape_case_growth_to_df,
     scrape_elderly_table_df,
 )
+from pipeline.extract_history import extract_history_command_df
+from pipeline.config import GSPREAD_CLIENT
 
-from .dropbox import dropbox_target, textio2binary
+from .dropbox import dropbox_target, textio2binary, textio2stringio
 from .stopcoronavirus_mcgm_scrapping import DownloadMcgmDashboardPdfTask
+from .cities_metrics_v1 import FetchCovid19IndiaDataTask
+from .cities_metrics import calculate_metrics_input
 
-from ..config import GSPREAD_CLIENT
 
 
 def worksheet_as_df_by_url(sheet_url: str, worksheet_name: str) -> Tuple[gspread.Worksheet, pandas.DataFrame]:
@@ -80,7 +83,7 @@ class ExtractCaseGrowthTableGSheetTask(luigi.ExternalTask):
         return self.response != None
 
 
-class ExtractElderlyTableGSheetTask(luigi.Task):
+class ExtractElderlyTableGSheetTask(luigi.ExternalTask):
     date = luigi.DateParameter(default=date.today())
     page = luigi.IntParameter(default=22)
     response = None
@@ -98,6 +101,45 @@ class ExtractElderlyTableGSheetTask(luigi.Task):
             result_df = pandas.concat([elderly_df, scrap_df])
             result_df = result_df.fillna('NA')
             self.response = worksheet.update([result_df.columns.values.tolist()] + result_df.values.tolist())
+            return True
+        return False
+
+    def complete(self):
+        return self.response != None
+
+class ExtractDataFromPdfDashboardGSheetWrapper(luigi.WrapperTask):
+    date = luigi.DateParameter(default=date.today())
+    elderly_page = luigi.IntParameter(default=22)
+    daily_case_growth_page = luigi.IntParameter(default=25)
+    positive_breakdown_index = luigi.IntParameter(default=22)
+
+    def requires(self):
+        yield ExtractWardPositiveBreakdownGSheetTask(
+            date=self.date, page_index=self.positive_breakdown_index
+        )
+        yield ExtractCaseGrowthTableGSheetTask(
+            date=self.date, page=self.daily_case_growth_page
+        )
+        yield ExtractElderlyTableGSheetTask(date=self.date, page=self.elderly_page)
+
+class ExtractMetricsHistoryGSheetTask(luigi.ExternalTask):
+    date = luigi.DateParameter(default=date.today())
+    states_and_districts = luigi.DictParameter()
+
+    def run(self):
+        json_input = yield FetchCovid19IndiaDataTask(date=self.date)
+        worksheet, metrics_history_df = worksheet_as_df_by_url(WORKSHEET_URL, "metrics-history")
+        with json_input.open("r") as input_file:
+            scrap_df = extract_history_command_df(
+                textio2stringio(input_file), self.states_and_districts
+            )
+            scrap_df["downloaded_for"] = self.date.strftime('%Y-%m-%d')
+            # result_df = pandas.concat([metrics_history_df, scrap_df])
+            result_df = scrap_df.fillna('NULL')
+            result_df.index = result_df.index.astype('str')
+            worksheet_headers = [ ['date'] + result_df.columns.values.tolist()]
+
+            self.response = worksheet.update(worksheet_headers + result_df.to_records().tolist())
             return True
         return False
 
