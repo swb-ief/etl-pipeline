@@ -1,3 +1,8 @@
+"""Calculate metrics of covid19india.org data.
+
+Author: saurabhmj <https://github.com/saurabhmj>
+"""
+
 import pandas as pd
 import numpy as np
 from numpy import random
@@ -23,7 +28,6 @@ def imputeCols(col):
 
 
 def generate_hospitalizations(df, hospitalizations):
-
     try:
         df_bck = pd.read_csv(hospitalizations, index_col=["date"])
     except Exception as e:
@@ -98,7 +102,10 @@ def calculate_metrics(
     df["delta.percent.case.growth"] = df["delta.confirmed"].pct_change()
 
     # Impute hospitalization data
-    df["delta.hospitalized"] = generate_hospitalizations(df, hospitalizations)
+    hospitalizations_df = generate_hospitalizations(df, hospitalizations)
+    # df = df[~df.index.duplicated()]
+    hospitalizations_df = hospitalizations_df[~hospitalizations_df.index.duplicated()]
+    df["delta.hospitalized"] = hospitalizations_df
 
     # total hospitalizations
     df["total.hospitalized"] = df["delta.hospitalized"].cumsum()
@@ -118,6 +125,18 @@ def calculate_metrics(
     df["spline.recovered"] = cubic_spline(df["delta.recovered"])
 
     df.to_csv(output, mode="w" if header else "a", header=header)
+
+
+def calculate_metrics_input(
+    input_file="input/city_stats.csv",
+    start_date="2020-04-20",
+    hospitalizations="output/percentages_for_hospitalizations.csv",
+    output="output/city_metrics.csv",
+    header=True,
+):
+    df = pd.read_csv(input_file, index_col=["date"])
+    df.index = pd.to_datetime(df.index)
+    return calculate_metrics(df, start_date, hospitalizations, output, header)
 
 
 # df = pd.read_csv("output/city_stats.csv", index_col=["date"])

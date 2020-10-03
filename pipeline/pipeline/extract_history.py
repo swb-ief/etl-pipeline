@@ -5,43 +5,43 @@ from collections import defaultdict
 from pandas import isnull
 from pandas.io.json import json_normalize
 import itertools
-import yaml
+
+# import yaml
 import logging
 import os
-import calculate_metrics
+
+# import calculate_metrics
 
 # file path info
 logging.basicConfig(format="%(levelname)s - %(message)s", level=logging.INFO)
-full_path = os.path.realpath(__file__)
-path, filename = os.path.split(full_path)
+# full_path = os.path.realpath(__file__)
+# path, filename = os.path.split(full_path)
 
-try:
+# try:
 
-    logging.info("Reading YAML")
-    with open(os.path.join(path, "parameters.yaml"), "r") as f:
-        yaml_file = yaml.load(f, Loader=yaml.FullLoader)
+#    logging.info("Reading YAML")
+#    with open(os.path.join(path, "parameters.yaml"), "r") as f:
+#        yaml_file = yaml.load(f, Loader=yaml.FullLoader)
 
-    # assign defult values to fields.
-    json_url = yaml_file.get(
-        "history_json_url",
-        "https://raw.githubusercontent.com/covid19india/api/gh-pages/v4/data-all.json",
-    )
-    states_and_districts = yaml_file.get("states_and_districts", [{"MH": ["Mumbai"]}])
-    output_file = os.path.join(
-        path, yaml_file.get("output_file", "output/city_stats.csv")
-    )
-    hospitalizations = os.path.join(
-        path, yaml_file.get("hospitalizations", "percentages_for_hospitalizations.csv")
-    )
-    start_date = yaml_file.get("start_date", "2020-04-20")
-    metrics_file = os.path.join(
-        path, yaml_file.get("metrics_file", "output/city_metrics.csv")
-    )
+# assign defult values to fields.
+#   json_url = yaml_file.get(
+#       "history_json_url", "https://raw.githubusercontent.com/covid19india/api/gh-pages/v4/data-all.json")
+#    states_and_districts = yaml_file.get(
+#        "states_and_districts", [{'MH': ['Mumbai']}])
+#    output_file = os.path.join(path, yaml_file.get("output_file", "output/city_stats.csv"))
+#    hospitalizations = os.path.join(path, yaml_file.get("hospitalizations", "percentages_for_hospitalizations.csv"))
+#    start_date = yaml_file.get("start_date", "2020-04-20")
+#    metrics_file = os.path.join(path, yaml_file.get("metrics_file", "output/city_metrics.csv"))
 
+# except Exception as e:
+#    logging.exception("Error Occurred")
+
+
+def extract_history_command(history_json_url, states_and_districts, output_file):
     logging.info("Fetching JSON from URL")
 
     # 1. Convert the JSON to a DF
-    df = pd.read_json(json_url)
+    df = pd.read_json(history_json_url)
     df = df.T
 
     logging.info("Parsed JSON")
@@ -50,9 +50,7 @@ try:
 
     logging.info("Reading states and districts")
     # 2. Now, filter the entries that are in the YAML
-    for entry_ in states_and_districts:
-        state = list(entry_.keys())[0]
-        districts = list(entry_.values())[0]
+    for state, districts in states_and_districts.items():
         json_keys = ["delta", "total"]
         logging.info("Extracting data for State: {}".format(state))
 
@@ -89,16 +87,4 @@ try:
             # 2.7 Output to CSV
             logging.info("Writing data to output file")
             dist_df.to_csv(output_file, mode="w" if header else "a", header=header)
-
-            # Calculate metrics
-            logging.info("calculating metrics for {}".format(district))
-            calculate_metrics.calculate_metrics(
-                dist_df,
-                header=header,
-                hospitalizations=hospitalizations,
-                output=metrics_file,
-            )
-
             header = False
-except Exception as e:
-    logging.exception("Error Occurred")
