@@ -60,38 +60,65 @@ def extract_ward_data_from_pdf_line(ward_pdf_line):
     }
 
 
-def pdf_data_to_pandas_df(ward_pdf_info):
-    ward_positive_df = pd.DataFrame(
-        ward_pdf_info,
-        columns=[
+def postive_breakdown_pdf_columns():
+    return [
+            "as_of",
             "Ward_Name",
             "Total_Positive_Cases",
             "Total_Discharged",
             "Total_Deaths",
             "Total_Active",
-        ],
+            "imputed"
+        ];
+
+
+def pdf_data_to_pandas_df(ward_pdf_info):
+    ward_positive_df = pd.DataFrame(
+        ward_pdf_info,
+        columns=postive_breakdown_pdf_columns(),
     )
+    ward_positive_df['Total_Positive_Cases'] = pd.to_numeric(ward_positive_df['Total_Positive_Cases'])
+    ward_positive_df["Total_Deaths"] = pd.to_numeric(ward_positive_df["Total_Deaths"])
+    ward_positive_df["Total_Discharged"] = pd.to_numeric(ward_positive_df["Total_Discharged"])
+    ward_positive_df["Total_Active"] = pd.to_numeric(ward_positive_df["Total_Active"])
     return ward_positive_df
 
 
 def export_df_to_file(df, output_ward_path):
     return df.to_csv(output_ward_path, index=False)
 
+def positive_breakdown_fix_dtypes(ward_positive_df):
+    if ward_positive_df.empty:
+        return pd.DataFrame([], columns=postive_breakdown_pdf_columns())
+    ward_positive_df['Total_Positive_Cases'] = pd.to_numeric(ward_positive_df['Total_Positive_Cases'])
+    ward_positive_df["Total_Deaths"] = pd.to_numeric(ward_positive_df["Total_Deaths"])
+    ward_positive_df["Total_Discharged"] = pd.to_numeric(ward_positive_df["Total_Discharged"])
+    ward_positive_df["Total_Active"] = pd.to_numeric(ward_positive_df["Total_Active"])
+    ward_positive_df["imputed"] = pd.to_numeric(ward_positive_df["imputed"]) 
+    return ward_positive_df.copy()
 
-def scrap_positive_wards_to_csv(source_file_path, output_path, page=22):
+def scrap_positive_wards_to_df(source_file_path, page=20):
     pdf = read_pdf(source_file_path)
     positive_cases_page = pdf.pages[page]
     breakdown_date_string = extract_breakdown_positive_cases_date(positive_cases_page)
     ward_pdf_data = extract_wards_data_from_page(positive_cases_page)
     ward_positive_df = pdf_data_to_pandas_df(ward_pdf_data)
     breakdown_date = datetime.strptime(breakdown_date_string, "As of %b %d, %Y")
-    ward_positive_df["as_of"] = breakdown_date
-    ward_positive_df["imputed"] = False
+    ward_positive_df["as_of"] = breakdown_date.strftime('%Y-%m-%d')
+    ward_positive_df["imputed"] = 0
+    return ward_positive_df.copy()
+
+def scrap_positive_wards_to_csv(source_file_path, output_path, page=22):
+    ward_positive_df = scrap_positive_wards_to_df(source_file_path, page)
     ward_positive_df.to_csv(output_path, index=False)
 
 
-# scrapping case growth
 def scrape_case_growth_to_csv(source_file_path, output_path, page=25):
+    new_cases = scrape_case_growth_to_df(source_file_path, page)
+    new_cases.to_csv(output_path)
+
+# scrapping case growth
+def scrape_case_growth_to_df(source_file_path, page=25):
     new_case_growth = tabula_read_pdf(
         source_file_path, pages=page, multiple_tables=False
     )
@@ -162,10 +189,14 @@ def scrape_case_growth_to_csv(source_file_path, output_path, page=25):
     # save as csv files
     # saved_files_path = '/Users/wasilaq/SWB/data-analysis/'
 
-    new_cases.to_csv(output_path)
+    return new_cases.copy()
 
 
 def scrape_elderly_table(source_file_path, output_path, page=23):
+    elderly_df = scrape_elderly_table_df(source_file_path, page=23)
+    elderly_df.to_csv(output_path)
+
+def scrape_elderly_table_df(source_file_path, page=23):
     # elderly screening data
     elderly_screening = tabula_read_pdf(
         source_file_path, pages=page, multiple_tables=False
@@ -212,5 +243,5 @@ def scrape_elderly_table(source_file_path, output_path, page=23):
         "Sr Citizen SPO2<95",
     ]
     elderly.index = elderly["Wards"]
-    elderly.drop(columns=["Wards"], inplace=True)
-    elderly.to_csv(output_path)
+    # elderly.drop(columns=["Wards"], inplace=True)
+    return elderly.copy()
