@@ -16,5 +16,5 @@ WORKSHEET_URL = os.getenv("SWB_WORKSHEET_URL", DEFAULT_WORKSHEET_URL)
 
 try:
     GSPREAD_CLIENT = gspread.service_account()
-except Exception as e:
+except FileNotFoundError as e:
     logging.error(f"Unable to create gspread client #{e.message}")
