@@ -7,12 +7,12 @@ from scipy.interpolate import CubicSpline
 def imputeCols(col):
     col = pd.Series(np.where(col < 0, np.NaN, col))
     preNaNs = (
-            col.isnull()
-            .astype(int)
-            .groupby(col.notnull().astype(int).cumsum())
-            .cumsum()
-            .shift(1)
-            + 1
+        col.isnull()
+        .astype(int)
+        .groupby(col.notnull().astype(int).cumsum())
+        .cumsum()
+        .shift(1)
+        + 1
     )
     avgs = np.round(col / preNaNs)
     avgs = avgs.bfill()
@@ -47,11 +47,11 @@ def cubic_spline(col):
 
 
 def calculate_metrics(
-        df,
-        start_date="2020-04-20",
-        hospitalizations_csv="output/percentages_for_hospitalizations.csv",
-        output_city_metrics_csv="output/city_metrics.csv",
-        header=True,
+    df,
+    start_date="2020-04-20",
+    hospitalizations_csv="output/percentages_for_hospitalizations.csv",
+    output_city_metrics_csv="output/city_metrics.csv",
+    header=True,
 ):
     # add "other" columns
     if not "delta.other" in df.columns:
@@ -104,10 +104,10 @@ def calculate_metrics(
 
     # active cases by day
     df["delta.active"] = (
-            df["total.confirmed"]
-            - df["total.deceased"]
-            - df["total.recovered"]
-            - df["delta.other"]
+        df["total.confirmed"]
+        - df["total.deceased"]
+        - df["total.recovered"]
+        - df["delta.other"]
     )
 
     # cubic splines
@@ -117,6 +117,7 @@ def calculate_metrics(
     df["spline.recovered"] = cubic_spline(df["delta.recovered"])
 
     df.to_csv(output_city_metrics_csv, mode="w" if header else "a", header=header)
+
 
 # df = pd.read_csv("output/city_stats.csv", index_col=["date"])
 # df.index = pd.to_datetime(df.index)

@@ -9,12 +9,12 @@ from pipeline.calculate_metrics_file import calculate_metrics
 
 
 def extract_history(
-        covid19_json_url_path: str,
-        states_and_districts: Dict,
-        city_stats_output_csv: str,
-        hospitalizations_output_csv: str,
-        metrics_file_csv: str,
-        start_date: str = "2020-04-20",
+    covid19_json_url_path: str,
+    states_and_districts: Dict,
+    city_stats_output_csv: str,
+    hospitalizations_output_csv: str,
+    metrics_file_csv: str,
+    start_date: str = "2020-04-20",
 ):
     # 1. Convert the JSON to a DF
     df = pd.read_json(covid19_json_url_path)

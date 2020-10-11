@@ -21,7 +21,7 @@ from .stopcoronavirus_mcgm_scrapping import DownloadMcgmDashboardPdfTask
 
 
 def worksheet_as_df_by_url(
-        sheet_url: str, worksheet_name: str
+    sheet_url: str, worksheet_name: str
 ) -> Tuple[gspread.Worksheet, pandas.DataFrame]:
     sheet = GSPREAD_CLIENT.open_by_url(sheet_url)
     worksheet = sheet.worksheet(worksheet_name)
@@ -143,20 +143,16 @@ class HospitalizationSheetGSheetTask(luigi.ExternalTask):
         city_stats_worksheet, city_stats_df = worksheet_as_df_by_url(
             WORKSHEET_URL, "city_stats"
         )
-        metrics_worksheet, metrics_df = worksheet_as_df_by_url(
-            WORKSHEET_URL, "metrics"
-        )
+        metrics_worksheet, metrics_df = worksheet_as_df_by_url(WORKSHEET_URL, "metrics")
 
-        tmp_hospitalization = tempfile.NamedTemporaryFile('a+')
-        tmp_city_stats = tempfile.NamedTemporaryFile('w+')
-        tmp_metrics = tempfile.NamedTemporaryFile('w+')
+        tmp_hospitalization = tempfile.NamedTemporaryFile("a+")
+        tmp_city_stats = tempfile.NamedTemporaryFile("w+")
+        tmp_metrics = tempfile.NamedTemporaryFile("w+")
 
-        with tmp_city_stats as tmp_city_stats_file, (
-                tmp_metrics
-        ) as tmp_metrics_file, (
-                tmp_hospitalization
+        with tmp_city_stats as tmp_city_stats_file, (tmp_metrics) as tmp_metrics_file, (
+            tmp_hospitalization
         ) as tmp_hospitalization_file, (
-                covid19_api_json_output.open('r')
+            covid19_api_json_output.open("r")
         ) as covid19_json_path:
             hospitalization_df.to_csv(tmp_hospitalization_file)
             # city_stats_df.to_csv(tmp_city_stats_file)
@@ -167,7 +163,7 @@ class HospitalizationSheetGSheetTask(luigi.ExternalTask):
                 self.states_and_districts,
                 tmp_city_stats_file.name,
                 tmp_hospitalization_file.name,
-                tmp_metrics_file.name
+                tmp_metrics_file.name,
             )
 
             hospitalization_df_update = pandas.read_csv(tmp_hospitalization_file.name)
@@ -175,17 +171,19 @@ class HospitalizationSheetGSheetTask(luigi.ExternalTask):
             metrics_df_update = pandas.read_csv(tmp_metrics_file.name)
 
             self.response_hospitalization = hospitalization_worksheet.update(
-                [hospitalization_df_update.columns.values.tolist()] +
-                hospitalization_df_update.replace('', numpy.nan).values.tolist()
+                [hospitalization_df_update.columns.values.tolist()]
+                + hospitalization_df_update.replace("", numpy.nan).values.tolist()
             )
             self.response_city_stats = city_stats_worksheet.update(
-                [city_stats_df_update.columns.values.tolist()] +
-                city_stats_df_update.replace('', numpy.nan).fillna('').values.tolist()
+                [city_stats_df_update.columns.values.tolist()]
+                + city_stats_df_update.replace("", numpy.nan).fillna("").values.tolist()
             )
             self.response_metrics = metrics_worksheet.update(
-                [metrics_df_update.columns.values.tolist()] +
-                [[str(vv).strip() if pandas.notnull(vv) else '' for vv in ll] for ll in
-                 metrics_df_update.values.tolist()]
+                [metrics_df_update.columns.values.tolist()]
+                + [
+                    [str(vv).strip() if pandas.notnull(vv) else "" for vv in ll]
+                    for ll in metrics_df_update.values.tolist()
+                ]
             )
 
     def complete(self):
