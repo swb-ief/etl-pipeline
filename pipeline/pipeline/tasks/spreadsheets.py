@@ -13,6 +13,7 @@ from pipeline.dashboard_pdf_scrapper import (
     positive_breakdown_fix_dtypes,
     scrape_case_growth_to_df,
     scrape_elderly_table_df,
+    extract_ward_wise_positive_cases_glance_page,
 )
 from pipeline.extract_history_file import extract_history
 from .cities_metrics_v1 import FetchCovid19IndiaDataTask
@@ -56,6 +57,33 @@ class ExtractWardPositiveBreakdownGSheetTask(luigi.ExternalTask):
     def complete(self):
         return self.response is not None
 
+
+class ExtractGlanceWardWisePositiveCases(luigi.ExternalTask):
+    date = luigi.DateParameter(default=date.today())
+    page_index = luigi.IntParameter(default=1)
+    response = None
+
+    def run(self):
+        pdf_input = yield DownloadMcgmDashboardPdfTask(date=self.date)
+        worksheet, worksheet_df = worksheet_as_df_by_url(
+            WORKSHEET_URL, "ward-wise-positive-cases"
+        )
+        with pdf_input.open("r") as input_file, tempfile.NamedTemporaryFile(
+            "ab+"
+        ) as named_tmp_file:
+            named_tmp_file.write(textio2binary(input_file))
+            scrap_df = extract_ward_wise_positive_cases_glance_page(named_tmp_file.name, page=self.page_index)
+            scrap_df["downloaded_for"] = self.date.strftime("%Y-%m-%d")
+            result_df = pandas.concat([worksheet_df, scrap_df])
+            self.response = worksheet.update(
+                [result_df.columns.values.tolist()] + result_df.values.tolist()
+            )
+            # TODO: Check number of rows written vs scrap_df
+            return True
+        return False
+
+    def complete(self):
+        return self.response is not None
 
 class ExtractCaseGrowthTableGSheetTask(luigi.ExternalTask):
     date = luigi.DateParameter(default=date.today())
