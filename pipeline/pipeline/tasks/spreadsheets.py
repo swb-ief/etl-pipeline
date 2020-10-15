@@ -1,27 +1,23 @@
+import tempfile
 from datetime import date
 from typing import Tuple
-import tempfile
-import datetime
 
-import luigi
-import pandas
 import gspread
+import luigi
+import numpy
+import pandas
 
-
+from pipeline.config import GSPREAD_CLIENT, WORKSHEET_URL
 from pipeline.dashboard_pdf_scrapper import (
     scrap_positive_wards_to_df,
-    scrape_elderly_table,
     positive_breakdown_fix_dtypes,
     scrape_case_growth_to_df,
     scrape_elderly_table_df,
 )
-
-from pipeline.config import GSPREAD_CLIENT, WORKSHEET_URL
-
-from .dropbox import dropbox_target, textio2binary, textio2stringio
-from .stopcoronavirus_mcgm_scrapping import DownloadMcgmDashboardPdfTask
+from pipeline.extract_history_file import extract_history
 from .cities_metrics_v1 import FetchCovid19IndiaDataTask
-from .cities_metrics import calculate_metrics_input
+from .dropbox import textio2binary, textio2stringio
+from .stopcoronavirus_mcgm_scrapping import DownloadMcgmDashboardPdfTask
 
 
 def worksheet_as_df_by_url(
@@ -58,7 +54,7 @@ class ExtractWardPositiveBreakdownGSheetTask(luigi.ExternalTask):
         return False
 
     def complete(self):
-        return self.response != None
+        return self.response is not None
 
 
 class ExtractCaseGrowthTableGSheetTask(luigi.ExternalTask):
@@ -86,7 +82,7 @@ class ExtractCaseGrowthTableGSheetTask(luigi.ExternalTask):
         return False
 
     def complete(self):
-        return self.response != None
+        return self.response is not None
 
 
 class ExtractElderlyTableGSheetTask(luigi.ExternalTask):
@@ -113,7 +109,7 @@ class ExtractElderlyTableGSheetTask(luigi.ExternalTask):
         return False
 
     def complete(self):
-        return self.response != None
+        return self.response is not None
 
 
 class ExtractDataFromPdfDashboardGSheetWrapper(luigi.WrapperTask):
@@ -130,3 +126,65 @@ class ExtractDataFromPdfDashboardGSheetWrapper(luigi.WrapperTask):
             date=self.date, page=self.daily_case_growth_page
         )
         yield ExtractElderlyTableGSheetTask(date=self.date, page=self.elderly_page)
+
+
+class HospitalizationSheetGSheetTask(luigi.ExternalTask):
+    date = luigi.DateParameter(default=date.today())
+    states_and_districts = luigi.DictParameter()
+    response_metrics = None
+    response_hospitalization = None
+    response_city_stats = None
+
+    def run(self):
+        covid19_api_json_output = yield FetchCovid19IndiaDataTask(date=self.date)
+        hospitalization_worksheet, hospitalization_df = worksheet_as_df_by_url(
+            WORKSHEET_URL, "hospitalization"
+        )
+        city_stats_worksheet, city_stats_df = worksheet_as_df_by_url(
+            WORKSHEET_URL, "city_stats"
+        )
+        metrics_worksheet, metrics_df = worksheet_as_df_by_url(WORKSHEET_URL, "metrics")
+
+        tmp_hospitalization = tempfile.NamedTemporaryFile("a+")
+        tmp_city_stats = tempfile.NamedTemporaryFile("w+")
+        tmp_metrics = tempfile.NamedTemporaryFile("w+")
+
+        with tmp_city_stats as tmp_city_stats_file, (tmp_metrics) as tmp_metrics_file, (
+            tmp_hospitalization
+        ) as tmp_hospitalization_file, (
+            covid19_api_json_output.open("r")
+        ) as covid19_json_path:
+            hospitalization_df.to_csv(tmp_hospitalization_file)
+            # city_stats_df.to_csv(tmp_city_stats_file)
+            # metrics_df.to_csv(tmp_metrics_file)
+
+            extract_history(
+                textio2stringio(covid19_json_path),
+                self.states_and_districts,
+                tmp_city_stats_file.name,
+                tmp_hospitalization_file.name,
+                tmp_metrics_file.name,
+            )
+
+            hospitalization_df_update = pandas.read_csv(tmp_hospitalization_file.name)
+            city_stats_df_update = pandas.read_csv(tmp_city_stats_file.name)
+            metrics_df_update = pandas.read_csv(tmp_metrics_file.name)
+
+            self.response_hospitalization = hospitalization_worksheet.update(
+                [hospitalization_df_update.columns.values.tolist()]
+                + hospitalization_df_update.replace("", numpy.nan).values.tolist()
+            )
+            self.response_city_stats = city_stats_worksheet.update(
+                [city_stats_df_update.columns.values.tolist()]
+                + city_stats_df_update.replace("", numpy.nan).fillna("").values.tolist()
+            )
+            self.response_metrics = metrics_worksheet.update(
+                [metrics_df_update.columns.values.tolist()]
+                + [
+                    [str(vv).strip() if pandas.notnull(vv) else "" for vv in ll]
+                    for ll in metrics_df_update.values.tolist()
+                ]
+            )
+
+    def complete(self):
+        return self.response_metrics is not None
