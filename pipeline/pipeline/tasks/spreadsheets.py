@@ -72,7 +72,9 @@ class ExtractGlanceWardWisePositiveCases(luigi.ExternalTask):
             "ab+"
         ) as named_tmp_file:
             named_tmp_file.write(textio2binary(input_file))
-            scrap_df = extract_ward_wise_positive_cases_glance_page(named_tmp_file.name, page=self.page_index)
+            scrap_df = extract_ward_wise_positive_cases_glance_page(
+                named_tmp_file.name, page_index=self.page_index
+            )
             scrap_df["downloaded_for"] = self.date.strftime("%Y-%m-%d")
             result_df = pandas.concat([worksheet_df, scrap_df])
             self.response = worksheet.update(
@@ -84,6 +86,7 @@ class ExtractGlanceWardWisePositiveCases(luigi.ExternalTask):
 
     def complete(self):
         return self.response is not None
+
 
 class ExtractCaseGrowthTableGSheetTask(luigi.ExternalTask):
     date = luigi.DateParameter(default=date.today())
@@ -154,6 +157,7 @@ class ExtractDataFromPdfDashboardGSheetWrapper(luigi.WrapperTask):
             date=self.date, page=self.daily_case_growth_page
         )
         # yield ExtractElderlyTableGSheetTask(date=self.date, page=self.elderly_page)
+
 
 class AllDataGSheetTask(luigi.WrapperTask):
     date = luigi.DateParameter(default=date.today())
