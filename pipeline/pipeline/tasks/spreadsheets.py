@@ -114,9 +114,9 @@ class ExtractElderlyTableGSheetTask(luigi.ExternalTask):
 
 class ExtractDataFromPdfDashboardGSheetWrapper(luigi.WrapperTask):
     date = luigi.DateParameter(default=date.today())
-    elderly_page = luigi.IntParameter(default=22)
-    daily_case_growth_page = luigi.IntParameter(default=25)
-    positive_breakdown_index = luigi.IntParameter(default=22)
+    # elderly_page = luigi.IntParameter(default=22)
+    daily_case_growth_page = luigi.IntParameter(default=23)
+    positive_breakdown_index = luigi.IntParameter(default=20)
 
     def requires(self):
         yield ExtractWardPositiveBreakdownGSheetTask(
@@ -125,7 +125,24 @@ class ExtractDataFromPdfDashboardGSheetWrapper(luigi.WrapperTask):
         yield ExtractCaseGrowthTableGSheetTask(
             date=self.date, page=self.daily_case_growth_page
         )
-        yield ExtractElderlyTableGSheetTask(date=self.date, page=self.elderly_page)
+        # yield ExtractElderlyTableGSheetTask(date=self.date, page=self.elderly_page)
+
+class AllDataGSheetTask(luigi.WrapperTask):
+    date = luigi.DateParameter(default=date.today())
+    daily_case_growth_page = luigi.IntParameter(default=25)
+    positive_breakdown_index = luigi.IntParameter(default=22)
+    states_and_districts = luigi.DictParameter()
+
+    def requires(self):
+        yield ExtractWardPositiveBreakdownGSheetTask(
+            date=self.date, page_index=self.positive_breakdown_index
+        )
+        yield ExtractCaseGrowthTableGSheetTask(
+            date=self.date, page=self.daily_case_growth_page
+        )
+        yield HospitalizationSheetGSheetTask(
+            data=self.date, states_and_districts=self.states_and_districts
+        )
 
 
 class HospitalizationSheetGSheetTask(luigi.ExternalTask):
