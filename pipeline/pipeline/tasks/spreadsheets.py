@@ -13,6 +13,7 @@ from pipeline.dashboard_pdf_scrapper import (
     positive_breakdown_fix_dtypes,
     scrape_case_growth_to_df,
     scrape_elderly_table_df,
+    extract_ward_wise_positive_cases_glance_page,
 )
 from pipeline.extract_history_file import extract_history
 from .cities_metrics_v1 import FetchCovid19IndiaDataTask
@@ -46,6 +47,36 @@ class ExtractWardPositiveBreakdownGSheetTask(luigi.ExternalTask):
             scrap_df = scrap_positive_wards_to_df(named_tmp_file, page=self.page_index)
             scrap_df["downloaded_for"] = self.date.strftime("%Y-%m-%d")
             result_df = pandas.concat([positive_breakdown_df, scrap_df])
+            self.response = worksheet.update(
+                [result_df.columns.values.tolist()] + result_df.values.tolist()
+            )
+            # TODO: Check number of rows written vs scrap_df
+            return True
+        return False
+
+    def complete(self):
+        return self.response is not None
+
+
+class ExtractGlanceWardWisePositiveCases(luigi.ExternalTask):
+    date = luigi.DateParameter(default=date.today())
+    page_index = luigi.IntParameter(default=1)
+    response = None
+
+    def run(self):
+        pdf_input = yield DownloadMcgmDashboardPdfTask(date=self.date)
+        worksheet, worksheet_df = worksheet_as_df_by_url(
+            WORKSHEET_URL, "ward-wise-positive-cases"
+        )
+        with pdf_input.open("r") as input_file, tempfile.NamedTemporaryFile(
+            "ab+"
+        ) as named_tmp_file:
+            named_tmp_file.write(textio2binary(input_file))
+            scrap_df = extract_ward_wise_positive_cases_glance_page(
+                named_tmp_file.name, page_index=self.page_index
+            )
+            scrap_df["downloaded_for"] = self.date.strftime("%Y-%m-%d")
+            result_df = pandas.concat([worksheet_df, scrap_df])
             self.response = worksheet.update(
                 [result_df.columns.values.tolist()] + result_df.values.tolist()
             )
@@ -114,9 +145,9 @@ class ExtractElderlyTableGSheetTask(luigi.ExternalTask):
 
 class ExtractDataFromPdfDashboardGSheetWrapper(luigi.WrapperTask):
     date = luigi.DateParameter(default=date.today())
-    elderly_page = luigi.IntParameter(default=22)
-    daily_case_growth_page = luigi.IntParameter(default=25)
-    positive_breakdown_index = luigi.IntParameter(default=22)
+    # elderly_page = luigi.IntParameter(default=22)
+    daily_case_growth_page = luigi.IntParameter(default=23)
+    positive_breakdown_index = luigi.IntParameter(default=20)
 
     def requires(self):
         yield ExtractWardPositiveBreakdownGSheetTask(
@@ -125,7 +156,25 @@ class ExtractDataFromPdfDashboardGSheetWrapper(luigi.WrapperTask):
         yield ExtractCaseGrowthTableGSheetTask(
             date=self.date, page=self.daily_case_growth_page
         )
-        yield ExtractElderlyTableGSheetTask(date=self.date, page=self.elderly_page)
+        # yield ExtractElderlyTableGSheetTask(date=self.date, page=self.elderly_page)
+
+
+class AllDataGSheetTask(luigi.WrapperTask):
+    date = luigi.DateParameter(default=date.today())
+    daily_case_growth_page = luigi.IntParameter(default=25)
+    positive_breakdown_index = luigi.IntParameter(default=22)
+    states_and_districts = luigi.DictParameter()
+
+    def requires(self):
+        yield ExtractWardPositiveBreakdownGSheetTask(
+            date=self.date, page_index=self.positive_breakdown_index
+        )
+        yield ExtractCaseGrowthTableGSheetTask(
+            date=self.date, page=self.daily_case_growth_page
+        )
+        yield HospitalizationSheetGSheetTask(
+            data=self.date, states_and_districts=self.states_and_districts
+        )
 
 
 class HospitalizationSheetGSheetTask(luigi.ExternalTask):
