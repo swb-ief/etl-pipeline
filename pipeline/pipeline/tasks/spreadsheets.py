@@ -161,9 +161,10 @@ class ExtractDataFromPdfDashboardGSheetWrapper(luigi.WrapperTask):
 
 class AllDataGSheetTask(luigi.WrapperTask):
     date = luigi.DateParameter(default=date.today())
-    daily_case_growth_page = luigi.IntParameter(default=25)
-    positive_breakdown_index = luigi.IntParameter(default=22)
+    daily_case_growth_page = luigi.IntParameter(default=23)
+    positive_breakdown_index = luigi.IntParameter(default=20)
     states_and_districts = luigi.DictParameter()
+    glance_page_index = luigi.IntParameter(default=1)
 
     def requires(self):
         yield ExtractWardPositiveBreakdownGSheetTask(
@@ -173,7 +174,10 @@ class AllDataGSheetTask(luigi.WrapperTask):
             date=self.date, page=self.daily_case_growth_page
         )
         yield HospitalizationSheetGSheetTask(
-            data=self.date, states_and_districts=self.states_and_districts
+            date=self.date, states_and_districts=self.states_and_districts
+        )
+        yield ExtractGlanceWardWisePositiveCases(
+            date=self.date, page_index=self.glance_page_index
         )
 
 
