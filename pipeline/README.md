@@ -367,6 +367,139 @@ This progress looks :) because there were no failed tasks or missing dependencie
 ===== Luigi Execution Summary =====
 ```
 
+
+#### `AllDataGSheetTask`
+
+This is a wrapper tasks that not only runs the PDF scrapping but also the metrics calculation using the india19covid.org API.
+
+In runs the following tasks:
+
+- `ExtractWardPositiveBreakdownGSheetTask`
+
+  Extracts numbers in the "Ward wise breakdown of positive cases"
+
+  ![positive-breakdown-image](./docs/ward-wise-breakdown-dashboard.png)
+
+  And adds them to a spreadsheet page with the title `positive-breakdown`
+
+  ![spreadsheet-page](./docs/spreadsheet-positive-breakdown.png)
+
+  Columns:
+
+  - as_of: The date that appears in the page, in this case it would be `2020-10-15`.
+  - Ward_Name: The abbreviation of the ward (eg. RC, KW...)
+  - Total_Positive_Cases: The numbers at the side of each bar.
+  - Total_Discharged: The numbers with a green background.
+  - Total_Deaths: The numbers with a red background.
+  - Total_Active: The numbers with a salmon background.
+  - imputed: A boolean field to mark if the values has been imputed. `0` for false, `1` for true.
+  - downloaded_for: The date for which the data was scrapped, the value of the date parameter in the task. 
+
+- `ExtractCaseGrowthTableGSheetTask`
+
+  Extracts numbers in the "Ward-wise new cases" table.
+
+  ![positive-breakdown-image](./docs/ward-wise-new-case-dashboard+.png)
+
+  And adds them to a spreadsheet page with the title `daily-case-growth`
+
+  ![spreadsheet-page](./docs/spreadsheet-daily-case-growth.png)
+
+  Columns:
+
+  - Date of report: As in the table.
+  - RC	
+  - HW	
+  - RS	
+  - RN	
+  - PS	
+  - A	
+  - C	
+  - D	
+  - KW	
+  - T	
+  - PN	
+  - N	
+  - FN	
+  - FS	
+  - MW	
+  - ME	
+  - B	
+  - E	
+  - GS	
+  - KE	
+  - GN	
+  - S	
+  - HE	
+  - L	
+  - Grand Total: The total of the numbers for that week in each ward.
+  - downloaded_for: The date for which the task was run.
+
+  The columns that do not have a description, the name represent the ward abbreviation.
+
+- `ExtractGlanceWardWisePositiveCases`
+
+  Extracts the table with the title "Ward wise positive cases"
+
+  ![firstpage](./docs/page-1-of-dashboard.png)
+
+
+  ![firstpage](./docs/spreadsheet-ward-wise-positive-cases.png)
+
+  Columns:
+
+  - Wards	
+  - RN	
+  - RS	
+  - HW	
+  - PS	
+  - RC	
+  - KW	
+  - HE	
+  - D	
+  - T	
+  - PN	
+  - A	
+  - C	
+  - MW	
+  - L	
+  - FN	
+  - KE	
+  - N	
+  - S	
+  - E	
+  - GN	
+  - B	
+  - ME	
+  - FS	
+  - GS	
+  - "Overall Mumbai"	
+  - downloaded_for
+
+  **NOTE** With this spreadsheet we may have an issue, since we would need to transform the columns to a way we could represent it.
+
+  Maybe have the following columns:
+
+  - Ward: The ward abbreviation
+  - Positive Cases: The value of the positive cases for that ward.
+  - Days to double: The value of days to double for that ward.
+  - Weekly Growth Rate: The value for the ward.
+
+  Basically transpose the current table, the same may be needed for "Ward-wise new cases".
+
+- `HospitalizationSheetGSheetTask`
+
+  Takes data from the covid19india.org API and transform it to the metrics the dashboards needs.
+
+  1. Fetchs the [latest data](https://raw.githubusercontent.com/covid19india/api/gh-pages/v4/data-all.json) of the covid india project for all states and districts and stores it on dropbox.
+  2. Fetch the data from `hospitalization` sheet, if any.
+  3. Executes the function `pipeline.calculate_metrics_file.extract_history` with the existing hospitalization data.
+  4. With the results updates the `hospitalization` sheet.
+  5. Updates the `city_stats` sheet.
+  6. And finally makes an update to the `metrics` sheet.
+ 
+
+
 Task for 2020-09-26 to 2020-10-17
 
 ```sh
