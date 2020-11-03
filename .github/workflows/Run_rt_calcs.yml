@@ -78,7 +78,7 @@ jobs:
           python-version: 3.7
       - name: Install Python dependencies
         run: |
-          pip install pandas, gspread, numpy, luigi
+          pip install pandas gspread numpy luigi
       - name: Run py script
         run: |
           python pipeline/pipeline/tasks/rt_dt_to_sheets.py
