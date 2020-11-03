@@ -2,8 +2,20 @@ import gspread
 import numpy
 import pandas
 
+GSPREAD_CLIENT = None
+DEFAULT_WORKSHEET_URL = "https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k2ZraDb6DzgCOSXI0f0/edit#gid=0"
 
-from pipeline.config import GSPREAD_CLIENT, WORKSHEET_URL
+
+WORKSHEET_URL = os.getenv("SWB_WORKSHEET_URL", DEFAULT_WORKSHEET_URL)
+
+try:
+    GSPREAD_CLIENT = gspread.service_account(
+        filename=os.getenv(
+            "GOOGLE_APPLICATION_CREDENTIALS", "~/.config/gspread/service_account.json"
+        )
+    )
+except FileNotFoundError as e:
+    logging.error(f"Unable to create gspread client #{e}")
 
 def worksheet_as_df_by_url(sheet_url: str, worksheet_name: str) -> Tuple[gspread.Worksheet, pandas.DataFrame]:
     sheet = GSPREAD_CLIENT.open_by_url(sheet_url)
