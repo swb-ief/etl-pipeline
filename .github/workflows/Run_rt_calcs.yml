@@ -81,4 +81,4 @@ jobs:
           pip install pandas gspread  numpy luigi
       - name: Run py script
         run: |
-          python pipeline/pipeline/tasks/rt_dt_to_sheets.py
+          python pipeline/pipeline/tasks/push_Rt_to_gsheets.py
