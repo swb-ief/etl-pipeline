@@ -1,0 +1,84 @@
+name: R_proc
+
+on:
+  workflow_dispatch: 
+  schedule:
+    - cron:  '0 10 * * *'
+
+jobs:
+  setup_run_r:
+    runs-on: ubuntu-18.04
+    env:
+      CRAN_REPO: 'https://packagemanager.rstudio.com/all/__linux__/bionic/latest'
+      CSV_DATA_SOURCE: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRlIadXzFkZNn5kijxCWx3IHfwvFIJQEMy9UEwm9uCjvWwVtbu9UdYnhPV9SlijmvlnytfcZjW0sp9B/pub?gid=533672872&single=true&output=csv"
+
+    steps:
+      - name: checkout this repo
+        uses: actions/checkout@v2
+        with: 
+          ref: ${{ github.head_ref }}
+      - name:  setup R
+        uses: r-lib/actions/setup-r@master
+        with:
+          r-version: '3.6.0'
+      - name: update apt-get
+        run: sudo apt-get update -y
+      - name: install v8
+        run: sudo apt-get install libv8-dev libcurl4-openssl-dev  -y 
+      - name: Download the input CSV
+        run: |
+          echo "trying to create a direcotry"
+          sudo mkdir /usr/data/
+          echo "created directory"
+          sudo chmod -R 777 /usr/data/
+          wget  -O /usr/data/city_stats.csv $CSV_DATA_SOURCE
+          echo "downloaded the file to machine"
+      - name: Install remotes
+        run: |
+          install.packages("remotes", repos = c("CRAN" = Sys.getenv("CRAN_REPO")))
+          install.packages("devtools")
+        shell: Rscript {0}
+      - name: Install Epinow2
+        run: |
+          require(devtools)
+          install_version("EpiNow2", version = "1.1.0", repos = "http://cran.us.r-project.org")
+        shell: Rscript {0}
+      - name: Install Rstan
+        run: |
+          install.packages("rstan")
+        shell: Rscript {0}
+
+      - name: Install deps
+        run: |
+          install.packages("drat")
+          drat:::add("epiforecasts")
+          install.packages("ggplot2")
+          install.packages("gridExtra")
+          #install.packages("incidence")
+          install.packages("magrittr")
+          install.packages("readr")
+          install.packages("knitr")
+          install.packages("dplyr")
+          #install.packages("EpiEstim")
+        shell: Rscript {0}
+      - name: Run R script
+        run: Rscript  R_scripts/Rt_calcs.R
+
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+         version: '290.0.1'
+         service_account_key: ${{ secrets.GCP_SA_KEY }}
+         service_account_email: ${{ secrets.GCP_SA_EMAIL }}
+         export_default_credentials: true
+      - run: gcloud info
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install Python dependencies
+        run: |
+          pip install pandas, gspread, numpy, luigi
+      - name: Run py script
+        run: |
+          python pipeline/pipeline/tasks/rt_dt_to_sheets.py
