@@ -1,6 +1,7 @@
 import gspread
 import numpy
 import pandas
+import os
 
 GSPREAD_CLIENT = None
 DEFAULT_WORKSHEET_URL = "https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k2ZraDb6DzgCOSXI0f0/edit#gid=0"
