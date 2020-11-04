@@ -1,6 +1,6 @@
 import gspread
 import numpy
-import pandas
+import pandas as pd
 import os
 
 GSPREAD_CLIENT = None
