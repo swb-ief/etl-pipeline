@@ -26,6 +26,8 @@ def worksheet_as_df_by_url(sheet_url: str, worksheet_name: str): # -> Tuple[gspr
 worksheet, Rt_df = worksheet_as_df_by_url(WORKSHEET_URL, "Rt")
  
 new_Rt_df = pd.read_csv("/usr/data/epinow2_out.csv")
+new_Rt_df["city"] = "Mumbai"
+new_Rt_df = new_Rt_df.drop('strat', 1)
  
 worksheet.update([new_Rt_df.columns.values.tolist()] + new_Rt_df.values.tolist())
  
