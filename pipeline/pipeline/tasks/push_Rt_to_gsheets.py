@@ -18,7 +18,7 @@ try:
 except FileNotFoundError as e:
     logging.error(f"Unable to create gspread client #{e}")
 
-def worksheet_as_df_by_url(sheet_url: str, worksheet_name: str) -> Tuple[gspread.Worksheet, pandas.DataFrame]:
+def worksheet_as_df_by_url(sheet_url: str, worksheet_name: str): # -> Tuple[gspread.Worksheet, pandas.DataFrame]:
     sheet = GSPREAD_CLIENT.open_by_url(sheet_url)
     worksheet = sheet.worksheet(worksheet_name)
     return worksheet, pandas.DataFrame(worksheet.get_all_records())
