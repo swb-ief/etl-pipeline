@@ -21,7 +21,7 @@ except FileNotFoundError as e:
 def worksheet_as_df_by_url(sheet_url: str, worksheet_name: str): # -> Tuple[gspread.Worksheet, pandas.DataFrame]:
     sheet = GSPREAD_CLIENT.open_by_url(sheet_url)
     worksheet = sheet.worksheet(worksheet_name)
-    return worksheet, pandas.DataFrame(worksheet.get_all_records())
+    return worksheet, pd.DataFrame(worksheet.get_all_records())
     
 worksheet, Rt_df = worksheet_as_df_by_url(WORKSHEET_URL, "Rt")
  
