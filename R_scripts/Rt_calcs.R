@@ -19,12 +19,17 @@ library(magrittr)
 library(readr)  # for read_csv
 library(knitr)  # for kable
 library(dplyr)
+library(googlesheets4)
 
 
-myfile <- "/usr/data/city_stats.csv"
-suppressMessages(mumbai_new<-read_csv(myfile))
+#myfile <- "/usr/data/city_stats.csv"
+#suppressMessages(mumbai_new<-read_csv(myfile))
 #kable(head(mumbai))
 
+#to skip auth 
+gs4_deauth()
+sheets_url <- "https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k2ZraDb6DzgCOSXI0f0/edit#gid=0"
+mumbai_new <- read_sheet(sheets_url,sheet="city_stats")
 
 mumbai_filtered = mumbai_new[mumbai_new$district == 'Mumbai',]
 mumbai_filtered <- na.omit(mumbai_filtered) 
