@@ -23,12 +23,22 @@ def worksheet_as_df_by_url(sheet_url: str, worksheet_name: str): # -> Tuple[gspr
     worksheet = sheet.worksheet(worksheet_name)
     return worksheet, pd.DataFrame(worksheet.get_all_records())
     
-worksheet, Rt_df = worksheet_as_df_by_url(WORKSHEET_URL, "Rt")
- 
+rt_worksheet, Rt_df = worksheet_as_df_by_url(WORKSHEET_URL, "Rt")
+dt_worksheet, dt_df = worksheet_as_df_by_url(WORKSHEET_URL, "doubling_time")
+
+# Read the existing Rt out file by the R Script
 new_Rt_df = pd.read_csv("/usr/data/epinow2_out.csv")
 new_Rt_df["city"] = "Mumbai"
 new_Rt_df = new_Rt_df.drop('strat', 1)
+
+# Read the existing doubling time numbers in days 
+new_dt_df = pd.read_csv('/usr/data/dt_mumbai.csv')
+new_dt_df["city"] = "Mumbai"
+new_dt_df = new_dt_df.drop('r', 1)
+
+# populate the googlesheets
  
-worksheet.update([new_Rt_df.columns.values.tolist()] + new_Rt_df.values.tolist())
+rt_worksheet.update([new_Rt_df.columns.values.tolist()] + new_Rt_df.values.tolist())
+dt_worksheet.update([new_dt_df.columns.values.tolist()] + new_dt_df.values.tolist())
  
  
