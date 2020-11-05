@@ -33,7 +33,7 @@ jobs:
           sudo chmod -R 777 /usr/data/
           wget  -O /usr/data/city_stats.csv $CSV_DATA_SOURCE
           echo "downloaded the file to machine"
-      - name: Install remotes
+      - name: Install remotes devtools, googlesheets4, httpuv
         run: |
           install.packages("remotes", repos = c("CRAN" = Sys.getenv("CRAN_REPO")))
           install.packages("devtools")
@@ -56,12 +56,10 @@ jobs:
           drat:::add("epiforecasts")
           install.packages("ggplot2")
           install.packages("gridExtra")
-          #install.packages("incidence")
           install.packages("magrittr")
           install.packages("readr")
           install.packages("knitr")
           install.packages("dplyr")
-          #install.packages("EpiEstim")
         shell: Rscript {0}
       - name: Run R script
         run: Rscript  R_scripts/Rt_calcs.R
