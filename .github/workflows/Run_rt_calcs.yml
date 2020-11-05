@@ -37,6 +37,8 @@ jobs:
         run: |
           install.packages("remotes", repos = c("CRAN" = Sys.getenv("CRAN_REPO")))
           install.packages("devtools")
+          install.packages("googlesheets4")
+          install.packages("httpuv")
         shell: Rscript {0}
       - name: Install Epinow2
         run: |
