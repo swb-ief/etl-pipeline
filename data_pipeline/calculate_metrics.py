@@ -97,6 +97,11 @@ def calculate_metrics(
     # daily percent case growth
     df["delta.percent.case.growth"] = df["delta.confirmed"].pct_change()
 
+    # 21-Day MA of daily percent case growth
+    df["MA.21.delta.percent.case.growth"] = (
+        df["delta.percent.case.growth"].rolling(window=21).mean()
+    )
+
     # Impute hospitalization data
     df["delta.hospitalized"] = generate_hospitalizations(df, hospitalizations)
 
