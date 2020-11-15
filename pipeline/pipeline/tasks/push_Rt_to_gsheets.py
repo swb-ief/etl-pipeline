@@ -29,7 +29,7 @@ dt_worksheet, dt_df = worksheet_as_df_by_url(WORKSHEET_URL, "doubling_time")
 # Read the existing Rt out file by the R Script
 new_Rt_df = pd.read_csv("/usr/data/epinow2_out.csv")
 new_Rt_df["city"] = "Mumbai"
-new_Rt_df = new_Rt_df.drop('strat', 1)
+#new_Rt_df = new_Rt_df.drop('strat', 1)
 
 # Read the existing doubling time numbers in days 
 new_dt_df = pd.read_csv('/usr/data/dt_mumbai.csv')
