@@ -150,8 +150,8 @@ estimates_mumbai <- EpiNow2::epinow(reported_cases = mumbai_tab, generation_time
 #Rt_Epiestim <- cbind(mumbai_tab[unlist(Rt_covid_mumbai$R[ 2]),1],Rt_covid_mumbai$R[,c (8, 5, 11)])
 
 Rt_EpiNow2 <- estimates_mumbai$estimates$summarised
-Rt_mean_sd <- Rt_EpiNow2[which(Rt_EpiNow2[,"variable"]=="R" & Rt_EpiNow2[,"type"]=="estimate") ,c(10,11)]
-Rt_tab = cbind(Rt_EpiNow2[which(Rt_EpiNow2[,"variable"]=="R" &  Rt_EpiNow2[,"type"]=="estimate") ,c(1, 9, 7,8)], mean=Rt_mean_sd[,1],
+Rt_mean_sd <- Rt_EpiNow2[which(Rt_EpiNow2[,"variable"]=="R") ,c(10,11)]
+Rt_tab = cbind(Rt_EpiNow2[which(Rt_EpiNow2[,"variable"]=="R") ,c(1, 9, 7,8)], mean=Rt_mean_sd[,1],
                CI_lower = Rt_mean_sd[,1]-1.96* Rt_mean_sd[,2],  CI_upper =Rt_mean_sd[,1]+ 1.96* Rt_mean_sd[,2]) 
 
 Rt_tab
