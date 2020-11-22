@@ -30,4 +30,4 @@ jobs:
           pip install pandas gspread  numpy luigi          
       - name: Run py script
         run: |
-          python pipeline/pipeline/tasks/ward_metrics.py
+          python pipeline/pipeline/ward_metrics.py
