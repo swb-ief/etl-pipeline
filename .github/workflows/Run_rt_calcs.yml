@@ -83,4 +83,4 @@ jobs:
           
       - name: Run py script
         run: |
-          python pipeline/pipeline/tasks/push_Rt_to_gsheets.py
+          python R_scripts/push_Rt_to_gsheets.py
