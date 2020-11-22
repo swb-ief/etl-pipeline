@@ -32,9 +32,9 @@ new_Rt_df["city"] = "Mumbai"
 
 
 # Read the existing doubling time numbers in days 
-new_dt_df = pd.read_csv('/usr/data/dt_mumbai.csv')
+new_dt_df = pd.read_csv("/usr/data/dt_mumbai.csv")
 new_dt_df["city"] = "Mumbai"
-new_dt_df = new_dt_df.drop('r', 1)
+new_dt_df = new_dt_df.drop("r", 1)
 
 # populate the googlesheets
 rt_worksheet.update([new_Rt_df.columns.values.tolist()] + new_Rt_df.values.tolist())
