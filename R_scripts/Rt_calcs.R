@@ -32,7 +32,7 @@ sheets_url <- "https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k
 mumbai_new <- read_sheet(sheets_url,sheet="city_stats")
 
 mumbai_filtered = mumbai_new[mumbai_new$district == 'Mumbai',]
-mumbai_filtered <- na.omit(mumbai_filtered) 
+#mumbai_filtered <- na.omit(mumbai_filtered) 
 case_series_mumbai<-as.numeric(unlist(mumbai_filtered[,"delta.confirmed"])) ## take out delta case##
 tot_cases_mumbai<-as.numeric(unlist(mumbai_filtered[,"total.confirmed"])) ## take out delta case##
 case_dates_mumbai <- unlist(mumbai_filtered[,"date"])
@@ -41,10 +41,12 @@ case_dates_mumbai <- unlist(mumbai_filtered[,"date"])
 #length(case_series_mumbai)
 
 mumbai_tab <- data.frame(date= as.Date(case_dates_mumbai,  origin = "1970-01-01"), confirm=case_series_mumbai)
+mumbai_tab <- na.omit(mumbai_tab)
+mumbai_tab["confirm"] <- replace(mumbai_tab["confirm"], mumbai_tab["confirm"] < 0, 0)
 
-
-mumbai_tab2 <- mumbai_tab[-1,]
+#mumbai_tab2 <- mumbai_tab[-1,]
 mumbai_tab3 <- data.frame(date= as.Date(case_dates_mumbai,  origin = "1970-01-01"), tot_cases=tot_cases_mumbai)
+mumbai_tab3 <- na.omit(mumbai_tab3)
 
 # ##this part is from {incidence}##
 # mumbai_tab2$dates.x <- (case_dates_mumbai[-1] -  case_dates_mumbai[-length(case_dates_mumbai)])/2
