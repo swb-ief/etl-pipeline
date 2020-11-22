@@ -1,0 +1,41 @@
+name: Ward_metrics_computation
+
+on:
+  workflow_dispatch: 
+  schedule:
+    - cron:  '0 10 * * *'
+
+jobs:
+  setup_run_r:
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: checkout this repo
+        uses: actions/checkout@v2
+        with: 
+          ref: ${{ github.head_ref }}
+      - name: update apt-get
+        run: sudo apt-get update -y
+      - name: Install remotes devtools, googlesheets4, httpuv
+        run: |
+          install.packages("remotes", repos = c("CRAN" = Sys.getenv("CRAN_REPO")))
+          install.packages("devtools")
+          install.packages("googlesheets4")
+          install.packages("httpuv")
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+         version: '290.0.1'
+         service_account_key: ${{ secrets.GCP_SA_KEY }}
+         service_account_email: ${{ secrets.GCP_SA_EMAIL }}
+         export_default_credentials: true
+      - run: gcloud info
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install Python dependencies
+        run: |
+          pip install pandas gspread  numpy luigi          
+      - name: Run py script
+        run: |
+          python pipeline/pipeline/tasks/ward_metrics.py
