@@ -10,18 +10,10 @@ jobs:
     runs-on: ubuntu-18.04
 
     steps:
-      - name: checkout this repo
+      - name: Check out this repo
         uses: actions/checkout@v2
-        with: 
+        with:
           ref: ${{ github.head_ref }}
-      - name: update apt-get
-        run: sudo apt-get update -y
-      - name: Install remotes devtools, googlesheets4, httpuv
-        run: |
-          install.packages("remotes", repos = c("CRAN" = Sys.getenv("CRAN_REPO")))
-          install.packages("devtools")
-          install.packages("googlesheets4")
-          install.packages("httpuv")
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
          version: '290.0.1'
@@ -32,7 +24,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.8
       - name: Install Python dependencies
         run: |
           pip install pandas gspread  numpy luigi          
