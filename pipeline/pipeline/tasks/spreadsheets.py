@@ -7,7 +7,7 @@ import luigi
 import numpy
 import pandas
 
-from pipeline.config import GSPREAD_CLIENT, WORKSHEET_URL
+from pipeline.config import GCS_TOKEN, WORKSHEET_URL
 from pipeline.dashboard_pdf_scrapper import (
     scrap_positive_wards_to_df,
     positive_breakdown_fix_dtypes,
@@ -17,14 +17,14 @@ from pipeline.dashboard_pdf_scrapper import (
 )
 from pipeline.extract_history_file import extract_history
 from .cities_metrics_v1 import FetchCovid19IndiaDataTask
-from .dropbox import textio2binary, textio2stringio
+from .gcloud import textio2binary, textio2stringio
 from .stopcoronavirus_mcgm_scrapping import DownloadMcgmDashboardPdfTask
 
 
 def worksheet_as_df_by_url(
     sheet_url: str, worksheet_name: str
 ) -> Tuple[gspread.Worksheet, pandas.DataFrame]:
-    sheet = GSPREAD_CLIENT.open_by_url(sheet_url)
+    sheet = GCS_TOKEN.open_by_url(sheet_url)
     worksheet = sheet.worksheet(worksheet_name)
     return worksheet, pandas.DataFrame(worksheet.get_all_records())
 

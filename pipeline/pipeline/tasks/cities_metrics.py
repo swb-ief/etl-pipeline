@@ -13,7 +13,7 @@ import pandas as pd
 
 from pipeline.calculate_metrics import calculate_metrics_input
 from pipeline.extract_history import extract_history_command
-from .dropbox import dropbox_target, textio2stringio
+from .gcloud import gcs_target, textio2stringio
 from .cities_metrics_v1 import FetchCovid19IndiaDataTask
 
 
@@ -29,7 +29,7 @@ class ExtractMetricsHistoryTask(luigi.Task):
         return FetchCovid19IndiaDataTask(date=self.date)
 
     def output(self):
-        return dropbox_target(
+        return gcs_target(
             f"/data/history-metrics/{state_districts_hash(self.states_and_districts)}-{self.date}.csv"
         )
 
@@ -54,10 +54,10 @@ class CalculateCityMetricsTask(luigi.Task):
 
     def output(self):
         return {
-            "city_metrics": dropbox_target(
+            "city_metrics": gcs_target(
                 f"/data/city-metrics/{state_districts_hash(self.states_and_districts)}-{self.date}-city-metrics.csv"
             ),
-            "hospitalizations": dropbox_target(
+            "hospitalizations": gcs_target(
                 f"/data/hospitalizations/hospitalizations-city-metrics.csv"
             ),
         }

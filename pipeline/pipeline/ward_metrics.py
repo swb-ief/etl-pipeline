@@ -8,13 +8,13 @@ from ward_data_computation import (
     impute_missing_metrics,
 )
 
-GSPREAD_CLIENT = None
+GCS_TOKEN = None
 DEFAULT_WORKSHEET_URL = "https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k2ZraDb6DzgCOSXI0f0/edit#gid=0"
 
 WORKSHEET_URL = os.getenv("SWB_WORKSHEET_URL", DEFAULT_WORKSHEET_URL)
 
 try:
-    GSPREAD_CLIENT = gspread.service_account(
+    GCS_TOKEN = gspread.service_account(
         filename=os.getenv(
             "GOOGLE_APPLICATION_CREDENTIALS", "~/.config/gspread/service_account.json"
         )
@@ -26,7 +26,7 @@ except FileNotFoundError as e:
 def worksheet_as_df_by_url(
     sheet_url: str, worksheet_name: str
 ):  # -> Tuple[gspread.Worksheet, pandas.DataFrame]:
-    sheet = GSPREAD_CLIENT.open_by_url(sheet_url)
+    sheet = GCS_TOKEN.open_by_url(sheet_url)
     worksheet = sheet.worksheet(worksheet_name)
     return worksheet, pd.DataFrame(worksheet.get_all_records())
 

@@ -36,8 +36,6 @@ jobs:
         export_default_credentials: true
     - run: gcloud info
     - name: luigi pipeline
-      env:
-        SWB_DROPBOX_TOKEN: ${{ secrets.SWB_DROPBOX_TOKEN }}
       working-directory: ./pipeline
       run: |
         python -m luigi --module pipeline.tasks.spreadsheets AllDataGSheetTask  --states-and-districts '{ "MH": ["Mumbai", "Pune", "Nanded", "Raigad"], "UP": ["Agra"]  }' --local-scheduler
