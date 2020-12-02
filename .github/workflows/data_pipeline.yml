@@ -14,7 +14,8 @@ jobs:
 
     steps:
       - name: Set env
-        run: echo "::set-env name=PDF_FILE_PATH::$(echo $PDF_FILE_PATH-$(date +%s).pdf)"
+        env:
+          PDF_FILE_PATH: PDF_FILE_PATH-$(date +%s).pdf
       - name: Check out this repo
         uses: actions/checkout@v2
         with:
