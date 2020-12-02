@@ -4,7 +4,7 @@ import tempfile
 import luigi
 import requests
 
-from .dropbox import dropbox_target, textio2binary
+from .dropbox import dropbox_target, textio2binary, dropbox_delete
 from pipeline.dashboard_pdf_scrapper import (
     scrap_positive_wards_to_csv,
     scrape_case_growth_to_csv,
@@ -28,7 +28,17 @@ class DownloadMcgmDashboardPdfTask(luigi.Task):
         with self.output().temporary_path() as output_path:
             with open(output_path, "wb") as output_tmp_file:
                 output_tmp_file.write(response.content)
+        self.delete()
 
+    def output(self):
+        return dropbox_target(
+            f"/data/dashboard-pdf/{self.date}-mcgm.stopcoronavirus.pdf"
+        )
+    
+    def delete(self):
+        return dropbox_target(
+            f"/data/dashboard-pdf/{self.date}-mcgm.stopcoronavirus.pdf"
+        )    
 
 class ExtractWardPositiveBreakdownTask(luigi.Task):
     date = luigi.DateParameter(default=date.today())
@@ -50,7 +60,12 @@ class ExtractWardPositiveBreakdownTask(luigi.Task):
             scrap_positive_wards_to_csv(
                 named_tmp_file, output_file, page=self.page_index
             )
+        self.delete()
 
+    def delete(self):
+        return dropbox_delete(
+            f"/data/dashboard-pdf/{self.date}-mcgm.stopcoronavirus.pdf"
+        )
 
 class ExtractCaseGrowthTableTask(luigi.Task):
     date = luigi.DateParameter(default=date.today())
@@ -68,7 +83,12 @@ class ExtractCaseGrowthTableTask(luigi.Task):
         ) as input_file, tempfile.NamedTemporaryFile("ab+") as named_tmp_file:
             named_tmp_file.write(textio2binary(input_file))
             scrape_case_growth_to_csv(named_tmp_file.name, output_file, page=self.page)
+        self.delete()
 
+    def delete(self):
+        return dropbox_delete(
+            f"/data/dashboard-pdf/{self.date}-mcgm.stopcoronavirus.pdf"
+        )
 
 class ExtractElderlyTableTask(luigi.Task):
     date = luigi.DateParameter(default=date.today())
@@ -80,13 +100,16 @@ class ExtractElderlyTableTask(luigi.Task):
     def output(self):
         return dropbox_target(f"/data/dashboard-elderly/elderly-{self.date}.csv")
 
+    def delete(self):
+        return dropbox_delete(f"/data/dashboard-elderly/elderly-{self.date}.csv")    
+
     def run(self):
         with self.output().open("w") as output_file, self.input().open(
             "r"
         ) as input_file, tempfile.NamedTemporaryFile("ab+") as named_tmp_file:
             named_tmp_file.write(textio2binary(input_file))
             scrape_elderly_table(named_tmp_file.name, output_file, page=self.page)
-
+        self.delete()
 
 class ExtractDataFromPdfDashboardWrapper(luigi.WrapperTask):
     date = luigi.DateParameter(default=date.today())
