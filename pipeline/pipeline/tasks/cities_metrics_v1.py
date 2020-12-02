@@ -16,7 +16,7 @@ from pipeline.calculate_metrics_v1 import (
     reset_hospitalization_percentages,
     calculate_city_stats_with_hospitalizations,
 )
-from .gcloud import gcs_target, textio2stringio
+from .dropbox import dropbox_target, textio2stringio
 
 
 def hospitalization_csv_path(city_name, date):
@@ -38,7 +38,7 @@ class FetchCovid19IndiaDataTask(luigi.Task):
             output.write(response.text)
 
     def output(self):
-        return gcs_target(f"/data/covid19api/{self.date}.json")
+        return dropbox_target(f"/data/covid19api/{self.date}.json")
 
 
 class ExtractHistoryTask(luigi.Task):
@@ -49,7 +49,7 @@ class ExtractHistoryTask(luigi.Task):
         return FetchCovid19IndiaDataTask(date=self.date)
 
     def output(self):
-        return gcs_target(f"/data/history/{self.date}.csv")
+        return dropbox_target(f"/data/history/{self.date}.csv")
 
     def run(self):
         with self.input().open("r") as input_file, self.output().open(
@@ -71,7 +71,7 @@ class CalculateMetricsWithoutHospitalizationTask(luigi.Task):
         )
 
     def output(self):
-        return gcs_target(
+        return dropbox_target(
             f"/data/metrics/{self.city_name}/{self.date}-metrics-without-hospitalization.csv"
         )
 
@@ -101,7 +101,7 @@ class CreateDefaultHosptializationTask(luigi.Task):
         )
 
     def output(self):
-        return gcs_target(self.default_hospitalization_path)
+        return dropbox_target(self.default_hospitalization_path)
 
     def run(self):
         with self.output().open("w") as output_file, self.input().open(
@@ -127,7 +127,7 @@ class FetchHospitalizationTask(luigi.Task):
         )
 
     def output(self):
-        return gcs_target(hospitalization_csv_path(self.city_name, self.date))
+        return dropbox_target(hospitalization_csv_path(self.city_name, self.date))
 
     def run(self):
         with (self.input().open("r")) as previous_hospitalization_file, (
@@ -150,7 +150,7 @@ class CreateHospitalizationTask(luigi.Task):
         )
 
     def output(self):
-        return gcs_target(hospitalization_csv_path(self.city_name, self.date))
+        return dropbox_target(hospitalization_csv_path(self.city_name, self.date))
 
     def run(self):
         yesterday_hospitalization = yield FetchHospitalizationTask(
@@ -183,7 +183,7 @@ class CalculateMetricsTask(luigi.Task):
         )
 
     def output(self):
-        return gcs_target(
+        return dropbox_target(
             f"/data/metrics/{self.city_name}/{self.date}-metrics-with-hospitalization.csv"
         )
 

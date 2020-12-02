@@ -54,6 +54,8 @@ jobs:
         service_account_email: ${{ secrets.GCP_SA_EMAIL }}
         export_default_credentials: true
     - name: luigi pipeline
+      env:
+        SWB_DROPBOX_TOKEN: ${{ secrets.SWB_DROPBOX_TOKEN }}
       working-directory: ./pipeline
       run: |
         python -m luigi --module pipeline.tasks.spreadsheets AllDataGSheetTask  --daily-case-growth-page ${{ github.event.inputs.dailyCaseGrowthPage }} --positive-breakdown-index ${{ github.event.inputs.positiveBreakdownIndex }}  --states-and-districts '${{ github.event.inputs.statesDistricts }}' --local-scheduler

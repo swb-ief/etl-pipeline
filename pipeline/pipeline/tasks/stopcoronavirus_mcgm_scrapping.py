@@ -4,7 +4,7 @@ import tempfile
 import luigi
 import requests
 
-from .gcloud import gcs_target, textio2binary
+from .dropbox import dropbox_target, textio2binary
 from pipeline.dashboard_pdf_scrapper import (
     scrap_positive_wards_to_csv,
     scrape_case_growth_to_csv,
@@ -19,7 +19,9 @@ class DownloadMcgmDashboardPdfTask(luigi.Task):
     date = luigi.DateParameter(default=date.today())
 
     def output(self):
-        return gcs_target(f"/data/dashboard-pdf/{self.date}-mcgm.stopcoronavirus.pdf")
+        return dropbox_target(
+            f"/data/dashboard-pdf/{self.date}-mcgm.stopcoronavirus.pdf"
+        )
 
     def run(self):
         response = requests.get(self.url)
@@ -36,7 +38,7 @@ class ExtractWardPositiveBreakdownTask(luigi.Task):
         return DownloadMcgmDashboardPdfTask(date=self.date)
 
     def output(self):
-        return gcs_target(
+        return dropbox_target(
             f"/data/positive-wards/ward-positive-breakdown-{self.date}.csv"
         )
 
@@ -58,7 +60,7 @@ class ExtractCaseGrowthTableTask(luigi.Task):
         return DownloadMcgmDashboardPdfTask(date=self.date)
 
     def output(self):
-        return gcs_target(f"/data/dashboard-case-growth/growth-{self.date}.csv")
+        return dropbox_target(f"/data/dashboard-case-growth/growth-{self.date}.csv")
 
     def run(self):
         with self.output().open("w") as output_file, self.input().open(
@@ -76,7 +78,7 @@ class ExtractElderlyTableTask(luigi.Task):
         return DownloadMcgmDashboardPdfTask(date=self.date)
 
     def output(self):
-        return gcs_target(f"/data/dashboard-elderly/elderly-{self.date}.csv")
+        return dropbox_target(f"/data/dashboard-elderly/elderly-{self.date}.csv")
 
     def run(self):
         with self.output().open("w") as output_file, self.input().open(
