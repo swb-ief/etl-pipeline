@@ -11,6 +11,7 @@ jobs:
     env:
       PDF_SOURCE: 'http://stopcoronavirus.mcgm.gov.in/assets/docs/Dashboard.pdf'
       PDF_FILE_PATH: '/tmp/stopcovid-dashboard'
+      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
 
     steps:
       - name: Set env
