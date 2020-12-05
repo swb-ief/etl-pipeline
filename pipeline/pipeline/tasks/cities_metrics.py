@@ -13,7 +13,7 @@ import pandas as pd
 
 from pipeline.calculate_metrics import calculate_metrics_input
 from pipeline.extract_history import extract_history_command
-from .dropbox import dropbox_target, textio2stringio, dropbox_delete
+from .dropbox import dropbox_target, textio2stringio
 from .cities_metrics_v1 import FetchCovid19IndiaDataTask
 
 
@@ -33,11 +33,6 @@ class ExtractMetricsHistoryTask(luigi.Task):
             f"/data/history-metrics/{state_districts_hash(self.states_and_districts)}-{self.date}.csv"
         )
 
-    def delete(self):
-        return dropbox_delete(
-            f"/data/history-metrics/{state_districts_hash(self.states_and_districts)}-{self.date}.csv"
-        )
-
     def run(self):
         with self.input().open("r") as input_file, self.output().open(
             "w"
@@ -45,7 +40,7 @@ class ExtractMetricsHistoryTask(luigi.Task):
             extract_history_command(
                 textio2stringio(input_file), self.states_and_districts, output_file
             )
-        self.delete()
+
 
 class CalculateCityMetricsTask(luigi.Task):
     date = luigi.DateParameter()
@@ -66,14 +61,6 @@ class CalculateCityMetricsTask(luigi.Task):
                 f"/data/hospitalizations/hospitalizations-city-metrics.csv"
             ),
         }
-    
-    def delete(self):
-        dropbox_delete(
-            f"/data/city-metrics/{state_districts_hash(self.states_and_districts)}-{self.date}-city-metrics.csv"
-        )
-        dropbox_delete(
-            f"/data/hospitalizations/hospitalizations-city-metrics.csv"
-        )
 
     def run(self):
         hospitalizations = self.output()["hospitalizations"]
@@ -101,7 +88,7 @@ class CalculateCityMetricsTask(luigi.Task):
         with (hospitalizations.open("w")) as hosptialization_output:
             hosptialization_output.write((tmp_hospitalization.read().decode("utf-8")))
         tmp_hospitalization.close()
-        self.delete()
+
 
 if __name__ == "__main__":
     luigi.run()

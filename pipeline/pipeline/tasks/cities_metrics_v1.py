@@ -16,7 +16,7 @@ from pipeline.calculate_metrics_v1 import (
     reset_hospitalization_percentages,
     calculate_city_stats_with_hospitalizations,
 )
-from .dropbox import dropbox_target, textio2stringio, dropbox_delete
+from .dropbox import dropbox_target, textio2stringio
 
 
 def hospitalization_csv_path(city_name, date):
@@ -36,13 +36,10 @@ class FetchCovid19IndiaDataTask(luigi.Task):
         response = requests.get(self.url)
         with self.output().open("w") as output:
             output.write(response.text)
-        self.delete()   
 
     def output(self):
         return dropbox_target(f"/data/covid19api/{self.date}.json")
 
-    def delete(self):
-        return dropbox_delete(f"/data/covid19api/{self.date}.json")
 
 class ExtractHistoryTask(luigi.Task):
     date = luigi.DateParameter(default=date.today())
@@ -61,10 +58,7 @@ class ExtractHistoryTask(luigi.Task):
             extract_history_command(
                 textio2stringio(input_file), self.states_and_districts, output_file
             )
-        self.delete()   
 
-    def delete(self):
-        return dropbox_delete(f"/data/history/{self.date}.csv")
 
 class CalculateMetricsWithoutHospitalizationTask(luigi.Task):
     date = luigi.DateParameter(default=date.today())
@@ -88,12 +82,7 @@ class CalculateMetricsWithoutHospitalizationTask(luigi.Task):
             calculate_city_states_without_hospitalizations(
                 textio2stringio(input_file), output_file, self.city_name
             )
-        self.delete()   
 
-    def delete(self):
-        return dropbox_delete(
-            f"/data/metrics/{self.city_name}/{self.date}-metrics-without-hospitalization.csv"
-        )
 
 class CreateDefaultHosptializationTask(luigi.Task):
     date = luigi.DateParameter()
@@ -121,10 +110,7 @@ class CreateDefaultHosptializationTask(luigi.Task):
             reset_hospitalization_percentages(
                 textio2stringio(metrics_input_file), output_file, self.city_name
             )
-        self.delete()   
 
-    def delete(self):
-        return dropbox_delete(self.default_hospitalization_path)
 
 class FetchHospitalizationTask(luigi.Task):
     date = luigi.DateParameter()
@@ -148,10 +134,7 @@ class FetchHospitalizationTask(luigi.Task):
             self.output().open("w")
         ) as output_file:
             output_file.write(previous_hospitalization_file.read())
-        self.delete()   
 
-    def delete(self):
-        return dropbox_delete(hospitalization_csv_path(self.city_name, self.date))
 
 class CreateHospitalizationTask(luigi.Task):
     date = luigi.DateParameter()
@@ -185,10 +168,7 @@ class CreateHospitalizationTask(luigi.Task):
                 output_file,
                 self.city_name,
             )
-        self.delete()   
 
-    def delete(self):
-        return dropbox_delete(hospitalization_csv_path(self.city_name, self.date))
 
 class CalculateMetricsTask(luigi.Task):
     date = luigi.DateParameter(default=date.today())
@@ -204,11 +184,6 @@ class CalculateMetricsTask(luigi.Task):
 
     def output(self):
         return dropbox_target(
-            f"/data/metrics/{self.city_name}/{self.date}-metrics-with-hospitalization.csv"
-        )
-
-    def delete(self):
-        return dropbox_delete(
             f"/data/metrics/{self.city_name}/{self.date}-metrics-with-hospitalization.csv"
         )
 
@@ -228,7 +203,6 @@ class CalculateMetricsTask(luigi.Task):
                 output_file,
                 self.city_name,
             )
-        self.delete()    
 
 
 if __name__ == "__main__":

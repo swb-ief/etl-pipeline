@@ -1,5 +1,5 @@
 from io import StringIO
-import dropbox
+
 from luigi.contrib.dropbox import DropboxTarget
 from pipeline.config import DROPBOX_TOKEN
 
@@ -21,7 +21,3 @@ def textio2stringio(text_io_wrapper):
 
 def textio2binary(text_io_wrapper):
     return text_io_wrapper.buffer.read()
-
-def dropbox_delete(path):
-    dbx = dropbox.Dropbox(DROPBOX_TOKEN)
-    return dbx.files_delete(path)
