@@ -177,3 +177,28 @@ This requires two secrets:
 - SPREADSHEET_IDS: The list of spreadsheets to fetch, separated by one space eg. `id1 id2 id3 id4` 
 
 TODO: This is still a work in progress, since we don't know what to do with the data.
+
+
+
+### Rt and DT calculations
+
+Rt and Dt calculattions are performed using the Github Action `R_proc`located at https://github.com/swb-ief/etl-pipeline/blob/master/.github/workflows/Run_rt_calcs.yml
+
+The Action Does the following steps in order:
+1. Install R and its dependencies
+2. Install the R packages that the R script requires like EpiNow2
+3. Install Python and its dependencies (gspread etc)
+4. Run the R script `Rt_calcs.R`
+5. Run the Python Script `push_Rt_to_gsheets.py`
+
+The Rt and DT calculations are carried by the R Script located at https://github.com/swb-ief/etl-pipeline/tree/master/R_scripts. The R Script `Rt_calcs.R` performs the following things in sequential order once executed:
+  1. Fetch the Google Worksheet located at https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k2ZraDb6DzgCOSXI0f0/edit#gid=0
+  2. Read the sheet named `city_stats`
+  3. Filter rows for `Mumbai`
+  4. Perform Doubling time calculations and write the output to `'/usr/data/dt_mumbai.csv'`
+  5. Perform Rt calculations and write the output to `/usr/data/epinow2_out.csv`
+  
+Writing the Rt and DT results back into the Google Worksheet at https://github.com/swb-ief/etl-pipeline/tree/master/R_scripts is done by the python Script `push_Rt_to_gsheets.py`.
+The Python Process does the following things in a sequence:
+  1. Read the CSVs located under `/usr/data/`
+  2. Write them into the GSheets  `Rt` and `doubling_time`
