@@ -11,11 +11,10 @@ jobs:
     env:
       PDF_SOURCE: 'http://stopcoronavirus.mcgm.gov.in/assets/docs/Dashboard.pdf'
       PDF_FILE_PATH: '/tmp/stopcovid-dashboard'
-      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
 
     steps:
       - name: Set env
-        run: echo "::set-env name=PDF_FILE_PATH::$(echo $PDF_FILE_PATH-$(date +%s).pdf)"
+        run: echo "PDF_FILE_PATH=$PDF_FILE_PATH-$(date +%s).pdf" >> $GITHUB_ENV
       - name: Check out this repo
         uses: actions/checkout@v2
         with:
