@@ -19,7 +19,7 @@ def ensure_available_space(min_space):
     dbx = dropbox.Dropbox(DROPBOX_TOKEN) 
 
     # ? print usage
-    usage = dbx.users.SpaceUsage()
+    usage = dbx.users_get_space_usage()
     print(usage)
 
     # ? list files
