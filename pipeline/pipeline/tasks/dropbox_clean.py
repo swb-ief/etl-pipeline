@@ -2,9 +2,11 @@
 # https://dropbox-sdk-python.readthedocs.io/en/latest/index.html
 
 # from pipeline.config import DROPBOX_TOKEN
+import os
+
+print(os.getcwd())
 from luigi.contrib.dropbox import DropboxTarget, DropboxClient
 import dropbox
-import os
 
 
 DROPBOX_TOKEN = os.getenv("SWB_DROPBOX_TOKEN")  # TODO get from pipeline.config
@@ -38,6 +40,5 @@ def ensure_available_space(min_space):
 
 
 if __name__ == "__main__":
-    print(os.getcwd())
 
     ensure_available_space(1000)
