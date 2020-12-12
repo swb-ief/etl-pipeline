@@ -21,7 +21,3 @@ def textio2stringio(text_io_wrapper):
 
 def textio2binary(text_io_wrapper):
     return text_io_wrapper.buffer.read()
-
-
-
-
