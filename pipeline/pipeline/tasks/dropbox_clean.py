@@ -1,7 +1,7 @@
 # from pipeline.config import DROPBOX_TOKEN
-from luigi.contrib.dropbox import DropboxTarget
+from luigi.contrib.dropbox import DropboxTarget, DropboxClient
 import os
-import dropbox
+
 
 DROPBOX_TOKEN = os.getenv("SWB_DROPBOX_TOKEN") # TODO get from pipeline.config
 
@@ -15,7 +15,7 @@ def dropbox_target(path):
 # ? Additions re: Dropbox clear space
 def ensure_available_space(min_space):
 
-    dbx = dropbox.Dropbox(DROPBOX_TOKEN) 
+    dbx = DropboxClient(DROPBOX_TOKEN) 
 
     # ? print usage
     usage = dbx.users.SpaceUsage()
