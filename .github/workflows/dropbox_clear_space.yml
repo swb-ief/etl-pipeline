@@ -2,16 +2,14 @@ name: DropboxClearSpace
 
 on:
   workflow_dispatch:
-    inputs:
-      tags:
-        description: 'Manual clean dropbox'
 
 jobs:
   dropbox_clear_space:
+    name: Clean dropbox action
     runs-on: ubuntu-latest
     steps:
-    - name: Check out this repo
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+#     - uses: actions/setup-python@v2
 #     - name: Set up Python
 #       uses: actions/setup-python@v2
 #       with:
