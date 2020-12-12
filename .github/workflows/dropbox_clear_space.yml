@@ -3,12 +3,11 @@ name: some_name
 on:
   workflow_dispatch:
 
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - uses: actions/checkout@v2
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+       - uses: actions/checkout@v2
 
 #       - name: Run a one-line script
 #         run: echo Hello, world!
