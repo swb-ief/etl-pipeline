@@ -2,56 +2,36 @@ name: some_name
 
 on:
   workflow_dispatch:
+  push: # this allows testing, can be removed when on master when it will allow for manual triggers
 
 jobs:
-  build:
+  dropbox_clear_space:
+    name: Clean dropbox action
     runs-on: ubuntu-latest
     steps:
-       - uses: actions/checkout@v2
-
-#       - name: Run a one-line script
-#         run: echo Hello, world!
-
-#       - name: Run a multi-line script
-#         run: |
-#           echo Add other actions to build,
-#           echo test, and deploy your project.
-
-# name: DropboxClearSpace
-
-# on:
-#   workflow_dispatch:
-
-# jobs:
-#   dropbox_clear_space:
-#     name: Clean dropbox action
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v2
-#     - uses: actions/setup-python@v2
-#     - name: Set up Python
-#       uses: actions/setup-python@v2
-#       with:
-#         python-version: 3.8
-#     - name: Install Python dependencies
-#       working-directory: ./pipeline
-#       run: |
-#         pip install -r requirements.txt
-#     - uses: actions/cache@v2
-#       with:
-#         path: ~/.cache/pip
-#         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-#         restore-keys: |
-#           ${{ runner.os }}-pip-
-#     - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
-#       with:
-#         version: '290.0.1'
-#         service_account_key: ${{ secrets.GCP_SA_KEY }}
-#         service_account_email: ${{ secrets.GCP_SA_EMAIL }}
-#         export_default_credentials: true
-#     - name: luigi Dropbox space pipeline
-#       env:
-#         SWB_DROPBOX_TOKEN: ${{ secrets.SWB_DROPBOX_TOKEN }}
-#       working-directory: ./pipeline
-#       run: |
-#         python pipeline.tasks.dropbox_clean.py 
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install Python dependencies
+        working-directory: ./pipeline
+        run: |
+          pip install -r requirements.txt
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '290.0.1'
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          service_account_email: ${{ secrets.GCP_SA_EMAIL }}
+          export_default_credentials: true
+      - name: luigi Dropbox space pipeline
+        env:
+          SWB_DROPBOX_TOKEN: ${{ secrets.SWB_DROPBOX_TOKEN }}
+        working-directory: ./pipeline
+        run: |
+          python pipeline.tasks.dropbox_clean.py 
