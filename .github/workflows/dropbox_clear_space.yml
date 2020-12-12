@@ -34,4 +34,4 @@ jobs:
         SWB_DROPBOX_TOKEN: ${{ secrets.SWB_DROPBOX_TOKEN }}
       working-directory: ./pipeline
       run: |
-        python pipeline.tasks.dropbox.py 
+        python pipeline.tasks.dropbox_clean.py 
