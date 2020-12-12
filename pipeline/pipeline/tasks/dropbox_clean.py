@@ -7,11 +7,11 @@ import dropbox
 import os
 
 
-DROPBOX_TOKEN = os.getenv("SWB_DROPBOX_TOKEN") # TODO get from pipeline.config
+DROPBOX_TOKEN = os.getenv("SWB_DROPBOX_TOKEN")  # TODO get from pipeline.config
 
 # duplicate of a func in dropbox.py
 def dropbox_target(path):
-    return DropboxTarget(path, DROPBOX_TOKEN) 
+    return DropboxTarget(path, DROPBOX_TOKEN)
 
 
 # ? ==============================
@@ -19,7 +19,7 @@ def dropbox_target(path):
 # ? Additions re: Dropbox clear space
 def ensure_available_space(min_space):
 
-    dbx = dropbox.Dropbox(DROPBOX_TOKEN) 
+    dbx = dropbox.Dropbox(DROPBOX_TOKEN)
 
     # ? print usage
     usage = dbx.users_get_space_usage()
