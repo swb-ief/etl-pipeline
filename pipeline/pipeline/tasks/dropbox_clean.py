@@ -34,4 +34,4 @@ def ensure_available_space(min_space):
 
 if __name__ == "__main__":
 
-    ensure_available_space()
+    ensure_available_space(1000)
