@@ -4,7 +4,7 @@ import tempfile
 import luigi
 import requests
 
-from .dropbox import dropbox_target, textio2binary
+from .dropbox_utils import dropbox_target, textio2binary
 from pipeline.dashboard_pdf_scrapper import (
     scrap_positive_wards_to_csv,
     scrape_case_growth_to_csv,

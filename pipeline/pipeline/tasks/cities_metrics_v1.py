@@ -16,7 +16,7 @@ from pipeline.calculate_metrics_v1 import (
     reset_hospitalization_percentages,
     calculate_city_stats_with_hospitalizations,
 )
-from .dropbox import dropbox_target, textio2stringio
+from .dropbox_utils import dropbox_target, textio2stringio
 
 
 def hospitalization_csv_path(city_name, date):

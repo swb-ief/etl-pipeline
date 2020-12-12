@@ -13,7 +13,7 @@ import pandas as pd
 
 from pipeline.calculate_metrics import calculate_metrics_input
 from pipeline.extract_history import extract_history_command
-from .dropbox import dropbox_target, textio2stringio
+from .dropbox_utils import dropbox_target, textio2stringio
 from .cities_metrics_v1 import FetchCovid19IndiaDataTask
 
 
