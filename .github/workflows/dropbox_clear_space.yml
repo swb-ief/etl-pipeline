@@ -1,7 +1,10 @@
 name: DropboxClearSpace
 
 on:
-  workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Manual clean dropbox'
 
 jobs:
   dropbox_clear_space:
