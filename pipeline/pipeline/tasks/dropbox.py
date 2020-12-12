@@ -21,3 +21,27 @@ def textio2stringio(text_io_wrapper):
 
 def textio2binary(text_io_wrapper):
     return text_io_wrapper.buffer.read()
+
+
+#? ==============================
+#? dropbox_clear_space
+#? Additions re: Dropbox clear space
+def available_space(path):
+
+    dbx = dropbox.Dropbox(DROPBOX_TOKEN)
+
+    #? list files
+    for entry in dbx.files_list_folder('').entries:
+        print(entry.name)
+        print(dbx.files_get_metadata(entry.name))
+
+
+    return None
+
+
+if __name__ == "__main__":
+
+    print("hello")
+
+
+
