@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  DropboxClearSpace:
+  dropbox_clear_space:
     runs-on: ubuntu-latest
     steps:
     - name: Check out this repo
