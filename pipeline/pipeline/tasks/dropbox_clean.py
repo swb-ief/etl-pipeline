@@ -1,12 +1,13 @@
-from pipeline.config import DROPBOX_TOKEN
+# from pipeline.config import DROPBOX_TOKEN
 import dropbox
+import os
 
 # ? ==============================
 # ? dropbox_clear_space
 # ? Additions re: Dropbox clear space
 def ensure_available_space(min_space):
 
-    dbx = dropbox.Dropbox(DROPBOX_TOKEN)
+    dbx = dropbox.Dropbox(os.getenv("SWB_DROPBOX_TOKEN")) # TODO get from pipeline.config
 
     # ? print usage
     usage = dbx.users.SpaceUsage()
