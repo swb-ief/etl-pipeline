@@ -34,4 +34,4 @@ jobs:
           SWB_DROPBOX_TOKEN: ${{ secrets.SWB_DROPBOX_TOKEN }}
         working-directory: ./pipeline
         run: |
-          python -m luigi --module pipeline.tasks.dropbox_clean
+          python -m luigi --module pipeline.tasks.dropbox_clean ensure_available_space
