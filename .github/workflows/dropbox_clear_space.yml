@@ -1,4 +1,4 @@
-name: some_name
+name: Dropbox clear space
 
 on:
   workflow_dispatch:
