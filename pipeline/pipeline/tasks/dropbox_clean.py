@@ -26,7 +26,7 @@ def ensure_available_space(min_space):
     print(usage)
 
     # ? list files
-    for entry in dbx.files_list_folder(".", recursive=True).entries:
+    for entry in dbx.files_list_folder("/", recursive=True).entries:
         print(entry.name)
         print(dbx.files_get_metadata(entry.name))
 
