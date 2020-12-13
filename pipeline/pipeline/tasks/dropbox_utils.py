@@ -1,5 +1,6 @@
 from io import StringIO
 import re
+import datetime
 from luigi.contrib.dropbox import DropboxTarget
 from pipeline.config import DROPBOX_TOKEN
 import dropbox
@@ -34,8 +35,8 @@ def ensure_available_space(min_space):
     # test if usage threshhold exceeded (below min space)
     # if below, delete last two days of data (subject to change)
     usage = dbx.users_get_space_usage()
+    print(usage)
     used = usage.used
-    print(usage.allocation.get_individual())
     allocated = usage.allocation.get_individual().allocated
     # print(usage.allocation.individual())
     # print(type(usage.used))
@@ -50,14 +51,34 @@ def ensure_available_space(min_space):
     # patterns
     p1 = "^\d{4}-\d{2}-\d{2}-mcgm\.stopcoronavirus\.pdf$"
     p2 = "^\d{4}-\d{2}-\d{2}\.json$"
+    p3 = "\d{4}-\d{2}-\d{2}"
 
     # list files
-    for entry in dbx.files_list_folder("", recursive=True).entries:
-        if (re.search(p1, entry.name) is not None) | (
-            re.search(p2, entry.name) is not None
-        ):
-            print(entry.name)
-        # print(dbx.files_get_metadata(entry.name))
+    project_files = dbx.files_list_folder("", recursive=True).entries
+    stopcovid_pdf = [
+        entry.name for entry in project_files if re.search(p1, entry.name) is not None
+    ]
+    proj_json = [
+        entry.name for entry in project_files if re.search(p2, entry.name) is not None
+    ]
+
+    # filter files for oldest 10 files (arbitrary)
+    stopcovid_pdf = sorted(
+        stopcovid_pdf, key=lambda val: datetime.datetime.strptime(val, "%Y-%m-%d")
+    )[0:5]
+    proj_json = sorted(
+        stopcovid_pdf, key=lambda val: datetime.datetime.strptime(val, "%Y-%m-%d")
+    )[0:5]
+
+    print(stopcovid_pdf)
+    print(proj_json)
+
+    # for entry in dbx.files_list_folder("", recursive=True).entries:
+    #     if (re.search(p1, entry.name) is not None) | (
+    #         re.search(p2, entry.name) is not None
+    #     ):
+    #         print(entry.name)
+    # print(dbx.files_get_metadata(entry.name))
 
     # delete file
     # path = ""
