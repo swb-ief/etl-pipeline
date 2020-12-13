@@ -67,13 +67,14 @@ def ensure_available_space():
     )
     project_files_refdate = list(
         map(
-            lambda entry: entry.update(
-                {
-                    "ref_date": entry["name"][
+            lambda entry: {
+                **entry,
+                **{
+                    entry["ref_date"]: entry["name"][
                         entry["match"].start() : entry["match"].end()
                     ]
-                }
-            ),
+                },
+            },
             project_files_match,
         )
     )
@@ -84,7 +85,8 @@ def ensure_available_space():
     project_files_refdate = list(
         filter(
             lambda entry: datetime.datetime.strptime(entry["ref_date"], "%Y-%m-%d")
-            < min_date
+            < min_date,
+            project_files_refdate,
         )
     )
 
