@@ -28,58 +28,43 @@ def textio2binary(text_io_wrapper):
 # ? ==============================
 # ? dropbox_clear_space
 # ? Additions re: Dropbox clear space
-def ensure_available_space(min_space):
+def ensure_available_space():
 
     dbx = dropbox.Dropbox(DROPBOX_TOKEN)
 
     # test if usage threshhold exceeded (below min space)
     # if below, delete last two days of data (subject to change)
     usage = dbx.users_get_space_usage()
-    print(usage)
     used = usage.used
     allocated = usage.allocation.get_individual().allocated
     remaining_space = allocated - used
     print("remaining space: {}".format(str(remaining_space)))
 
-    if remaining_space >= min_space:
-        print("space is sufficient")
+    # delete any files older than 12 weeks
+    min_date = datetime.datetime.now() - datetime.timedelta(days=84)
+
+    # list files
+    project_files = dbx.files_list_folder("", recursive=True).entries
+    project_files = list(
+        filter(lambda entry: type(entry) == dropbox.files.FileMetadata, project_files)
+    )
+
+    # list files older than min date
+    project_files = list(
+        filter(lambda entry: entry.client_modified < min_date, project_files)
+    )
+
+    if len(project_files) == 0:
+        print("no files to delete")
         return None
     else:
-        print("space is insufficient!")
+        print(min_date)
+        print("deleting {} files".format(str(len(project_files))))
 
-        # patterns
-        p1 = "^\d{4}-\d{2}-\d{2}-mcgm\.stopcoronavirus\.pdf$"
-        p2 = "^\d{4}-\d{2}-\d{2}\.json$"
-        p3 = "\d{4}-\d{2}-\d{2}"
-
-        # list files
-        project_files = dbx.files_list_folder("", recursive=True).entries
-        print([type(entry) for entry in project_files])
-
-        stopcovid_pdf = [
-            entry.name
-            for entry in project_files
-            if re.search(p1, entry.name) is not None
-        ]
-        proj_json = [
-            entry.name
-            for entry in project_files
-            if re.search(p2, entry.name) is not None
-        ]
-
-        # filter files for oldest 10 files (arbitrary)
-        date_sort = lambda val: datetime.datetime.strptime(
-            val[re.search(p3, val).start() : re.search(p3, val).end()], "%Y-%m-%d"
-        )
-        stopcovid_pdf = sorted(stopcovid_pdf, key=date_sort)[0]
-        proj_json = sorted(proj_json, key=date_sort)[0]
-
-        print(stopcovid_pdf)
-        print(proj_json)
-
-        # delete file
-        # path = "/data/dashboard-pdf/2020-08-28-mcgm.stopcoronavirus.pdf"
-        # dbx.files_delete(path)
+        # delete old files
+        # for entry in project_files:
+        #     path = entry.path_lower
+        #     dbx.files_delete(path)
 
         return None
 
