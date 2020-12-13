@@ -49,10 +49,26 @@ def ensure_available_space():
         filter(lambda entry: type(entry) == dropbox.files.FileMetadata, project_files)
     )
 
-    # list files older than min date
-    project_files = list(
-        filter(lambda entry: entry.client_modified < min_date, project_files)
+    # list files older than min date --> name reference date
+    date_pattern = "\d{4}-\d{2}-\d{2}"
+    project_files_match = list(
+        map(
+            lambda entry: {
+                "name": entry.name,
+                "match": re.search(date_pattern, entry.name),
+                "path": entry.path_lower,
+            },
+            project_files,
+        )
     )
+    project_files_match = list(
+        filter(lambda entry: entry["match"] is not None, project_files_match)
+    )
+    # project_files = list(
+    #     filter(lambda entry: entry.client_modified < min_date, project_files)
+    # )
+
+    # list files older than min date --> name reference date
 
     if len(project_files) == 0:
         print("no files to delete")
@@ -61,7 +77,7 @@ def ensure_available_space():
         print(min_date)
         print("deleting {} files".format(str(len(project_files))))
         del_size = sum([entry.size for entry in project_files])
-        print("freeing up {} GB".format(str(del_size)))
+        print("freeing up {} bytes".format(str(del_size)))
         print([entry.name for entry in project_files])
 
         # delete old files
