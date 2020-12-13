@@ -54,6 +54,7 @@ def ensure_available_space(min_space):
 
         # list files
         project_files = dbx.files_list_folder("", recursive=True).entries
+        print(project_files)
         stopcovid_pdf = [
             entry.name
             for entry in project_files
@@ -69,8 +70,8 @@ def ensure_available_space(min_space):
         date_sort = lambda val: datetime.datetime.strptime(
             val[re.search(p3, val).start() : re.search(p3, val).end()], "%Y-%m-%d"
         )
-        stopcovid_pdf = sorted(stopcovid_pdf, key=date_sort)[0:5]
-        proj_json = sorted(stopcovid_pdf, key=date_sort)[0:5]
+        stopcovid_pdf = sorted(stopcovid_pdf, key=date_sort)[0]
+        proj_json = sorted(proj_json, key=date_sort)[0]
 
         print(stopcovid_pdf)
         print(proj_json)
@@ -83,7 +84,7 @@ def ensure_available_space(min_space):
         # print(dbx.files_get_metadata(entry.name))
 
         # delete file
-        # path = ""
+        # path = proj_json
         # dbx.files_delete(path)
 
         return None
