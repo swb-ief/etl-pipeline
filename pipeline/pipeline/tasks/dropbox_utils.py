@@ -77,16 +77,9 @@ def ensure_available_space(min_space):
         print(stopcovid_pdf)
         print(proj_json)
 
-        # for entry in dbx.files_list_folder("", recursive=True).entries:
-        #     if (re.search(p1, entry.name) is not None) | (
-        #         re.search(p2, entry.name) is not None
-        #     ):
-        #         print(entry.name)
-        # print(dbx.files_get_metadata(entry.name))
-
         # delete file
-        # path = proj_json
-        # dbx.files_delete(path)
+        path = "/data/dashboard-pdf/2020-08-28-mcgm.stopcoronavirus.pdf"
+        dbx.files_delete(path)
 
         return None
 
