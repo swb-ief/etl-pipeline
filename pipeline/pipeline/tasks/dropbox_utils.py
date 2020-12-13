@@ -55,6 +55,7 @@ def ensure_available_space():
         map(
             lambda entry: {
                 "name": entry.name,
+                "size": entry.size,
                 "match": re.search(date_pattern, entry.name),
                 "path": entry.path_lower,
             },
@@ -64,21 +65,40 @@ def ensure_available_space():
     project_files_match = list(
         filter(lambda entry: entry["match"] is not None, project_files_match)
     )
-    # project_files = list(
-    #     filter(lambda entry: entry.client_modified < min_date, project_files)
-    # )
+    project_files_refdate = list(
+        map(
+            lambda entry: entry.update(
+                {
+                    "ref_date": entry["name"][
+                        entry["match"].start() : entry["match"].end()
+                    ]
+                }
+            ),
+            project_files_match,
+        )
+    )
+
+    print(project_files_refdate)
 
     # list files older than min date --> name reference date
+    project_files_refdate = list(
+        filter(
+            lambda entry: datetime.datetime.strptime(entry["ref_date"], "%Y-%m-%d")
+            < min_date
+        )
+    )
 
-    if len(project_files) == 0:
+    print(project_files_refdate)
+
+    if len(project_files_refdate) == 0:
         print("no files to delete")
         return None
     else:
         print(min_date)
-        print("deleting {} files".format(str(len(project_files))))
-        del_size = sum([entry.size for entry in project_files])
+        print("deleting {} files".format(str(len(project_files_refdate))))
+        del_size = sum([entry["size"] for entry in project_files_refdate])
         print("freeing up {} bytes".format(str(del_size)))
-        print([entry.name for entry in project_files])
+        print([entry["name"] for entry in project_files_refdate])
 
         # delete old files
         # for entry in project_files:
