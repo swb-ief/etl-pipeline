@@ -1,5 +1,5 @@
 from io import StringIO
-
+import re
 from luigi.contrib.dropbox import DropboxTarget
 from pipeline.config import DROPBOX_TOKEN
 import dropbox
@@ -31,13 +31,21 @@ def ensure_available_space(min_space):
 
     dbx = dropbox.Dropbox(DROPBOX_TOKEN)
 
-    # ? print usage
+    # ? test if usage threshhold exceeded (below min space)
+    # ? if below, delete last two days of data (subject to change)
     usage = dbx.users_get_space_usage()
-    print(usage)
+    print(usage.allocation)
+    print(usage.used)
+    print(type(usage.used))
+
+    # ? patterns
+    p1 = "^\d{4}-\d{2}-\d{2}-mcgm\.stopcoronavirus\.pdf$"
+    p2 = "^\d{4}-\d{2}-\d{2}\.json$"
 
     # ? list files
     for entry in dbx.files_list_folder("", recursive=True).entries:
-        print(entry.name)
+        if (re.search(entry.name, p1) is not None) | (re.search(entry.name, p2)):
+            print(entry.name)
         # print(dbx.files_get_metadata(entry.name))
 
     # ? delete file
