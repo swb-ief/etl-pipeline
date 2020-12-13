@@ -44,7 +44,9 @@ def ensure_available_space(min_space):
 
     # ? list files
     for entry in dbx.files_list_folder("", recursive=True).entries:
-        if (re.search(entry.name, p1) is not None) | (re.search(entry.name, p2)):
+        if (re.search(entry.name, p1) is not None) | (
+            re.search(entry.name, p2) is not None
+        ):
             print(entry.name)
         # print(dbx.files_get_metadata(entry.name))
 
