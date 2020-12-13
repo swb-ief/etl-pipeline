@@ -3,10 +3,7 @@
 
 # from pipeline.config import DROPBOX_TOKEN
 import os
-
-print(os.getcwd())
 from luigi.contrib.dropbox import DropboxTarget, DropboxClient
-import dropbox_utils
 
 
 DROPBOX_TOKEN = os.getenv("SWB_DROPBOX_TOKEN")  # TODO get from pipeline.config
