@@ -70,7 +70,7 @@ def ensure_available_space():
             lambda entry: {
                 **entry,
                 **{
-                    entry["ref_date"]: entry["name"][
+                    "ref_date": entry["name"][
                         entry["match"].start() : entry["match"].end()
                     ]
                 },
