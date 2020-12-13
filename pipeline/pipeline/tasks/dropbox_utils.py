@@ -103,9 +103,9 @@ def ensure_available_space():
         print([entry["name"] for entry in project_files_refdate])
 
         # delete old files
-        # for entry in project_files:
-        #     path = entry.path_lower
-        #     dbx.files_delete(path)
+        for entry in project_files_refdate:
+            path = entry["path"]
+            dbx.files_delete(path)
 
         return None
 
