@@ -79,8 +79,6 @@ def ensure_available_space():
         )
     )
 
-    print(project_files_refdate)
-
     # list files older than min date --> name reference date
     project_files_refdate = list(
         filter(
@@ -89,8 +87,6 @@ def ensure_available_space():
             project_files_refdate,
         )
     )
-
-    print(project_files_refdate)
 
     if len(project_files_refdate) == 0:
         print("no files to delete")
