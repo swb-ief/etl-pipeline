@@ -54,7 +54,7 @@ def ensure_available_space(min_space):
 
         # list files
         project_files = dbx.files_list_folder("", recursive=True).entries
-        print(project_files)
+        print([entry.name for entry in project_files])
         stopcovid_pdf = [
             entry.name
             for entry in project_files
