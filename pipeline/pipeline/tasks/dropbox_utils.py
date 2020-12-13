@@ -60,6 +60,9 @@ def ensure_available_space():
     else:
         print(min_date)
         print("deleting {} files".format(str(len(project_files))))
+        del_size = sum([entry.size for entry in project_files])
+        print("freeing up {} GB".format(str(del_size)))
+        print([entry.name for entry in project_files])
 
         # delete old files
         # for entry in project_files:
