@@ -34,7 +34,7 @@ def ensure_available_space(min_space):
     # test if usage threshhold exceeded (below min space)
     # if below, delete last two days of data (subject to change)
     usage = dbx.users_get_space_usage()
-    used = usage.used()
+    used = usage.used
     print(usage.allocation.get_individual())
     allocated = usage.allocation.get_individual().allocated
     # print(usage.allocation.individual())
