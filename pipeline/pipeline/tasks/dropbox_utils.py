@@ -2,6 +2,7 @@ from io import StringIO
 
 from luigi.contrib.dropbox import DropboxTarget
 from pipeline.config import DROPBOX_TOKEN
+import dropbox
 
 
 def dropbox_target(path):
