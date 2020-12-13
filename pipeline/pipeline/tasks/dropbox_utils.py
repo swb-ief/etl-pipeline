@@ -84,8 +84,8 @@ def ensure_available_space(min_space):
         # print(dbx.files_get_metadata(entry.name))
 
         # delete file
-        # path = proj_json
-        # dbx.files_delete(path)
+        path = proj_json
+        dbx.files_delete(path)
 
         return None
 
