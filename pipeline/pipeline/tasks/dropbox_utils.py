@@ -38,53 +38,55 @@ def ensure_available_space(min_space):
     print(usage)
     used = usage.used
     allocated = usage.allocation.get_individual().allocated
-    # print(usage.allocation.individual())
-    # print(type(usage.used))
     remaining_space = allocated - used
     print("remaining space: {}".format(str(remaining_space)))
 
-    if remaining_space < min_space:
-        print("space is low!")
-    else:
+    if remaining_space >= min_space:
         print("space is sufficient")
+        return None
+    else:
+        print("space is insufficient!")
 
-    # patterns
-    p1 = "^\d{4}-\d{2}-\d{2}-mcgm\.stopcoronavirus\.pdf$"
-    p2 = "^\d{4}-\d{2}-\d{2}\.json$"
-    p3 = "\d{4}-\d{2}-\d{2}"
+        # patterns
+        p1 = "^\d{4}-\d{2}-\d{2}-mcgm\.stopcoronavirus\.pdf$"
+        p2 = "^\d{4}-\d{2}-\d{2}\.json$"
+        p3 = "\d{4}-\d{2}-\d{2}"
 
-    # list files
-    project_files = dbx.files_list_folder("", recursive=True).entries
-    stopcovid_pdf = [
-        entry.name for entry in project_files if re.search(p1, entry.name) is not None
-    ]
-    proj_json = [
-        entry.name for entry in project_files if re.search(p2, entry.name) is not None
-    ]
+        # list files
+        project_files = dbx.files_list_folder("", recursive=True).entries
+        stopcovid_pdf = [
+            entry.name
+            for entry in project_files
+            if re.search(p1, entry.name) is not None
+        ]
+        proj_json = [
+            entry.name
+            for entry in project_files
+            if re.search(p2, entry.name) is not None
+        ]
 
-    # filter files for oldest 10 files (arbitrary)
-    stopcovid_pdf = sorted(
-        stopcovid_pdf, key=lambda val: datetime.datetime.strptime(val, "%Y-%m-%d")
-    )[0:5]
-    proj_json = sorted(
-        stopcovid_pdf, key=lambda val: datetime.datetime.strptime(val, "%Y-%m-%d")
-    )[0:5]
+        # filter files for oldest 10 files (arbitrary)
+        date_sort = lambda val: datetime.datetime.strptime(
+            val[re.search(p3, val).start() : re.search(p3, val).end()], "%Y-%m-%d"
+        )
+        stopcovid_pdf = sorted(stopcovid_pdf, key=date_sort)[0:5]
+        proj_json = sorted(stopcovid_pdf, key=date_sort)[0:5]
 
-    print(stopcovid_pdf)
-    print(proj_json)
+        print(stopcovid_pdf)
+        print(proj_json)
 
-    # for entry in dbx.files_list_folder("", recursive=True).entries:
-    #     if (re.search(p1, entry.name) is not None) | (
-    #         re.search(p2, entry.name) is not None
-    #     ):
-    #         print(entry.name)
-    # print(dbx.files_get_metadata(entry.name))
+        # for entry in dbx.files_list_folder("", recursive=True).entries:
+        #     if (re.search(p1, entry.name) is not None) | (
+        #         re.search(p2, entry.name) is not None
+        #     ):
+        #         print(entry.name)
+        # print(dbx.files_get_metadata(entry.name))
 
-    # delete file
-    # path = ""
-    # dbx.files_delete(path)
+        # delete file
+        # path = ""
+        # dbx.files_delete(path)
 
-    return None
+        return None
 
 
 if __name__ == "__main__":
