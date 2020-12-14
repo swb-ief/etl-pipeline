@@ -3,8 +3,8 @@ name: Dropbox clear space
 on:
   workflow_dispatch:
   push: # this allows testing, can be removed when on master when it will allow for manual triggers
-  # schedule:
-  #   - cron:  '0 6 * * *'
+  schedule:
+    - cron:  '0 6 * * *'
 
 jobs:
   dropbox_clear_space:
