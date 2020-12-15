@@ -40,8 +40,8 @@ def ensure_available_space():
     remaining_space = allocated - used
     print("remaining space: {}".format(str(remaining_space)))
 
-    # delete any files older than 12 weeks
-    min_date = datetime.datetime.now() - datetime.timedelta(days=84)
+    # delete any files older than 8 weeks
+    min_date = datetime.datetime.now() - datetime.timedelta(days=56)
 
     # list files
     project_files = dbx.files_list_folder("", recursive=True).entries
