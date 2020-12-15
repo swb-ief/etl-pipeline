@@ -17,7 +17,7 @@ from pipeline.dashboard_pdf_scrapper import (
 )
 from pipeline.extract_history_file import extract_history
 from .cities_metrics_v1 import FetchCovid19IndiaDataTask
-from .dropbox import textio2binary, textio2stringio
+from .dropbox_utils import textio2binary, textio2stringio
 from .stopcoronavirus_mcgm_scrapping import DownloadMcgmDashboardPdfTask
 
 

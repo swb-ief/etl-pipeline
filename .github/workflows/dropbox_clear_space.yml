@@ -1,0 +1,38 @@
+name: Dropbox clear space
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron:  '0 6 * * *'
+
+jobs:
+  dropbox_clear_space:
+    name: Clean dropbox action
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install Python dependencies
+        working-directory: ./pipeline
+        run: |
+          pip install -r requirements.txt
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '290.0.1'
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          service_account_email: ${{ secrets.GCP_SA_EMAIL }}
+          export_default_credentials: true
+      - name: luigi Dropbox space pipeline
+        env:
+          SWB_DROPBOX_TOKEN: ${{ secrets.SWB_DROPBOX_TOKEN }}
+        working-directory: ./pipeline
+        run: |
+          python -m pipeline.tasks.dropbox_utils
