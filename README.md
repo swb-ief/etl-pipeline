@@ -1,7 +1,6 @@
 # etl-pipeline
 
 
-ETL Pipeline.
 ![Luigi Pipeline Scheduled](https://github.com/swb-ief/etl-pipeline/workflows/LuigiPipelineSchedule/badge.svg)
 
 
