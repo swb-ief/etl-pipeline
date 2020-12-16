@@ -7,9 +7,9 @@ from scipy.interpolate import CubicSpline
 def imputeCols(col):
     col = pd.Series(np.where(col < 0, np.NaN, col))
     preNaNs = (
-        col.isnull()
-        .astype(int)
-        .groupby(col.notnull().astype(int).cumsum())
+        col.isnull() #TRUE OR FALE#
+        .astype(int)#converts to 1 or 0#
+        .groupby(col.notnull().astype(int).cumsum())#count number of not missing values#
         .cumsum()
         .shift(1)
         + 1
@@ -66,6 +66,9 @@ def calculate_metrics(
     drop_rows = df[df.index < start_date]
     # print(drop_rows.index[0:5])
     df.drop(drop_rows.index, axis=0, inplace=True)
+
+    # Create non imputed data
+    df["delta.tested_non_imp"] = df["delta.tested"].fillna(value=0)
 
     # impute data
     df["delta.tested"] = imputeCols(df["delta.tested"])
