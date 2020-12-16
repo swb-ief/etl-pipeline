@@ -35,7 +35,7 @@ new_Rt_df["city"] = "Mumbai"
 # new_Rt_df = new_Rt_df.drop('strat', 1)
 
 # Read the existing doubling time numbers in days
-new_dt_df = pd.read_csv("/usr/data/dt_mumbai.csv")
+new_dt_df = pd.read_csv("/usr/data/dt.csv")
 new_dt_df["city"] = "Mumbai"
 new_dt_df = new_dt_df.drop("r", 1)
 
