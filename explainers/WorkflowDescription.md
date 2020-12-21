@@ -37,7 +37,12 @@
 |           Doubling time           |    metrics    |            date           |     n/a    |                                           |
 |           Levitt metric           |    metrics    |            date           |     n/a    |                                           |
 |           Levitt metric           |    metrics    |       levitt.Metric       |     n/a    |                                           |
-|-----------------------------------|---------------|---------------------------|------------|-------------------------------------------|
+
+### Ward data 
+**source:** gsheet <br />
+**destination:** gsheet <br />
+[ward_metrics](https://github.com/swb-ief/etl-pipeline/blob/master/pipeline/pipeline/ward_metrics.py) <br />
+call's -> [ward_data_computation](https://github.com/swb-ief/etl-pipeline/blob/master/pipeline/pipeline/ward_data_computation.py)
 
 ## code call structure
 ```
