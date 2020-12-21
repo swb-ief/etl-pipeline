@@ -2,7 +2,11 @@ import unittest
 import pandas as pd
 from numpy.testing import assert_array_equal
 import numpy as np
-from pipeline.pipeline.calculate_metrics_file import cubic_spline
+
+# pycharm does not like this wants an extra pipeline.import
+# but it works when running pytest in the root (and thus in the pipeline)
+# this will be fixed when we start moving code to backend package.
+from pipeline.calculate_metrics_file import cubic_spline
 
 
 class TestCalculateMetrics(unittest.TestCase):
