@@ -39,6 +39,15 @@
 |           Levitt metric           |    metrics    |       levitt.Metric       |     n/a    |                                           |
 |-----------------------------------|---------------|---------------------------|------------|-------------------------------------------|
 
+## code call structure
+```
+.github/workflows/pipeline-schedule.yml (with call: python -m luigi --module pipeline.tasks.spreadsheets ...)
+.github/workflows/pipeline.yml (with call: python -m luigi --module pipeline.tasks.spreadsheets ...)
+  -> pipeline/pipeline/tasks/spreadsheets.py
+    -> pipeline/pipeline/extract_history_file.py
+      -> pipeline/pipeline/calculate_metrics_file.py
+```
+
 ## Dependencies 
 
 Garima clarified that most of these sheets and columns are generated from running calculate_metrics.py
