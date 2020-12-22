@@ -5,6 +5,21 @@ from scipy.interpolate import CubicSpline
 
 
 def imputeCols(col):
+
+    '''
+    Uniformly distributes the accumulated figures over days with zero values.
+
+    Input- Column that needs to be imputed
+    Output- Numpy imputed column
+
+    For e.g if there are non tested reported on Day1,2 and 3 and there are 400 on day 4, then imputation
+    spread it out to 100 each on Day1,2,3,4
+
+    Issue identified- Since the tested/decesed etc has to be whole numbers hence we are loosing some numbers in distribution.
+    For e.g If on Day 1,2,3 no testing reported and on Day 4,  27 tested then This will spread out as Day1-6 tested Day2- 6 tested
+    Day 3-6 tested Day 4-6 tested, which is equal to 24. Hnece we will loose out 3 tested.
+    Over a period of time it cumulates to large numbers.
+    '''
     col = pd.Series(np.where(col < 0, np.NaN, col))
     preNaNs = (
         col.isnull()
@@ -66,6 +81,14 @@ def calculate_metrics(
     # print(drop_rows.index[0:5])
     df.drop(drop_rows.index, axis=0, inplace=True)
 
+    # create non imputed temp column before it gets imputed.Temp column is created just to store values
+    # It will be deleted and values transferred to another column to not affect the position of columns
+    df["delta.tested.non.impu.temp"] = df["delta.tested"].fillna(value=0)
+    df["delta.confirmed.non.impu.temp"] = df["delta.confirmed"].fillna(value=0)
+    df["delta.deceased.non.impu.temp"] = df["delta.deceased"].fillna(value=0)
+    df["delta.recovered.non.impu.temp"] = df["delta.recovered"].fillna(value=0)
+    df["delta.other.non.impu.temp"] = df["delta.other"].fillna(value=0)
+
     # impute data
     df["delta.tested"] = imputeCols(df["delta.tested"])
     df["delta.confirmed"] = imputeCols(df["delta.confirmed"])
@@ -115,6 +138,47 @@ def calculate_metrics(
     df["spline.deceased"] = cubic_spline(df["delta.deceased"])
     df["spline.hospitalized"] = cubic_spline(df["delta.hospitalized"])
     df["spline.recovered"] = cubic_spline(df["delta.recovered"])
+
+
+    # Create new columns for non imputed data and delete the temp column
+
+    #daily data
+
+    df["delta.tested.non.impu"] = df["delta.tested.non.impu.temp"]
+    df["delta.confirmed.non.impu"] = df["delta.confirmed.non.impu.temp"]
+    df["delta.deceased.non.impu"] = df["delta.deceased.non.impu.temp"]
+    df["delta.recovered.non.impu"] = df["delta.recovered.non.impu.temp"]
+    df["delta.other.non.impu"] = df["delta.other.non.impu.temp"]
+
+    df=df.drop(columns=["delta.tested.non.impu.temp","delta.confirmed.non.impu.temp","delta.deceased.non.impu.temp","delta.recovered.non.impu.temp","delta.other.non.impu.temp"])
+
+
+    #total column
+
+    df["total.tested.non.impu"] = df["delta.tested.non.impu"].cumsum()
+    df["total.confirmed.non.impu"] = df["delta.confirmed.non.impu"].cumsum()
+    df["total.recovered.non.impu"] = df["delta.recovered.non.impu"].cumsum()
+    df["total.deceased.non.impu"] = df["delta.deceased.non.impu"].cumsum()
+    df["total.other.non.impu"] = df["delta.other.non.impu"].cumsum()
+
+    # active cases by day non imputed
+    df["delta.active.non.impu"] = (
+            df["total.confirmed.non.impu"]
+            - df["total.deceased.non.impu"]
+            - df["total.recovered.non.impu"]
+            - df["delta.other.non.impu"]
+    )
+
+    #21 day moving average
+
+
+    df["MA.21.daily.active.non.impu"] = df["delta.active.non.impu"].rolling(window=21).mean()
+    df["MA.21.daily.deceased.non.impu"] = df["delta.deceased.non.impu"].rolling(window=21).mean()
+    #Hospitilasation function is picking data from imputed columns, hence will be created once imputed is replaced by non imputed
+    #df["MA.21.daily.hospitalized"] = df["delta.hospitalized"].rolling(window=21).mean()
+    df["MA.21.daily.recovered.non.impu"] = df["delta.recovered.non.impu"].rolling(window=21).mean()
+
+
 
     df.to_csv(output_city_metrics_csv, mode="w" if header else "a", header=header)
 
