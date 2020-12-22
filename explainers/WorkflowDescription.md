@@ -33,10 +33,10 @@
 |         Reproduction rate         |       Rt      |       CI_lower.mean       |     n/a    |                                           ||
 |         Reproduction rate         |       Rt      |       CI_upper.mean       |     n/a    |                                           ||
 |           Doubling time           | doubling_time |       doubling.time       |     n/a    |                                           ||
-|           Doubling time           |    metrics    |      delta.confirmed      |     n/a    |pipeline/pipeline/calculate_metrics_file.py||
-|           Doubling time           |    metrics    |            date           |     n/a    |Probably calculate_metrics_file.py                                           ||
-|           Levitt metric           |    metrics    |            date           |     n/a    |Probably calculate_metrics_file.py                                           ||
-|           Levitt metric           |    metrics    |       levitt.Metric       |     n/a    |pipeline/pipeline/calculate_metrics_file.py||
+|           Doubling time           |    metrics    |      delta.confirmed      |     n/a    |pipeline/pipeline/calculate_metrics_file.py|covid19india API|
+|           Doubling time           |    metrics    |            date           |     n/a    |pipeline/pipeline/extract_history_file.py|covid19india API|
+|           Levitt metric           |    metrics    |            date           |     n/a    |Ppipeline/pipeline/extract_history_file.py|covid19india API|
+|           Levitt metric           |    metrics    |       levitt.Metric       |     n/a    |pipeline/pipeline/calculate_metrics_file.py|covid19india API|
 
 ### Ward data 
 **source:** gsheet <br />
