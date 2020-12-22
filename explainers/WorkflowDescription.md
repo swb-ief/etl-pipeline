@@ -28,11 +28,11 @@
 |        Test positivity rate       |    metrics    |            date           |     n/a    |pipeline/pipeline/calculate_metrics_file.py|covid19india API|LuigiPipelineManual/Schedule|
 |        Test positivity rate       |    metrics    |   MA.21.delta.positivity  |     n/a    |pipeline/pipeline/calculate_metrics_file.py|covid19india API|LuigiPipelineManual/Schedule|
 |        Test positivity rate       |    metrics    |      delta.positivity     |     n/a    |pipeline/pipeline/calculate_metrics_file.py|covid19india API|LuigiPipelineManual/Schedule|
-|         Reproduction rate         |       Rt      |            date           |     n/a    |                                           ||
-|         Reproduction rate         |       Rt      |         mean.mean         |     n/a    |                                           ||
-|         Reproduction rate         |       Rt      |       CI_lower.mean       |     n/a    |                                           ||
-|         Reproduction rate         |       Rt      |       CI_upper.mean       |     n/a    |                                           ||
-|           Doubling time           | doubling_time |       doubling.time       |     n/a    |                                           ||
+|         Reproduction rate         |       Rt      |            date           |     n/a    |                                           |||
+|         Reproduction rate         |       Rt      |         mean.mean         |     n/a    |                                           |||
+|         Reproduction rate         |       Rt      |       CI_lower.mean       |     n/a    |                                           |||
+|         Reproduction rate         |       Rt      |       CI_upper.mean       |     n/a    |                                           |||
+|           Doubling time           | doubling_time |       doubling.time       |     n/a    |                                           |||
 |           Doubling time           |    metrics    |      delta.confirmed      |     n/a    |pipeline/pipeline/calculate_metrics_file.py|covid19india API|LuigiPipelineManual/Schedule|
 |           Doubling time           |    metrics    |            date           |     n/a    |pipeline/pipeline/extract_history_file.py|covid19india API|LuigiPipelineManual/Schedule|
 |           Levitt metric           |    metrics    |            date           |     n/a    |Ppipeline/pipeline/extract_history_file.py|covid19india API|LuigiPipelineManual/Schedule|
