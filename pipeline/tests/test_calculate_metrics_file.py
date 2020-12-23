@@ -1,5 +1,5 @@
 import pandas as pd
-from pipeline.pipeline.calculate_metrics_file import calculate_metrics
+from pipeline.calculate_metrics_file import calculate_metrics
 
 
 if __name__ == '__main__':
