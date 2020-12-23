@@ -3,6 +3,9 @@
 
 ![Luigi Pipeline Scheduled](https://github.com/swb-ief/etl-pipeline/workflows/LuigiPipelineSchedule/badge.svg)
 
+# Structure [ Phase 2]
+|- backend [Main package with all the calculations]
+|- tests [Unit tests]
 
 ## Configuring the project
 
