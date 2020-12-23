@@ -27,11 +27,11 @@
 |        Test positivity rate       |    metrics    |            date           |     n/a    |pipeline/pipeline/calculate_metrics_file.py|covid19india API|LuigiPipelineSchedule/Manual|
 |        Test positivity rate       |    metrics    |   MA.21.delta.positivity  |     n/a    |pipeline/pipeline/calculate_metrics_file.py|covid19india API|LuigiPipelineSchedule/Manual|
 |        Test positivity rate       |    metrics    |      delta.positivity     |     n/a    |pipeline/pipeline/calculate_metrics_file.py|covid19india API|LuigiPipelineSchedule/Manual|
-|         Reproduction rate         |       Rt      |            date           |     n/a    |                                           |||
-|         Reproduction rate         |       Rt      |         mean.mean         |     n/a    |                                           |||
-|         Reproduction rate         |       Rt      |       CI_lower.mean       |     n/a    |                                           |||
-|         Reproduction rate         |       Rt      |       CI_upper.mean       |     n/a    |                                           |||
-|           Doubling time           | doubling_time |       doubling.time       |     n/a    |                                           |||
+|         Reproduction rate         |       Rt      |            date           |     n/a    |R_scripts/push_Rt_to_gsheets.py |?|R_proc|
+|         Reproduction rate         |       Rt      |         mean.mean         |     n/a    |R_scripts/push_Rt_to_gsheets.py |?|R_proc|
+|         Reproduction rate         |       Rt      |       CI_lower.mean       |     n/a    |R_scripts/push_Rt_to_gsheets.py |?|R_proc|
+|         Reproduction rate         |       Rt      |       CI_upper.mean       |     n/a    |R_scripts/push_Rt_to_gsheets.py |?|R_proc|
+|           Doubling time           | doubling_time |       doubling.time       |     n/a    |R_scripts/push_Rt_to_gsheets.py |?|R_proc|
 |           Doubling time           |    metrics    |      delta.confirmed      |     n/a    |pipeline/pipeline/calculate_metrics_file.py|covid19india API|LuigiPipelineSchedule/Manual|
 |           Doubling time           |    metrics    |            date           |     n/a    |pipeline/pipeline/extract_history_file.py|covid19india API|LuigiPipelineSchedule/Manual|
 |           Levitt metric           |    metrics    |            date           |     n/a    |pipeline/pipeline/extract_history_file.py|covid19india API|LuigiPipelineSchedule/Manual|
@@ -70,6 +70,18 @@
 call's
 -> [ward_data_computation](https://github.com/swb-ief/etl-pipeline/blob/master/pipeline/pipeline/ward_data_computation.py)
 
-### 3) Rt 
+### 3) Rt data
+- [push_Rt_to_gsheets.py src](https://github.com/swb-ief/etl-pipeline/blob/6e1096d0b170103504e68df71e4c849f2abe3188/R_scripts/push_Rt_to_gsheets.py)
+- [readme](https://github.com/swb-ief/etl-pipeline/blob/827dbaca2676533e235232feedb83ab96b6077ac/README.md)
+    - input data (?)
+        - [google sheet](https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k2ZraDb6DzgCOSXI0f0/edit#gid=0)
+        - city stats tab
+
+**code call structure**
+- updates 'Rt' and 'doubling_time'
+```
+.github/workflows/Run_rt_calcs.yml (with call: python R_scripts/push_Rt_to_gsheets.py)
+  -> R_scripts/push_Rt_to_gsheets.py
+```
 
 
