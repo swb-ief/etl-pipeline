@@ -43,7 +43,7 @@ jobs:
       - name: Install Epinow2
         run: |
           require(devtools)
-          install_version("EpiNow2", version = "1.3.2", repos = "http://cran.us.r-project.org")
+          install.packages("EpiNow2")
         shell: Rscript {0}
       - name: Install Rstan
         run: |
