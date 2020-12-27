@@ -51,20 +51,23 @@ def calculate_levitt_metric(column: pd.Series) -> pd.Series:
 
 def calculate_or_impute_hospitalizations(
         delta_confirmed: pd.Series,
-        hospitalization_ratios: pd.Series = None) -> pd.Series:
-    """ returns delta confirmed * ratio and if there is no ratio it will randomly estimate it between .12 and .13"""
+        hospitalization_ratios: pd.Series) -> pd.DataFrame:
+    """ :return: merged Dataframe with an extra column 'hospitalizations' with delta confirmed * ratio
+            and if there is no ratio it will randomly estimate it between .12 and .16"""
 
-    estimated_ratios = random.uniform(0.12, 0.16, size=len(delta_confirmed))
-    if hospitalization_ratios is None:
-        ratio = estimated_ratios
-    else:
-        temp_series = pd.Series(estimated_ratios)
-        # use the update() to copy all non nan values from hospitalizations_ratios.
-        # This achieves filling all nan with random values.
-        pd.Series(estimated_ratios).update(hospitalization_ratios)
-        ratio = temp_series.values
+    ratio_column = 'percentages'  # incorrectly named percentages but is actualy a value between 0 and 1
+    assert isinstance(delta_confirmed.index, pd.DatetimeIndex)
+    assert isinstance(hospitalization_ratios.index, pd.DatetimeIndex)
+    assert delta_confirmed.name == 'delta.confirmed'
+    assert hospitalization_ratios.name == ratio_column
 
-    return delta_confirmed * ratio
+    df = delta_confirmed.to_frame()
+    df = df.merge(hospitalization_ratios, how='left', left_index=True, right_index=True)
+
+    df[ratio_column] = df[ratio_column].apply(lambda x: random.uniform(0.12, 0.16) if pd.isnull(x) else x)
+
+    df['hospitalizations'] = df['delta.confirmed'] * df[ratio_column]
+    return df
 
 
 def cubic_spline(column: pd.Series) -> np.array:
@@ -76,7 +79,10 @@ def calculate_all_metrics(
         start_date: datetime,
         city_stats: pd.DataFrame,
         hospitalizations: pd.DataFrame = None,
-) -> pd.DataFrame:
+) -> (pd.DataFrame, pd.DataFrame):
+    """
+    :returns: metrics, hospitalizations_updated
+    """
     measurements = ['tested', 'confirmed', 'deceased', 'recovered', 'other']
     mean_window = 21
 
@@ -94,43 +100,48 @@ def calculate_all_metrics(
 
     for measurement in measurements:
         # TODO: argument for fillna still being considered not imputed
-        city_stats[f'delta.{measurement}.non.impu'] = city_stats[f'delta.{measurement}'].fillna(value=0)
-        city_stats[f'total.{measurement}.non.impu'] = city_stats[f'delta.{measurement}.non.impu'].cumsum()
+        city_stats.loc[:, f'delta.{measurement}.non.impu'] = city_stats[f'delta.{measurement}'].fillna(value=0)
+        city_stats.loc[:, f'total.{measurement}.non.impu'] = city_stats[f'delta.{measurement}.non.impu'].cumsum()
 
-        city_stats[f'delta.{measurement}'] = impute_column(city_stats[f'delta.{measurement}'])
-        city_stats[f'total.{measurement}'] = city_stats[f'delta.{measurement}'].cumsum()
+        city_stats.loc[:, f'delta.{measurement}'] = impute_column(city_stats[f'delta.{measurement}'])
+        city_stats.loc[:, f'total.{measurement}'] = city_stats[f'delta.{measurement}'].cumsum()
 
         # TODO: move mean calculations here
 
     # generate Levitt Metric
-    city_stats["levitt.Metric"] = calculate_levitt_metric(city_stats["total.deceased"])
+    city_stats.loc[:, "levitt.Metric"] = calculate_levitt_metric(city_stats["total.deceased"])
 
     # 21-Day MA of daily tests
-    city_stats["MA.21.daily.tests"] = city_stats["delta.tested"].rolling(window=mean_window).mean()
+    city_stats.loc[:, "MA.21.daily.tests"] = city_stats["delta.tested"].rolling(window=mean_window).mean()
 
     # TPR% per day
-    city_stats["delta.positivity"] = (city_stats["delta.confirmed"] / city_stats["delta.tested"]) * 100.0
+    city_stats.loc[:, "delta.positivity"] = (city_stats["delta.confirmed"] / city_stats["delta.tested"]) * 100.0
 
     # 21-Day MA of TPR%
-    city_stats["MA.21.delta.positivity"] = city_stats["delta.positivity"].rolling(window=mean_window).mean()
+    city_stats.loc[:, "MA.21.delta.positivity"] = city_stats["delta.positivity"].rolling(window=mean_window).mean()
 
     # daily percent case growth
-    city_stats["delta.percent.case.growth"] = city_stats["delta.confirmed"].pct_change()
+    city_stats.loc[:, "delta.percent.case.growth"] = city_stats["delta.confirmed"].pct_change()
 
     # Impute hospitalization data
-    if hospitalizations and 'percentages' in hospitalizations:
+    if 'percentages' in hospitalizations.columns:
         hospitalization_ratios = hospitalizations['percentages']
     else:
         hospitalization_ratios = None
 
-    city_stats["delta.hospitalized"] = calculate_or_impute_hospitalizations(city_stats['delta.confirmed'],
-                                                                            hospitalization_ratios)
+    hospitalization_ratios_updated = calculate_or_impute_hospitalizations(city_stats['delta.confirmed'],
+                                                                          hospitalization_ratios)
+
+    # bit tricky this... we assume no kind of sorting happend
+    city_stats["delta.hospitalized"] = hospitalization_ratios_updated['hospitalizations'].values
+
+    hospitalization_ratios_updated = hospitalization_ratios_updated.drop(columns=['hospitalizations'])
 
     # total hospitalizations
-    city_stats["total.hospitalized"] = city_stats["delta.hospitalized"].cumsum()
+    city_stats.loc[:, "total.hospitalized"] = city_stats["delta.hospitalized"].cumsum()
 
     # active cases by day
-    city_stats["delta.active"] = (
+    city_stats.loc[:, "delta.active"] = (
             city_stats["total.confirmed"]
             - city_stats["total.deceased"]
             - city_stats["total.recovered"]
@@ -138,13 +149,13 @@ def calculate_all_metrics(
     )
 
     # cubic splines
-    city_stats["spline.active"] = cubic_spline(city_stats["delta.active"])
-    city_stats["spline.deceased"] = cubic_spline(city_stats["delta.deceased"])
-    city_stats["spline.hospitalized"] = cubic_spline(city_stats["delta.hospitalized"])
-    city_stats["spline.recovered"] = cubic_spline(city_stats["delta.recovered"])
+    city_stats.loc[:, "spline.active"] = cubic_spline(city_stats["delta.active"])
+    city_stats.loc[:, "spline.deceased"] = cubic_spline(city_stats["delta.deceased"])
+    city_stats.loc[:, "spline.hospitalized"] = cubic_spline(city_stats["delta.hospitalized"])
+    city_stats.loc[:, "spline.recovered"] = cubic_spline(city_stats["delta.recovered"])
 
     # active cases by day non imputed
-    city_stats["delta.active.non.impu"] = (
+    city_stats.loc[:, "delta.active.non.impu"] = (
             city_stats["total.confirmed.non.impu"]
             - city_stats["total.deceased.non.impu"]
             - city_stats["total.recovered.non.impu"]
@@ -152,12 +163,13 @@ def calculate_all_metrics(
     )
 
     # 21 day moving average
-    city_stats["MA.21.daily.active.non.impu"] = city_stats["delta.active.non.impu"].rolling(window=mean_window).mean()
-    city_stats["MA.21.daily.deceased.non.impu"] = city_stats["delta.deceased.non.impu"].rolling(
+    city_stats.loc[:, "MA.21.daily.active.non.impu"] = city_stats["delta.active.non.impu"].rolling(
+        window=mean_window).mean()
+    city_stats.loc[:, "MA.21.daily.deceased.non.impu"] = city_stats["delta.deceased.non.impu"].rolling(
         window=mean_window).mean()
     # Hospitilasation function is picking data from imputed columns, hence will be created once imputed is replaced by non imputed
     # df["MA.21.daily.hospitalized"] = df["delta.hospitalized"].rolling(window=mean_window).mean()
-    city_stats["MA.21.daily.recovered.non.impu"] = city_stats["delta.recovered.non.impu"].rolling(
+    city_stats.loc[:, "MA.21.daily.recovered.non.impu"] = city_stats["delta.recovered.non.impu"].rolling(
         window=mean_window).mean()
 
-    return city_stats
+    return city_stats, hospitalization_ratios_updated

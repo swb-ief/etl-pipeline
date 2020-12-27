@@ -4,6 +4,8 @@ from datetime import datetime
 import pandas as pd
 from numpy.testing import assert_array_equal, assert_allclose
 import numpy as np
+from pandas._testing import assert_frame_equal
+
 from backend.metrics.calculations import *
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -28,10 +30,10 @@ class TestCalculateMetrics(unittest.TestCase):
 
         expected_shape = (905, 38)
 
-        result = calculate_all_metrics(
+        result, _ = calculate_all_metrics(
             start_date=datetime(2020, 4, 20),
             city_stats=sample_df,
-            hospitalizations=None,
+            hospitalizations=pd.DataFrame({'percentages': [0.13]}, index=[datetime(2020, 10, 3)]),
         )
 
         self.assertEqual(expected_shape, result.shape)
@@ -60,40 +62,80 @@ class TestCalculateMetrics(unittest.TestCase):
 
     def test_impute_hospitalizations(self):
         np.random.seed(27)  # would be better to mock this
-        data = pd.Series([2, 3, 4, 5, 6, 7])
-        expected = np.array([0.274058, 0.45775, 0.597664, 0.773601, 0.812011, 1.114248])
+        new_percentages = [0.13702885642075582, 0.1525833496197821, 0.14941589160798718, 0.15472012799518942,
+                           0.1353352309149048, 0.15917826528578083]
+        data = {
+            'delta.confirmed': [2, 3, 4, 5, 6, 7],
+            'percentages': [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan],
+            'hospitalizations': [0.274058, 0.45775, 0.597664, 0.773601, 0.812011, 1.114248]}
+        index = [
+            datetime(2020, 10, 2),
+            datetime(2020, 10, 3),
+            datetime(2020, 10, 4),
+            datetime(2020, 10, 5),
+            datetime(2020, 10, 6),
+            datetime(2020, 10, 7),
+        ]
+        df = pd.DataFrame(data=data, index=index)
 
         result = calculate_or_impute_hospitalizations(
-            delta_confirmed=data
+            delta_confirmed=df['delta.confirmed'],
+            hospitalization_ratios=df['percentages']
         )
 
-        assert_allclose(result, expected, rtol=1e-04)
+        df['percentages'] = new_percentages
+
+        assert_frame_equal(result, df)
 
     def test_calculate_hospitalizations(self):
         np.random.seed(27)  # would be better to mock this
-        data = pd.Series([2, 3, 4, 5, 6, 7])
-        ratios = pd.Series([.125, .125, .125, .125, .125, .125])
-        expected = np.array([0.25, 0.375, 0.5, 0.625, 0.75, 0.875])
+        data = {
+            'delta.confirmed': [2, 3, 4, 5, 6, 7],
+            'percentages': [.125, .125, .125, .125, .125, .125],
+            'hospitalizations': [0.25, 0.375, 0.5, 0.625, 0.75, 0.875]}
+        index = [
+            datetime(2020, 10, 2),
+            datetime(2020, 10, 3),
+            datetime(2020, 10, 4),
+            datetime(2020, 10, 5),
+            datetime(2020, 10, 6),
+            datetime(2020, 10, 7),
+        ]
+        df = pd.DataFrame(data=data, index=index)
 
         result = calculate_or_impute_hospitalizations(
-            delta_confirmed=data,
-            hospitalization_ratios=ratios
+            delta_confirmed=df['delta.confirmed'],
+            hospitalization_ratios=df['percentages']
         )
 
-        assert_allclose(result, expected, rtol=1e-04)
+        assert_frame_equal(result, df)
 
     def test_calculate_or_impute_hospitalizations(self):
         np.random.seed(27)  # would be better to mock this
-        data = pd.Series([2, 3, 4, 5, 6, 7])
-        ratios = pd.Series([.125, .125, np.nan, .125, .125, .125])
-        expected = np.array([0.25, 0.375, 0.597664, 0.625, 0.75, 0.875])
+        expected_ratios = [0.15, 0.15, 0.13702885642075582, 0.1525833496197821, 0.14941589160798718, 0.15]
+        data = {
+            'delta.confirmed': [2, 3, 4, 5, 6, 7],
+            'percentages': [.15, .15, np.nan, np.nan, np.nan, .15],
+            'hospitalizations': [0.3, 0.44999999999999996, 0.5481154256830233, 0.7629167480989105, 0.8964953496479231,
+                                 1.05]}
+        index = [
+            datetime(2020, 10, 2),
+            datetime(2020, 10, 3),
+            datetime(2020, 10, 4),
+            datetime(2020, 10, 5),
+            datetime(2020, 10, 6),
+            datetime(2020, 10, 7),
+        ]
+        df = pd.DataFrame(data=data, index=index)
 
         result = calculate_or_impute_hospitalizations(
-            delta_confirmed=data,
-            hospitalization_ratios=ratios
+            delta_confirmed=df['delta.confirmed'],
+            hospitalization_ratios=df['percentages']
         )
 
-        assert_allclose(result, expected, rtol=1e-04)
+        df['percentages'] = expected_ratios
+
+        assert_frame_equal(result, df)
 
     def test_calculate_levitt_metric(self):
         data = pd.Series([2, 3, 4, 5, 6, 7])
