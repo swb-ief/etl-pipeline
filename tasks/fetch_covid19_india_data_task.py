@@ -19,4 +19,4 @@ class FetchCovid19IndiaDataTask(luigi.Task):
             output.write(response.text)
 
     def output(self):
-        return self.localTarget(f'{self.date}.json')  # dropbox_target(f"/data/covid19api/{self.date}.json")
+        return luigi.LocalTarget(f'{self.date}.json')  # dropbox_target(f"/data/covid19api/{self.date}.json")

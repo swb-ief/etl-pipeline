@@ -133,7 +133,7 @@ class TestCalculateMetrics(unittest.TestCase):
 
         expected_shape = (905, 38)
 
-        result, _ = calculate_all_metrics(
+        result, _ = update_city_stats(
             start_date=datetime(2020, 4, 20),
             city_stats=sample_df,
             hospitalizations=hospitalizations

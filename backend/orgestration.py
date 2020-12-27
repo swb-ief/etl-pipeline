@@ -5,14 +5,14 @@ from datetime import datetime
 import pandas as pd
 from pandas import isnull
 
-from backend.metrics.calculations import calculate_all_metrics
+from backend.metrics.calculations import update_city_stats
 
 log = logging.getLogger(__name__)
 
 
 def update_data(
         covid19data: pd.DataFrame,
-        states_and_districts: dict,
+        #        states_and_districts: dict,
         hospitalizations: pd.DataFrame,
         start_date: datetime,
 ) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame):
@@ -57,10 +57,10 @@ def update_data(
 
             # Calculate metrics
             log.info("calculating metrics for {}".format(district))
-            metrics, hospitalizations_updated = calculate_all_metrics(
+            metrics, hospitalizations_updated = update_city_stats(
                 start_date=start_date,
                 city_stats=city_stats,
                 hospitalizations=hospitalizations,
             )
 
-            return city_stats, metrics, hospitalizations_updated
+        return city_stats, metrics, hospitalizations_updated

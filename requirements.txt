@@ -34,3 +34,4 @@ urllib3==1.25.10
 Wand==0.6.2
 
 luigi~=3.0.2
+gspread~=3.6.0
