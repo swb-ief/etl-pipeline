@@ -142,3 +142,4 @@ cython_debug/
 v1/**/*.csv
 
 temp/
+"test/test output/"
