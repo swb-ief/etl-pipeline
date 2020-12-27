@@ -49,6 +49,20 @@ def calculate_levitt_metric(column: pd.Series) -> pd.Series:
     return np.log(column / shifted)
 
 
+def impute_hospitalization_percentages(current_hospitalizations: pd.DataFrame, expected_dates: pd.Series):
+    assert expected_dates.name == 'date'
+    assert isinstance(current_hospitalizations.index, pd.DatetimeIndex)
+
+    # they can have duplicates (multi city/ward/etc..)
+    expected_dates = expected_dates.drop_duplicates()
+
+    ratio_column = 'percentages'  # incorrectly named percentages but is actualy a value between 0 and 1
+    df = expected_dates.to_frame().set_index('date')
+    df = df.merge(current_hospitalizations, how='left', left_index=True, right_index=True)
+    df[ratio_column] = df[ratio_column].apply(lambda x: random.uniform(0.12, 0.16) if pd.isnull(x) else x)
+    return df
+
+
 def calculate_or_impute_hospitalizations(
         delta_confirmed: pd.Series,
         hospitalization_ratios: pd.Series) -> pd.DataFrame:
@@ -63,8 +77,6 @@ def calculate_or_impute_hospitalizations(
 
     df = delta_confirmed.to_frame()
     df = df.merge(hospitalization_ratios, how='left', left_index=True, right_index=True)
-
-    df[ratio_column] = df[ratio_column].apply(lambda x: random.uniform(0.12, 0.16) if pd.isnull(x) else x)
 
     df['hospitalizations'] = df['delta.confirmed'] * df[ratio_column]
     return df
@@ -97,6 +109,7 @@ def calculate_all_metrics(
 
     # we start all the data from this date as a baseline date
     city_stats = city_stats[city_stats.index >= start_date]
+    hospitalizations = hospitalizations[hospitalizations.index >= start_date]
 
     for measurement in measurements:
         # TODO: argument for fillna still being considered not imputed
