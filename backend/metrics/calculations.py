@@ -90,19 +90,13 @@ def cubic_spline(column: pd.Series) -> np.array:
     return cs(range(len(column)))
 
 
-def _split_on_date(df: pd.DataFrame, split_date: datetime) -> (pd.DataFrame, pd.DataFrame):
-    """ Splits the dataset in a before date dataset, and an 'on or after' date dataset"""
-    before = df[df.index < split_date]
-    on_or_after = df[df.index >= split_date]
-    return before, on_or_after
-
-
 def update_city_stats(
         start_date: datetime,
         city_stats: pd.DataFrame,
         hospitalizations: pd.DataFrame = None,
 ) -> (pd.DataFrame, pd.DataFrame):
     """
+    :param start_date: Don't process any data before it
     :returns: metrics
     """
     measurements = ['tested', 'confirmed', 'deceased', 'recovered', 'other']
@@ -118,8 +112,8 @@ def update_city_stats(
     city_stats.loc[city_stats["delta.other"] < 0, ["delta.other"]] = np.nan
 
     # we start all the data from this date as a baseline date
-    city_stats_before, city_stats = _split_on_date(city_stats, start_date)
-    _, hospitalizations = _split_on_date(hospitalizations, start_date)
+    city_stats = city_stats[city_stats.index >= start_date]
+    hospitalizations = hospitalizations[hospitalizations.index >= start_date]
 
     for measurement in measurements:
         # TODO: argument for fillna still being considered not imputed

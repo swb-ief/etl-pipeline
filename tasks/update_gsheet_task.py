@@ -3,17 +3,18 @@ from datetime import date, datetime
 import pandas as pd
 import numpy as np
 
+from backend.gsheet_repository import GSheetRepository
 from backend.metrics.calculations import impute_hospitalization_percentages
 from tasks.fetch_covid19_india_data_task import FetchCovid19IndiaDataTask
-from backend.gsheet import get_worksheet, get_dataframe, WORKSHEET_URL
 from backend.orgestration import update_data
 
 
 class UpdateGSheetTask(luigi.ExternalTask):
     date = luigi.DateParameter(default=date.today())
-    response_metrics = None
-    response_hospitalization = None
-    response_city_stats = None
+
+    worksheet_hospitalizations = 'phase 2 - hospitalization'
+    worksheet_metrics = 'phase 2 - metrics'
+    worksheet_city_stats = 'phase 2 - city stats'
 
     metrics_sheet_columns_needed_by_dashboard = [
         # updated 2020-12-28 Phase 1
@@ -42,36 +43,33 @@ class UpdateGSheetTask(luigi.ExternalTask):
     ]
 
     def run(self):
+        repository = GSheetRepository(GSheetRepository.get_worksheet_url_from_env())
+
         covid19_api_json_output = yield FetchCovid19IndiaDataTask()
         with covid19_api_json_output.open('r') as json_file:
             all_covid19india_data = pd.read_json(json_file).T
 
-        hospitalization_worksheet = get_worksheet(WORKSHEET_URL, "hospitalization")
-        hospitalization_df = get_dataframe(hospitalization_worksheet)
+        hospitalization_df = repository.get_dataframe(self.worksheet_hospitalizations)
 
-        city_stats_worksheet = get_worksheet(WORKSHEET_URL, "city_stats")
-        city_stats_df = get_dataframe(city_stats_worksheet)
+        # city_stats_worksheet = get_worksheet(WORKSHEET_URL, "city_stats")
+        # city_stats_df = get_dataframe(city_stats_worksheet)
 
-        metrics_worksheet = get_worksheet(WORKSHEET_URL, 'metrics')
-        metrics_df = get_dataframe(metrics_worksheet)
+        # metrics_worksheet = get_worksheet(WORKSHEET_URL, 'metrics')
+        # metrics_df = get_dataframe(metrics_worksheet)
 
         hospitalizations_updated = impute_hospitalization_percentages(hospitalization_df, all_covid19india_data.index)
 
         city_stats_updated, metrics_updated = update_data(
             all_covid19india_data,
-            self.states_and_districts,
             hospitalizations_updated,
-            datetime(2020, 4, 20)  # TODO see below... how do we want to handle this.
+            start_date=datetime(2020, 4, 1)
         )
 
-        # TODO this will overwrite old stuff
-        # need to append old and new dataframes
-        # however with the hard coded date it is alwasy everything
-        # so this works for now...
-        # Recomendation: make the expectation that it will return the entire dataset updated.
-        # We want to keep the tasks themselves as light as possible
+        repository.store_dataframe(hospitalizations_updated, self.worksheet_hospitalizations)
+        repository.store_dataframe(metrics_updated, self.worksheet_metrics)
 
-        # TODO: Might need to fix ordering of columns...
+        # do we need this?
+        repository.store_dataframe(city_stats_updated, self.worksheet_city_stats)
 
         # self.response_hospitalization = hospitalization_worksheet.update(
         #     [hospitalizations_updated.columns.values.tolist()]

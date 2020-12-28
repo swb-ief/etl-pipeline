@@ -12,11 +12,11 @@ log = logging.getLogger(__name__)
 
 def update_data(
         covid19data: pd.DataFrame,
-        #        states_and_districts: dict,
         hospitalizations: pd.DataFrame,
         start_date: datetime,
 ) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame):
     """
+    :param start_date: Don't process any data before it
     :returns: city_stats, metrics, hospitalization
     """
 
