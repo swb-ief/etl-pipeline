@@ -50,6 +50,9 @@ def calculate_levitt_metric(column: pd.Series) -> pd.Series:
 
 
 def impute_hospitalization_percentages(current_hospitalizations: pd.DataFrame, expected_dates: pd.Series):
+    """ we impute a random ratio for each day, it is needed to calculate 'hospitalized'
+
+    """
     assert expected_dates.name == 'date'
     assert isinstance(current_hospitalizations.index, pd.DatetimeIndex)
 
@@ -100,7 +103,7 @@ def update_city_stats(
         hospitalizations: pd.DataFrame = None,
 ) -> (pd.DataFrame, pd.DataFrame):
     """
-    :returns: metrics, hospitalizations_updated
+    :returns: metrics
     """
     measurements = ['tested', 'confirmed', 'deceased', 'recovered', 'other']
     mean_window = 21

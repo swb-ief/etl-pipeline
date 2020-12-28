@@ -11,11 +11,11 @@ _DEFAULT_WORKSHEET_URL = "https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNK
 WORKSHEET_URL = os.getenv("SWB_WORKSHEET_URL", _DEFAULT_WORKSHEET_URL)
 
 
-def _get_client():
+def _get_gspread_client():
     """ Singleton instance of the google spreadsheet client"""
     global _GSPREAD_CLIENT
 
-    if not _GSPREAD_CLIENT:
+    if _GSPREAD_CLIENT is None:
         try:
             _GSPREAD_CLIENT = gspread.service_account(
                 filename=os.getenv(
@@ -29,7 +29,7 @@ def _get_client():
 
 
 def get_worksheet(url: str, worksheet_name: str) -> gspread.Worksheet:
-    sheet = _get_client().open_by_url(url)
+    sheet = _get_gspread_client().open_by_url(url)
     worksheet = sheet.worksheet(worksheet_name)
     return worksheet
 

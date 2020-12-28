@@ -131,9 +131,9 @@ class TestCalculateMetrics(unittest.TestCase):
         hospitalizations = impute_hospitalization_percentages(
             pd.DataFrame({'percentages': [0.13]}, index=[datetime(2020, 10, 3)]), sample_df.index)
 
-        expected_shape = (905, 38)
+        expected_shape = (1170, 38)
 
-        result, _ = update_city_stats(
+        result = update_city_stats(
             start_date=datetime(2020, 4, 20),
             city_stats=sample_df,
             hospitalizations=hospitalizations

@@ -11,27 +11,54 @@ from backend.orgestration import update_data
 
 class UpdateGSheetTask(luigi.ExternalTask):
     date = luigi.DateParameter(default=date.today())
-    # states_and_districts = luigi.DictParameter()
     response_metrics = None
     response_hospitalization = None
     response_city_stats = None
 
+    metrics_sheet_columns_needed_by_dashboard = [
+        # updated 2020-12-28 Phase 1
+        # more can be found here https://github.com/swb-ief/etl-pipeline/blob/data_pipeline_readme/explainers/WorkflowDescription.md
+        # note it is still on a branch. soon replace /data_pipeline_readme/ for /master/
+        'district',
+        'date',
+
+        'delta.confirmed',
+        'delta.deceased',
+        'delta.tested',
+        'delta.recovered',
+        'delta.hospitalized',
+        'delta.percent.case.growth',
+        'delta.positivity',
+
+        'spline.active',
+        'spline.deceased',
+        'spline.hospitalized',
+        'spline.recovered',
+
+        'levitt.Metric',  # this needs a better name
+
+        'MA.21.daily.tests',
+        'MA.21.delta.positivity',
+    ]
+
     def run(self):
-        covid19_api_json_output = yield FetchCovid19IndiaDataTask(date=self.date)
+        covid19_api_json_output = yield FetchCovid19IndiaDataTask()
+        with covid19_api_json_output.open('r') as json_file:
+            all_covid19india_data = pd.read_json(json_file).T
+
         hospitalization_worksheet = get_worksheet(WORKSHEET_URL, "hospitalization")
         hospitalization_df = get_dataframe(hospitalization_worksheet)
+
         city_stats_worksheet = get_worksheet(WORKSHEET_URL, "city_stats")
         city_stats_df = get_dataframe(city_stats_worksheet)
 
         metrics_worksheet = get_worksheet(WORKSHEET_URL, 'metrics')
         metrics_df = get_dataframe(metrics_worksheet)
 
-        covid_19_df = pd.read_json(covid19_api_json_output).T
-
-        hospitalizations_updated = impute_hospitalization_percentages(hospitalization_df, covid_19_df.index)
+        hospitalizations_updated = impute_hospitalization_percentages(hospitalization_df, all_covid19india_data.index)
 
         city_stats_updated, metrics_updated = update_data(
-            covid_19_df,
+            all_covid19india_data,
             self.states_and_districts,
             hospitalizations_updated,
             datetime(2020, 4, 20)  # TODO see below... how do we want to handle this.

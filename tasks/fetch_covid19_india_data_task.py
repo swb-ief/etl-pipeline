@@ -5,10 +5,10 @@ import requests
 
 
 class FetchCovid19IndiaDataTask(luigi.Task):
+    """ Fetches all the data available trough the API without any filtering """
     url = luigi.Parameter(
         default="https://raw.githubusercontent.com/covid19india/api/gh-pages/v4/data-all.json"
     )
-    date = luigi.DateParameter(default=date.today())
 
     def requires(self):
         return None
@@ -19,4 +19,4 @@ class FetchCovid19IndiaDataTask(luigi.Task):
             output.write(response.text)
 
     def output(self):
-        return luigi.LocalTarget(f'{self.date}.json')  # dropbox_target(f"/data/covid19api/{self.date}.json")
+        return luigi.LocalTarget(f'covid19india_{date.today()}.json')
