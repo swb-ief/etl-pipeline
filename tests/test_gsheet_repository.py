@@ -2,7 +2,7 @@ import unittest
 import pytest
 import numpy as np
 import pandas as pd
-from pandas._testing import assert_frame_equal
+from numpy.testing import assert_array_equal
 
 from backend.gsheet_repository import GSheetRepository
 
@@ -34,10 +34,11 @@ class TestGSheetRepository(unittest.TestCase):
         sut = GSheetRepository('not_important')
         result = sut._df_to_cleaned_data(df)
 
-        def flatten(a_list):
-            return [item for sublist in a_list for item in sublist]
+        def flatten_numpy(a_list):
+            # onlyway to compare nested lists with nan's
+            return np.array([item for sublist in a_list for item in sublist])
 
-        self.assertListEqual(flatten(expected), flatten(result))
+        assert_array_equal(flatten_numpy(expected), flatten_numpy(result))
 
 
 @pytest.mark.skip("Probably never make a test for this")
