@@ -115,7 +115,7 @@ def impute_metrics(
         # TODO: move mean calculations here
 
     # generate Levitt Metric
-    raw_metrics.loc[:, "levitt.Metric"] = calculate_levitt_metric(raw_metrics["total.deceased"])
+    raw_metrics.loc[:, "total.deceased.levitt"] = calculate_levitt_metric(raw_metrics["total.deceased"])
 
     # 21-Day MA of daily tests
     raw_metrics.loc[:, "MA.21.daily.tests"] = raw_metrics["delta.tested"].rolling(window=mean_window).mean()

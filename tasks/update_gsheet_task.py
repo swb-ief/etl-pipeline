@@ -1,8 +1,12 @@
 import json
+from typing import List
 
 import luigi as luigi
-from datetime import date, datetime
+from datetime import datetime
 import pandas as pd
+import logging
+
+log = logging.getLogger(__name__)
 
 from backend.data import ExtractCovid19IndiaData
 from backend.gsheet_repository import GSheetRepository
@@ -11,18 +15,17 @@ from tasks.fetch_covid19_india_data_task import FetchCovid19IndiaDataTask
 
 
 class UpdateGSheetTask(luigi.ExternalTask):
-    date = luigi.DateParameter(default=date.today())
-
     worksheet_hospitalizations = 'Phase 2 - Hospitalization'
     worksheet_districts = 'Phase 2 - Districts'
     worksheet_states = 'Phase 2 - States'
 
-    metrics_sheet_columns_needed_by_dashboard = [
+    states_is_valid = False
+    districts_is_valid = False
+
+    metrics_needed_by_dashboard = [
         # updated 2020-12-28 Phase 1
         # more can be found here https://github.com/swb-ief/etl-pipeline/blob/data_pipeline_readme/explainers/WorkflowDescription.md
         # note it is still on a branch. soon replace /data_pipeline_readme/ for /master/
-        'district',
-        'date',
 
         'delta.confirmed',
         'delta.deceased',
@@ -37,11 +40,17 @@ class UpdateGSheetTask(luigi.ExternalTask):
         'spline.hospitalized',
         'spline.recovered',
 
-        'levitt.Metric',  # this needs a better name
+        'total.deceased.levitt',  # this needs a better name
 
         'MA.21.daily.tests',
         'MA.21.delta.positivity',
     ]
+
+    state_keys = ['date', 'state']
+    district_keys = ['date', 'state', 'district']
+
+    state_columns_needed_by_dashboard = state_keys + metrics_needed_by_dashboard
+    district_columns_needed_by_dashboard = district_keys + metrics_needed_by_dashboard
 
     def run(self):
         # we are skipping older data since we only have low case numbers there.
@@ -49,9 +58,11 @@ class UpdateGSheetTask(luigi.ExternalTask):
 
         repository = GSheetRepository(GSheetRepository.get_worksheet_url_from_env())
 
-        covid19_api_json_output = yield FetchCovid19IndiaDataTask()
-        with covid19_api_json_output.open('r') as json_file:
+        fetch_covid19_india_task = yield FetchCovid19IndiaDataTask()
+        with fetch_covid19_india_task.open('r') as json_file:
             all_covid19india_data = json.load(json_file)
+
+        fetch_covid19_india_task.remove()
 
         # we have access to the state metrics as well but not needed yet in the dashboard
         state_data, district_data = ExtractCovid19IndiaData().process(all_covid19india_data)
@@ -71,6 +82,24 @@ class UpdateGSheetTask(luigi.ExternalTask):
             hospitalizations=hospitalizations_updated,
         )
 
+        # validate and filter
+        self.states_is_valid = self._has_all_columns(state_data, self.state_columns_needed_by_dashboard)
+        self.districts_is_valid = self._has_all_columns(district_data, self.district_columns_needed_by_dashboard)
+
+        states_filtered = state_data[self.state_columns_needed_by_dashboard]
+        districts_filtered = district_data[self.district_columns_needed_by_dashboard]
+
         repository.store_dataframe(hospitalizations_updated, self.worksheet_hospitalizations)
-        repository.store_dataframe(state_data, self.worksheet_states)
-        repository.store_dataframe(district_data, self.worksheet_districts)
+        repository.store_dataframe(states_filtered, self.worksheet_states)
+        repository.store_dataframe(districts_filtered, self.worksheet_districts)
+
+    @staticmethod
+    def _has_all_columns(df: pd.DataFrame, columns: List[str]) -> bool:
+        for column in columns:
+            if column not in df.columns:
+                log.error(f'Missing column: {column}')
+                return False
+        return True
+
+    def complete(self):
+        return self.states_is_valid and self.districts_is_valid

@@ -17,8 +17,8 @@ class TestUpdateGSheetTask(unittest.TestCase):
         results = dict()
         expected_results = {
             UpdateGSheetTask.worksheet_hospitalizations: (308, 2),
-            UpdateGSheetTask.worksheet_states: (9826, 40),
-            UpdateGSheetTask.worksheet_districts: (157350, 39)
+            UpdateGSheetTask.worksheet_states: (9826, 16),
+            UpdateGSheetTask.worksheet_districts: (157350, 17)  # +1 column for district
         }
 
         def my_get_dataframe(self, storage_name):
@@ -29,7 +29,7 @@ class TestUpdateGSheetTask(unittest.TestCase):
 
         def my_store_dataframe(self, df: pd.DataFrame, storage_name):
             results[storage_name] = df
-            df.to_csv(f'test_update_{storage_name}.csv')
+            df.to_csv(os.path.join(THIS_DIR, f'../tests/test output/test_update_{storage_name}.csv'))
 
         with patch.object(GSheetRepository, 'get_dataframe', new=my_get_dataframe), \
                 patch.object(GSheetRepository, 'store_dataframe', new=my_store_dataframe):
