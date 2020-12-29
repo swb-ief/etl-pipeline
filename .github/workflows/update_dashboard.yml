@@ -1,0 +1,26 @@
+name: Update dashboard
+
+on:
+  # manual for now
+  #schedule:
+  #  - cron:  '0 16 * * *'
+  workflow_dispatch:
+
+
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out etl-pipeline repo
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt
+      - name: Execuiting UpdateGSheetTask
+        run: |
+          python -m luigi --module tasks UpdateGSheetTask --local-scheduler
