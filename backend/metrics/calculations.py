@@ -54,34 +54,38 @@ def impute_hospitalization_percentages(current_hospitalizations: pd.DataFrame, e
 
     """
     assert expected_dates.name == 'date'
-    assert isinstance(current_hospitalizations.index, pd.DatetimeIndex)
+    assert 'date' in current_hospitalizations.columns
+    assert 'percentages' in current_hospitalizations.columns
 
     # they can have duplicates (multi city/ward/etc..)
     expected_dates = expected_dates.drop_duplicates()
+    current_hospitalizations = current_hospitalizations.set_index('date')
 
     ratio_column = 'percentages'  # incorrectly named percentages but is actualy a value between 0 and 1
     df = expected_dates.to_frame().set_index('date')
     df = df.merge(current_hospitalizations, how='left', left_index=True, right_index=True)
     df[ratio_column] = df[ratio_column].apply(lambda x: random.uniform(0.12, 0.16) if pd.isnull(x) else x)
-    return df
+    return df.reset_index()
 
 
 def calculate_or_impute_hospitalizations(
-        delta_confirmed: pd.Series,
-        hospitalization_ratios: pd.Series) -> pd.DataFrame:
+        delta_confirmed: pd.DataFrame,
+        hospitalization_ratios: pd.DataFrame) -> pd.DataFrame:
     """ :return: merged Dataframe with an extra column 'hospitalizations' with delta confirmed * ratio
             and if there is no ratio it will randomly estimate it between .12 and .16"""
 
     ratio_column = 'percentages'  # incorrectly named percentages but is actualy a value between 0 and 1
-    assert isinstance(delta_confirmed.index, pd.DatetimeIndex)
-    assert isinstance(hospitalization_ratios.index, pd.DatetimeIndex)
-    assert delta_confirmed.name == 'delta.confirmed'
-    assert hospitalization_ratios.name == ratio_column
+    assert 'date' in delta_confirmed.columns
+    assert 'delta.confirmed' in delta_confirmed.columns
+    assert 'date' in hospitalization_ratios.columns
+    assert ratio_column in hospitalization_ratios.columns
 
-    df = delta_confirmed.to_frame()
-    df = df.merge(hospitalization_ratios, how='left', left_index=True, right_index=True)
+    df = delta_confirmed.merge(hospitalization_ratios, how='left', left_on='date', right_on='date')
 
     df['hospitalizations'] = df['delta.confirmed'] * df[ratio_column]
+    columns_to_drop = list(hospitalization_ratios.columns)
+    columns_to_drop.remove('date')
+    df = df.drop(columns=columns_to_drop)
     return df
 
 
@@ -125,14 +129,8 @@ def impute_metrics(
     # daily percent case growth
     raw_metrics.loc[:, "delta.percent.case.growth"] = raw_metrics["delta.confirmed"].pct_change()
 
-    # Impute hospitalization data
-    if 'percentages' in hospitalizations.columns:
-        hospitalization_ratios = hospitalizations['percentages']
-    else:
-        hospitalization_ratios = None
-
-    hospitalization_ratios_updated = calculate_or_impute_hospitalizations(raw_metrics['delta.confirmed'],
-                                                                          hospitalization_ratios)
+    hospitalization_ratios_updated = calculate_or_impute_hospitalizations(raw_metrics,
+                                                                          hospitalizations)
 
     # bit tricky this... we assume no kind of sorting happend
     raw_metrics["delta.hospitalized"] = hospitalization_ratios_updated['hospitalizations'].values

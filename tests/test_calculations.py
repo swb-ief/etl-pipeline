@@ -54,43 +54,44 @@ class TestCalculateMetrics(unittest.TestCase):
     def test_calculate_hospitalizations(self):
         np.random.seed(27)  # would be better to mock this
         data = {
+            'date': [
+                datetime(2020, 10, 2),
+                datetime(2020, 10, 3),
+                datetime(2020, 10, 4),
+                datetime(2020, 10, 5),
+                datetime(2020, 10, 6),
+                datetime(2020, 10, 7),
+            ],
             'delta.confirmed': [2, 3, 4, 5, 6, 7],
-            'percentages': [.125, .125, .125, .125, .125, .125],
-            'hospitalizations': [0.25, 0.375, 0.5, 0.625, 0.75, 0.875]}
-        index = [
-            datetime(2020, 10, 2),
-            datetime(2020, 10, 3),
-            datetime(2020, 10, 4),
-            datetime(2020, 10, 5),
-            datetime(2020, 10, 6),
-            datetime(2020, 10, 7),
-        ]
-        df = pd.DataFrame(data=data, index=index)
+            'hospitalizations': [0.25, 0.375, 0.5, 0.625, 0.75, 0.875],
+            'percentages': [.125, .125, .125, .125, .125, .125]
+        }
+        df = pd.DataFrame(data=data)
 
         result = calculate_or_impute_hospitalizations(
-            delta_confirmed=df['delta.confirmed'],
-            hospitalization_ratios=df['percentages']
+            delta_confirmed=df.drop(columns=['hospitalizations', 'percentages']),
+            hospitalization_ratios=df.drop(columns=['hospitalizations', 'delta.confirmed'])
         )
 
-        assert_frame_equal(result, df)
+        assert_frame_equal(result, df.drop(columns=['percentages']))
 
     def test_impute_hospitalization_percentages(self):
         np.random.seed(27)
         data = {
-            'percentages': [.15, .15, np.nan, np.nan, np.nan, .15],
+            'date': [
+                datetime(2020, 10, 2),
+                datetime(2020, 10, 3),
+                datetime(2020, 10, 4),
+                datetime(2020, 10, 5),
+                datetime(2020, 10, 6),
+                datetime(2020, 10, 7),
+            ],
+            'percentages': [.15, .15, np.nan, np.nan, np.nan, .15]
         }
-        index = pd.Series([
-            datetime(2020, 10, 2),
-            datetime(2020, 10, 3),
-            datetime(2020, 10, 4),
-            datetime(2020, 10, 5),
-            datetime(2020, 10, 6),
-            datetime(2020, 10, 7),
-        ], name='date')
-        df = pd.DataFrame(data=data, index=index)
+        df = pd.DataFrame(data=data)
 
         expected_ratios = [0.15, 0.15, 0.13702885642075582, 0.1525833496197821, 0.14941589160798718, 0.15]
-        result = impute_hospitalization_percentages(df, index)
+        result = impute_hospitalization_percentages(df, df['date'])
 
         df['percentages'] = expected_ratios
         assert_frame_equal(result, df)
@@ -98,23 +99,23 @@ class TestCalculateMetrics(unittest.TestCase):
     def test_extend_hospitalization_percentages(self):
         np.random.seed(27)
         data = {
-            'percentages': [.15, .15, np.nan, np.nan],
+            'date': [
+                datetime(2020, 10, 2),
+                datetime(2020, 10, 3),
+                datetime(2020, 10, 4),
+                datetime(2020, 10, 5),
+                datetime(2020, 10, 6),
+                datetime(2020, 10, 7),
+            ],
+            'percentages': [.15, .15, np.nan, np.nan, np.nan, np.nan],
         }
-        index = pd.Series([
-            datetime(2020, 10, 2),
-            datetime(2020, 10, 3),
-            datetime(2020, 10, 4),
-            datetime(2020, 10, 5),
-            datetime(2020, 10, 6),
-            datetime(2020, 10, 7),
-        ], name='date')
-        df = pd.DataFrame(data=data, index=index[:4])
+        df = pd.DataFrame(data={'date': data['date'][:4], 'percentages': data['percentages'][:4]})
 
         expected_ratios = [0.15, 0.15, 0.13702885642075582, 0.1525833496197821, 0.14941589160798718,
                            0.15472012799518942]
-        result = impute_hospitalization_percentages(df, index)
+        result = impute_hospitalization_percentages(df, pd.Series(data['date'], name='date'))
 
-        df_expected = pd.DataFrame({'percentages': expected_ratios}, index=index)
+        df_expected = pd.DataFrame({'date': data['date'], 'percentages': expected_ratios})
         assert_frame_equal(result, df_expected)
 
     def test_calculate_metrics(self):
@@ -122,16 +123,14 @@ class TestCalculateMetrics(unittest.TestCase):
         our input """
 
         sample_df = pd.read_csv(os.path.join(THIS_DIR, 'samples/Dashboard PDF SWB - city_stats.csv'),
-                                parse_dates=['date'],
-                                index_col=['date'])
+                                parse_dates=['date'])
 
         hospitalizations = impute_hospitalization_percentages(
-            pd.DataFrame({'percentages': [0.13]}, index=[datetime(2020, 10, 3)]), sample_df.index)
+            pd.DataFrame({'date': [datetime(2020, 10, 3)], 'percentages': [0.13]}), sample_df['date'])
 
-        expected_shape = (905, 38)
+        expected_shape = (1170, 39)
 
         result = impute_metrics(
-            start_date=datetime(2020, 4, 20),
             raw_metrics=sample_df,
             hospitalizations=hospitalizations
         )

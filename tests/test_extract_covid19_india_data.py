@@ -16,7 +16,7 @@ class TestExtractCovid19IndiaData(unittest.TestCase):
         sut = ExtractCovid19IndiaData()
         df_state, df_district = sut.process(covid_data)
 
-        expected_state = (10347, 12)
-        expected_district = (156_792, 11)
+        expected_state = (10347, 14)
+        expected_district = (156_792, 13)
         self.assertEqual(expected_state, df_state.shape)
         self.assertEqual(expected_district, df_district.shape)
