@@ -1,9 +1,6 @@
 import os
 import unittest
-from datetime import datetime
-import pandas as pd
 from numpy.testing import assert_array_equal, assert_allclose
-import numpy as np
 from pandas._testing import assert_frame_equal
 
 from backend.metrics.calculations import *
@@ -131,11 +128,11 @@ class TestCalculateMetrics(unittest.TestCase):
         hospitalizations = impute_hospitalization_percentages(
             pd.DataFrame({'percentages': [0.13]}, index=[datetime(2020, 10, 3)]), sample_df.index)
 
-        expected_shape = (1170, 38)
+        expected_shape = (905, 38)
 
-        result = update_city_stats(
+        result = impute_metrics(
             start_date=datetime(2020, 4, 20),
-            city_stats=sample_df,
+            raw_metrics=sample_df,
             hospitalizations=hospitalizations
         )
 

@@ -9,15 +9,15 @@ from backend.gsheet_repository import GSheetRepository
 
 class TestGSheetRepository(unittest.TestCase):
 
-    @pytest.mark.skip("TODO: make conditiona and only run on github")
+    @pytest.mark.skip("TODO: make conditional and only run on github")
     def test_get_worksheet_url_from_env(self):
         assert False
 
-    @pytest.mark.skip("TODO: make conditiona and only run on github")
+    @pytest.mark.skip("TODO: make conditional and only run on github")
     def test__get_gspread_client(self):
         assert False
 
-    @pytest.mark.skip("TODO: make conditiona and only run on github")
+    @pytest.mark.skip("TODO: make conditional and only run on github")
     def test__get_worksheet(self):
         assert False
 
@@ -35,7 +35,7 @@ class TestGSheetRepository(unittest.TestCase):
         result = sut._df_to_cleaned_data(df)
 
         def flatten_numpy(a_list):
-            # onlyway to compare nested lists with nan's
+            # only way to compare nested lists with nan's
             return np.array([item for sublist in a_list for item in sublist])
 
         assert_array_equal(flatten_numpy(expected), flatten_numpy(result))
@@ -46,5 +46,6 @@ def test_store_dataframe(self):
     assert False
 
 
+@pytest.mark.skip("TODO: make conditional and only run on github")
 def test_get_dataframe(self):
     assert False
