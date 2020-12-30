@@ -94,7 +94,7 @@ def cubic_spline(column: pd.Series) -> np.array:
     return cs(range(len(column)))
 
 
-def impute_metrics(
+def extend_and_impute_metrics(
         raw_metrics: pd.DataFrame,
         hospitalizations: pd.DataFrame = None,
 ) -> (pd.DataFrame, pd.DataFrame):

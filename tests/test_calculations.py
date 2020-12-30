@@ -130,7 +130,7 @@ class TestCalculateMetrics(unittest.TestCase):
 
         expected_shape = (1170, 39)
 
-        result = impute_metrics(
+        result = extend_and_impute_metrics(
             raw_metrics=sample_df,
             hospitalizations=hospitalizations
         )

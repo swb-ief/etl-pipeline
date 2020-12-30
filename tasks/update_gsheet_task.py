@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 from backend.data import ExtractCovid19IndiaData
 from backend.gsheet_repository import GSheetRepository
-from backend.metrics.calculations import impute_hospitalization_percentages, impute_metrics
+from backend.metrics.calculations import impute_hospitalization_percentages, extend_and_impute_metrics
 from tasks.fetch_covid19_india_data_task import FetchCovid19IndiaDataTask
 
 
@@ -59,6 +59,10 @@ class UpdateGSheetTask(luigi.ExternalTask):
         repository = GSheetRepository(GSheetRepository.get_worksheet_url_from_env())
 
         fetch_covid19_india_task = yield FetchCovid19IndiaDataTask()
+
+        # Kick off Ward data collection trough tasks
+        # See if luigi can parallelize these 'download' steps
+
         with fetch_covid19_india_task.open('r') as json_file:
             all_covid19india_data = json.load(json_file)
 
@@ -71,16 +75,19 @@ class UpdateGSheetTask(luigi.ExternalTask):
         hospitalizations_updated = impute_hospitalization_percentages(hospitalization_df, state_data['date'])
 
         state_data = state_data[state_data['date'] >= start_date]
-        state_data = impute_metrics(
+        state_data = extend_and_impute_metrics(
             raw_metrics=state_data,
             hospitalizations=hospitalizations_updated
         )
 
         district_data = district_data[district_data['date'] >= start_date]
-        district_data = impute_metrics(
+        district_data = extend_and_impute_metrics(
             raw_metrics=district_data,
             hospitalizations=hospitalizations_updated,
         )
+
+        # INSERT WARD PROCESSING HERE
+        # INSERT R0, Rt calculations here (might also be part of the extend_and_impute part)
 
         # validate and filter
         self.states_is_valid = self._has_all_columns(state_data, self.state_columns_needed_by_dashboard)
