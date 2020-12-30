@@ -23,13 +23,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      - name: Set up Cloud SDK for access to google sheets
+        uses: google-github-actions/setup-gcloud@master
         with:
           version: '290.0.1'
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           service_account_email: ${{ secrets.GCP_SA_EMAIL }}
           export_default_credentials: true
-      - run: gcloud info
 
       - name: Run tests with pytest
         run: pytest
