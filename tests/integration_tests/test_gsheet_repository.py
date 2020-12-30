@@ -21,14 +21,20 @@ class TestGSheetRepository(unittest.TestCase):
         result = sut._get_gspread_client()
         self.assertIsNotNone(result)
 
-    @pytest.mark.skip("TODO: make conditional and only run on github")
+    @pytest.mark.skipif('CI' not in os.environ, reason="Can only run on github (due to secrets)")
     def test__get_worksheet(self):
-        assert False
+        sut = GSheetRepository(GSheetRepository.get_worksheet_url_from_env())
+        # small worksheet, but might be removed in the future, then switch to an other sheet with little data
+        result = sut._get_worksheet('hospitalizations')
+        self.assertIsNotNone(result)
 
-    @pytest.mark.skip("TODO: make conditional and only run on github")
+    @pytest.mark.skipif('CI' not in os.environ, reason="Can only run on github (due to secrets)")
     def test_get_dataframe(self):
-        assert False
+        sut = GSheetRepository(GSheetRepository.get_worksheet_url_from_env())
+        # small worksheet, but might be removed in the future, then switch to an other sheet with little data
+        result = sut.get_dataframe('hospitalizations')
+        self.assertIsNotNone(result)
 
-    @pytest.mark.skip("Probably never make a test for this")
+    @pytest.mark.skip("Need a dev sheet in google sheets to safely test this.")
     def test_store_dataframe(self):
         assert False
