@@ -29,7 +29,7 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           service_account_email: ${{ secrets.GCP_SA_EMAIL }}
           export_default_credentials: true
-                                        - run: gcloud info
+      - run: gcloud info
 
       - name: Run tests with pytest
         run: pytest
