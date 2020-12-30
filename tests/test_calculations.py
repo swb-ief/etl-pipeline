@@ -1,5 +1,7 @@
 import os
 import unittest
+from datetime import datetime
+
 from numpy.testing import assert_array_equal, assert_allclose
 from pandas._testing import assert_frame_equal
 
