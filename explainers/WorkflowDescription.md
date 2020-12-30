@@ -31,11 +31,11 @@
 |        Test positivity rate       |    metrics    |            date           |     n/a    |pipeline/pipeline/calculate_metrics_file.py|covid19india API|LuigiPipelineSchedule/Manual|
 |        Test positivity rate       |    metrics    |   MA.21.delta.positivity  |     n/a    |pipeline/pipeline/calculate_metrics_file.py|covid19india API|LuigiPipelineSchedule/Manual|
 |        Test positivity rate       |    metrics    |      delta.positivity     |     n/a    |pipeline/pipeline/calculate_metrics_file.py|covid19india API|LuigiPipelineSchedule/Manual|
-|         Reproduction rate         |       Rt      |            date           |     n/a    |R_scripts/push_Rt_to_gsheets.py |?|R_proc|
-|         Reproduction rate         |       Rt      |         mean.mean         |     n/a    |R_scripts/push_Rt_to_gsheets.py |?|R_proc|
-|         Reproduction rate         |       Rt      |       CI_lower.mean       |     n/a    |R_scripts/push_Rt_to_gsheets.py |?|R_proc|
-|         Reproduction rate         |       Rt      |       CI_upper.mean       |     n/a    |R_scripts/push_Rt_to_gsheets.py |?|R_proc|
-|           Doubling time           | doubling_time |       doubling.time       |     n/a    |R_scripts/push_Rt_to_gsheets.py |?|R_proc|
+|         Reproduction rate         |       Rt      |            date           |     n/a    |R_scripts/push_Rt_to_gsheets.py | city_stats |R_proc|
+|         Reproduction rate         |       Rt      |         mean.mean         |     n/a    |R_scripts/push_Rt_to_gsheets.py | city_stats |R_proc|
+|         Reproduction rate         |       Rt      |       CI_lower.mean       |     n/a    |R_scripts/push_Rt_to_gsheets.py | city_stats |R_proc|
+|         Reproduction rate         |       Rt      |       CI_upper.mean       |     n/a    |R_scripts/push_Rt_to_gsheets.py | city_stats |R_proc|
+|           Doubling time           | doubling_time |       doubling.time       |     n/a    |R_scripts/push_Rt_to_gsheets.py | city_stats |R_proc|
 |           Doubling time           |    metrics    |      delta.confirmed      |     n/a    |pipeline/pipeline/calculate_metrics_file.py|covid19india API|LuigiPipelineSchedule/Manual|
 |           Doubling time           |    metrics    |            date           |     n/a    |pipeline/pipeline/extract_history_file.py|covid19india API|LuigiPipelineSchedule/Manual|
 |           Levitt metric           |    metrics    |            date           |     n/a    |pipeline/pipeline/extract_history_file.py|covid19india API|LuigiPipelineSchedule/Manual|
@@ -66,32 +66,37 @@
 ```
 
 ### 2) Ward data
+Ward-wise Time series for Daily confirmed cases, Daily deaths, Daily Tests, Cumulative cases, Cumulative Deaths.
 
 **source:** gsheet <br />
+- not available from any source other than google sheet
+
 **destination:** gsheet <br />
 [ward_metrics](https://github.com/swb-ief/etl-pipeline/blob/master/pipeline/pipeline/ward_metrics.py) <br />
 call's
 -> [ward_data_computation](https://github.com/swb-ief/etl-pipeline/blob/master/pipeline/pipeline/ward_data_computation.py)
 
-#### Data
 
-Ward-wise Time series for Daily confirmed cases, Daily deaths, Daily Tests, Cumulative cases, Cumulative Deaths.
+
 
 ### 3) Rt data
+**updating 'Rt' and 'doubling_time'**
 
-- [push_Rt_to_gsheets.py src](https://github.com/swb-ief/etl-pipeline/blob/6e1096d0b170103504e68df71e4c849f2abe3188/R_scripts/push_Rt_to_gsheets.py)
-- [readme](https://github.com/swb-ief/etl-pipeline/blob/827dbaca2676533e235232feedb83ab96b6077ac/README.md)
-    - input data (?)
-        - [google sheet](https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k2ZraDb6DzgCOSXI0f0/edit#gid=0)
-        - city stats tab
+- [Old Readme](https://github.com/swb-ief/etl-pipeline/blob/827dbaca2676533e235232feedb83ab96b6077ac/README.md)    
+- [input/output google sheet](https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k2ZraDb6DzgCOSXI0f0/edit#gid=0)
 
 **code call structure**
 
-- updates 'Rt' and 'doubling_time'
-
 ```
 .github/workflows/Run_rt_calcs.yml (with call: python R_scripts/push_Rt_to_gsheets.py)
-  -> R_scripts/push_Rt_to_gsheets.py
+  -> run R_scripts/Rt_calcs.R
+    -> read data from city_stats sheet in input/output google sheet
+        -> Perform Doubling time calculations and write the output to '/usr/data/dt_mumbai.csv' (this changed?)
+        -> Perform Rt calculations and write the output to /usr/data/epinow2_out.csv 
+  
+  -> run R_scripts/push_Rt_to_gsheets.py
+    -> reads results from /usr/data/epinow2_out.csv and /usr/data/dt.csv  --(not dt_mumbai.csv ?)
+    -> writes output to input/output google sheet
 ```
 
 
