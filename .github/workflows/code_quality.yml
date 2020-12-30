@@ -1,4 +1,4 @@
-name: code_quality
+name: Code quality validation
 
 on:
   push:
@@ -6,17 +6,22 @@ on:
 
 
 jobs:
-  build:
+  code_validation:
+    name: Code quality validation
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
+
       - name: Install Python 3
         uses: actions/setup-python@v1
         with:
           python-version: 3.8
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
       - name: Run tests with pytest
         run: pytest

@@ -6,12 +6,12 @@ from datetime import datetime
 import pandas as pd
 import logging
 
-log = logging.getLogger(__name__)
-
 from backend.data import ExtractCovid19IndiaData
 from backend.gsheet_repository import GSheetRepository
 from backend.metrics.calculations import impute_hospitalization_percentages, extend_and_impute_metrics
 from tasks.fetch_covid19_india_data_task import FetchCovid19IndiaDataTask
+
+log = logging.getLogger(__name__)
 
 
 class UpdateGSheetTask(luigi.ExternalTask):
@@ -45,6 +45,7 @@ class UpdateGSheetTask(luigi.ExternalTask):
         'MA.21.daily.tests',
         'MA.21.delta.positivity',
     ]
+    # Not yet added R generated metrics mean.mean, CI_lower.mean, CI_upper.mean, doubling.time
 
     state_keys = ['date', 'state']
     district_keys = ['date', 'state', 'district']

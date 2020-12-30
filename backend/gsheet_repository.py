@@ -1,12 +1,12 @@
 import gspread as gspread
 import pandas as pd
 import numpy as np
-
 import os
 import logging
 
-log = logging.getLogger(__name__)
 from backend.repository import Repository
+
+log = logging.getLogger(__name__)
 
 
 class GSheetRepository(Repository):
@@ -39,7 +39,8 @@ class GSheetRepository(Repository):
         worksheet = sheet.worksheet(worksheet_name)
         return worksheet
 
-    def _df_to_cleaned_data(self, df):
+    @staticmethod
+    def _df_to_cleaned_data(df):
         """ note it will convert int's to floats if it contains a field with an empty string.
         Because of the np.nan it will inject
         :remarks: '' to np.nan is a safe assumption the only string columns state/district/ward can't be empty
