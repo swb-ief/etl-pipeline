@@ -88,7 +88,6 @@ class UpdateGSheetTask(luigi.ExternalTask):
         )
 
         # INSERT WARD PROCESSING HERE
-        # INSERT R0, Rt calculations here (might also be part of the extend_and_impute part)
 
         # validate and filter
         self.states_is_valid = self._has_all_columns(state_data, self.state_columns_needed_by_dashboard)
@@ -97,9 +96,9 @@ class UpdateGSheetTask(luigi.ExternalTask):
         states_filtered = state_data[self.state_columns_needed_by_dashboard]
         districts_filtered = district_data[self.district_columns_needed_by_dashboard]
 
-        repository.store_dataframe(hospitalizations_updated, self.worksheet_hospitalizations)
-        repository.store_dataframe(states_filtered, self.worksheet_states)
-        repository.store_dataframe(districts_filtered, self.worksheet_districts)
+        repository.store_dataframe(hospitalizations_updated, self.worksheet_hospitalizations, allow_create=True)
+        repository.store_dataframe(states_filtered, self.worksheet_states, allow_create=True)
+        repository.store_dataframe(districts_filtered, self.worksheet_districts, allow_create=True)
 
     @staticmethod
     def _has_all_columns(df: pd.DataFrame, columns: List[str]) -> bool:
