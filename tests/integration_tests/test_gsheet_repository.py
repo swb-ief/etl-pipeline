@@ -32,12 +32,12 @@ class TestGSheetRepository(unittest.TestCase):
 
     def test__worksheet_exists(self):
         sut = GSheetRepository(GSheetRepository.get_worksheet_url_from_env())
-        result = sut._worksheet_exists('hospitalization')
+        result = sut.exists('hospitalization')
         self.assertTrue(result)
 
     def test__worksheet_not_exists(self):
         sut = GSheetRepository(GSheetRepository.get_worksheet_url_from_env())
-        result = sut._worksheet_exists('Fake_Name_should_not_exist')
+        result = sut.exists('Fake_Name_should_not_exist')
         self.assertFalse(result)
 
     @pytest.mark.skip("Need a dev sheet in google sheets to safely test this.")
