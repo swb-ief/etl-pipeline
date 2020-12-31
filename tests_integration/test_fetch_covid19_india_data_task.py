@@ -1,9 +1,7 @@
 import unittest
-from unittest.mock import patch
 
 import luigi
 
-from backend.gsheet_repository import GSheetRepository
 from tasks.update_gsheet_task import FetchCovid19IndiaDataTask
 
 

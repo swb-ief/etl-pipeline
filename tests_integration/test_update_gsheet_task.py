@@ -5,7 +5,7 @@ import pandas as pd
 
 import luigi
 
-from backend.gsheet_repository import GSheetRepository
+from backend.repository.gsheet_repository import GSheetRepository
 from tasks.update_gsheet_task import UpdateGSheetTask
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))

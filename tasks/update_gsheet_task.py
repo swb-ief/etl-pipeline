@@ -7,7 +7,7 @@ import pandas as pd
 import logging
 
 from backend.data import ExtractCovid19IndiaData
-from backend.gsheet_repository import GSheetRepository
+from backend.repository.gsheet_repository import GSheetRepository
 from backend.metrics.calculations import impute_hospitalization_percentages, extend_and_impute_metrics
 from tasks.fetch_covid19_india_data_task import FetchCovid19IndiaDataTask
 

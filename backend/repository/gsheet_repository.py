@@ -59,3 +59,8 @@ class GSheetRepository(Repository):
     def get_dataframe(self, storage_name: str) -> pd.DataFrame:
         worksheet = self._get_worksheet(storage_name)
         return pd.DataFrame(worksheet.get_all_records())
+
+    def _worksheet_exists(self, name):
+        spreadsheet = self._get_gspread_client().open_by_url(self.base_url)
+        sheet_names = [sheet['properties'].get('title', 'Sheet1') for sheet in spreadsheet]
+        return name in sheet_names
