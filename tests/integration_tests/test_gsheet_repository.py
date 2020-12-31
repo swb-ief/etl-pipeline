@@ -25,14 +25,14 @@ class TestGSheetRepository(unittest.TestCase):
     def test__get_worksheet(self):
         sut = GSheetRepository(GSheetRepository.get_worksheet_url_from_env())
         # small worksheet, but might be removed in the future, then switch to an other sheet with little data
-        result = sut._get_worksheet('hospitalizations')
+        result = sut._get_worksheet('hospitalization')
         self.assertIsNotNone(result)
 
     @pytest.mark.skipif('CI' not in os.environ, reason="Can only run on github (due to secrets)")
     def test_get_dataframe(self):
         sut = GSheetRepository(GSheetRepository.get_worksheet_url_from_env())
         # small worksheet, but might be removed in the future, then switch to an other sheet with little data
-        result = sut.get_dataframe('hospitalizations')
+        result = sut.get_dataframe('hospitalization')
         self.assertIsNotNone(result)
 
     @pytest.mark.skip("Need a dev sheet in google sheets to safely test this.")

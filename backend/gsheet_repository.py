@@ -1,4 +1,4 @@
-import gspread as gspread
+import gspread
 import pandas as pd
 import numpy as np
 import os
