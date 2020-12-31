@@ -1,9 +1,6 @@
 import os
 import unittest
 import pytest
-import numpy as np
-import pandas as pd
-from numpy.testing import assert_array_equal
 
 from backend import GSheetRepository
 
