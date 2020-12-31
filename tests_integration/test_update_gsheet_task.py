@@ -13,7 +13,7 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class TestUpdateGSheetTask(unittest.TestCase):
 
-    def test_update_gsheet_run(self):
+    def test_update_gsheet_full_run(self):
         """ This test will run as much of the pipeline locally this includes getting the data from the API
         Once you identify the problem write a unit test that only executes that part and mock everything else
         We don't want to overburden the covid19india.org api to much :-)

@@ -55,7 +55,7 @@ class GSheetRepository(Repository):
         return cleaned
 
     def store_dataframe(self, df: pd.DataFrame, storage_location: str, allow_create: bool) -> None:
-        if not self._worksheet_exists(storage_location):
+        if not self.exists(storage_location):
             if allow_create:
                 log.info(f'Created storage location {storage_location}')
                 self.create_storage_location(storage_location)
@@ -75,7 +75,7 @@ class GSheetRepository(Repository):
 
     def exists(self, storage_location: str) -> bool:
         spreadsheet = self._get_spreadsheet()
-        sheet_names = [sheet['properties'].get('title', 'Sheet1') for sheet in spreadsheet]
+        sheet_names = [sheet.title for sheet in spreadsheet]
         return storage_location in sheet_names
 
     def create_storage_location(self, storage_location: str) -> None:
