@@ -17,6 +17,7 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 class TestCalculateMetrics(unittest.TestCase):
     @staticmethod
     def _build_district_input(measurements, districts, values: list):
+        """ Quickly create a df that has all the required columns, and a few districts to test grouping """
         district_names = [f'city_{x}' for x in range(districts)]
 
         data = {
@@ -35,8 +36,7 @@ class TestCalculateMetrics(unittest.TestCase):
 
     def test__calculate_levitt_metric(self):
         data = pd.Series([2, 3, 4, 5, 6, 7])
-        expected = np.array([np.nan, 0.40546511, 0.28768207, 0.22314355, 0.18232156,
-                             0.15415068])
+        expected = np.array([np.nan, 0.40546511, 0.28768207, 0.22314355, 0.18232156, 0.15415068])
 
         result = _calculate_levitt_metric(data)
 
@@ -48,16 +48,17 @@ class TestCalculateMetrics(unittest.TestCase):
         expected = np.array([np.nan, np.nan, 0.40546511, 0.18232156, 0.28768207, 0.15415068])
 
         result = calculate_levitt_group(df, ['state', 'district'], 'TARGET')
+
         assert_allclose(expected, result)
 
-    @pytest.mark.skip("Not yet finished")
     def test_total_deceased_levitt(self):
-        np.random.seed(27)
+        np.random.seed(27)  # make tests reproducible, would be better to mock np.random
         input_df = self._build_district_input(measurements=3, districts=2, values=[10, 20])
         hospitalizations = impute_hospitalization_percentages(
             pd.DataFrame({'date': [datetime(1900, 1, 1)], 'percentages': [0.13]}),
             input_df['date'])
-        expected = np.array([1.3, 1.525833, 1.547201, 2.740577, 2.988318, 2.706705])
+        input_df['total.deceased'] = [2, 5, 3, 6, 4, 7]
+        expected = np.array([np.nan, 0.40546511, 0.28768207, np.nan, 0.18232156, 0.15415068])
 
         raw_result = extend_and_impute_metrics(
             raw_metrics=input_df,
@@ -69,7 +70,7 @@ class TestCalculateMetrics(unittest.TestCase):
         assert_allclose(expected, result, rtol=1e-04)
 
     def test_calculate_hospitalizations(self):
-        np.random.seed(27)  # would be better to mock this
+        np.random.seed(27)  # make tests reproducible, would be better to mock np.random
         data = {
             'date': [
                 datetime(2020, 10, 2),
@@ -93,7 +94,7 @@ class TestCalculateMetrics(unittest.TestCase):
         assert_frame_equal(result, df.drop(columns=['percentages']).set_index('date'))
 
     def test_impute_hospitalization_percentages(self):
-        np.random.seed(27)
+        np.random.seed(27)  # make tests reproducible, would be better to mock np.random
         data = {
             'date': [
                 datetime(2020, 10, 2),
@@ -114,7 +115,7 @@ class TestCalculateMetrics(unittest.TestCase):
         assert_frame_equal(result, df)
 
     def test_extend_hospitalization_percentages(self):
-        np.random.seed(27)
+        np.random.seed(27)  # make tests reproducible, would be better to mock np.random
         data = {
             'date': [
                 datetime(2020, 10, 2),
@@ -249,7 +250,7 @@ class TestCalculateMetrics(unittest.TestCase):
         assert_allclose(raw_result['expected'].to_numpy(), result)
 
     def test_delta_hospitalized(self):
-        np.random.seed(27)
+        np.random.seed(27)  # make tests reproducible, would be better to mock np.random
         input_df = self._build_district_input(measurements=3, districts=2, values=[10, 20])
         hospitalizations = impute_hospitalization_percentages(
             pd.DataFrame({'date': [datetime(1900, 1, 1)], 'percentages': [0.13]}),
