@@ -6,9 +6,10 @@ import pytest
 from numpy.testing import assert_allclose
 from pandas.testing import assert_frame_equal
 from backend.metrics.calculations import *
-from backend.metrics.calculations import _moving_average_grouped
 import pandas as pd
 import numpy as np
+
+from backend.metrics.calculations import _calculate_levitt_metric, _moving_average_grouped
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -32,12 +33,38 @@ class TestCalculateMetrics(unittest.TestCase):
         df = pd.DataFrame(data)
         return df
 
-    def test_calculate_levitt_metric(self):
+    def test__calculate_levitt_metric(self):
         data = pd.Series([2, 3, 4, 5, 6, 7])
         expected = np.array([np.nan, 0.40546511, 0.28768207, 0.22314355, 0.18232156,
                              0.15415068])
 
-        result = calculate_levitt_metric(data)
+        result = _calculate_levitt_metric(data)
+
+        assert_allclose(expected, result, rtol=1e-04)
+
+    def test_calculate_levitt_group(self):
+        df = self._build_district_input(3, 2, [3, 7]).set_index(['state', 'district'])
+        df['TARGET'] = [2, 5, 3, 6, 4, 7]
+        expected = np.array([np.nan, np.nan, 0.40546511, 0.18232156, 0.28768207, 0.15415068])
+
+        result = calculate_levitt_group(df, ['state', 'district'], 'TARGET')
+        assert_allclose(expected, result)
+
+    @pytest.mark.skip("Not yet finished")
+    def test_total_deceased_levitt(self):
+        np.random.seed(27)
+        input_df = self._build_district_input(measurements=3, districts=2, values=[10, 20])
+        hospitalizations = impute_hospitalization_percentages(
+            pd.DataFrame({'date': [datetime(1900, 1, 1)], 'percentages': [0.13]}),
+            input_df['date'])
+        expected = np.array([1.3, 1.525833, 1.547201, 2.740577, 2.988318, 2.706705])
+
+        raw_result = extend_and_impute_metrics(
+            raw_metrics=input_df,
+            hospitalizations=hospitalizations,
+            grouping_columns=['state', 'district']
+        )
+        result = raw_result['total.deceased.levitt'].values
 
         assert_allclose(expected, result, rtol=1e-04)
 
@@ -200,7 +227,7 @@ class TestCalculateMetrics(unittest.TestCase):
 
         assert_allclose(raw_result['expected'].to_numpy(), result)
 
-    def test_percent_case_growth(self):
+    def test_detla_percent_case_growth(self):
         input_df = self._build_district_input(measurements=25, districts=1, values=[.3])
         hospitalizations = impute_hospitalization_percentages(
             pd.DataFrame({'date': [datetime(1900, 1, 1)], 'percentages': [0.13]}),
@@ -238,6 +265,27 @@ class TestCalculateMetrics(unittest.TestCase):
 
         assert_allclose(expected, result, rtol=1e-04)
 
-    @pytest.mark.skip("Not yet implemented")
     def test_delta_active(self):
-        self.assertTrue(False)
+        value_city_1 = 10
+        value_city_2 = 20
+        measurements = 3
+
+        # confirmed - deceased - recovered - other
+        expected_city_1 = value_city_1 - value_city_1 - value_city_1 - value_city_1
+        expected_city_2 = value_city_2 - value_city_2 - value_city_2 - value_city_2
+
+        input_df = self._build_district_input(measurements=measurements, districts=2,
+                                              values=[value_city_1, value_city_2])
+        hospitalizations = impute_hospitalization_percentages(
+            pd.DataFrame({'date': [datetime(1900, 1, 1)], 'percentages': [0.13]}),
+            input_df['date'])
+        expected = np.array([expected_city_1] * measurements + [expected_city_2] * measurements)
+
+        raw_result = extend_and_impute_metrics(
+            raw_metrics=input_df,
+            hospitalizations=hospitalizations,
+            grouping_columns=['state', 'district']
+        )
+        result = raw_result['delta.active'].values
+
+        assert_allclose(expected, result, rtol=1e-04)

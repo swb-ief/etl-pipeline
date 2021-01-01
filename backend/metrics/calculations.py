@@ -1,14 +1,24 @@
 import numpy as np
 import pandas as pd
 from numpy import random
-from scipy.interpolate import CubicSpline
 
 
-def calculate_levitt_metric(column: pd.Series) -> pd.Series:
+def _calculate_levitt_metric(column: pd.Series) -> pd.Series:
     """ calculate and return levitt metric for a column
     """
     shifted = column.shift(1)
     return np.log(column / shifted)
+
+
+def calculate_levitt_group(df: pd.DataFrame, group_columns: list[str], target_column: str) -> pd.Series:
+    """ apply levitt on subgroups of the data
+     :returns: levitt series preserved index """
+    index_columns = df.index.names
+    df_no_index = df.reset_index()
+
+    df_no_index['levitt'] = df_no_index.groupby(group_columns)[target_column].transform(_calculate_levitt_metric)
+    df = df_no_index.set_index(index_columns)
+    return df['levitt']
 
 
 def impute_hospitalization_percentages(current_hospitalizations: pd.DataFrame, expected_dates: pd.Series):
@@ -87,32 +97,27 @@ def extend_and_impute_metrics(
 
     for group in ['delta', 'total']:
         for measurement in measurements:
-            # TODO: argument for fillna() still being considered not imputed?
             df[f'{group}.{measurement}'] = df[f'{group}.{measurement}'].fillna(value=0)
 
             df.loc[:, f'MA.21.{group}.{measurement}'] = _moving_average_grouped(df, grouping_columns,
                                                                                 f'{group}.{measurement}',
                                                                                 rolling_window)
 
-    # generate Levitt Metric
-    # TODO needs to be grouped first
-    df.loc[:, "total.deceased.levitt"] = calculate_levitt_metric(df["total.deceased"])
+    # generate Levitt Metric for total deceased
+    df.loc[:, "total.deceased.levitt"] = calculate_levitt_group(df, grouping_columns, "total.deceased")
 
     # TPR% per day
     df.loc[:, "delta.positivity"] = (df["delta.confirmed"] / df["delta.tested"]) * 100.0
 
     # daily percent case growth
-    df.loc[:, "delta.percent.case.growth"] = df.groupby(
-        grouping_columns)["delta.confirmed"].pct_change()
+    df.loc[:, "delta.percent.case.growth"] = df.groupby(grouping_columns)["delta.confirmed"].pct_change()
 
-    hospitalization_ratios_updated = calculate_hospitalizations(df,
-                                                                hospitalizations)
+    hospitalization_ratios_updated = calculate_hospitalizations(df, hospitalizations)
 
     df["delta.hospitalized"] = hospitalization_ratios_updated['hospitalizations'].values
 
     # total hospitalizations
-    df.loc[:, "total.hospitalized"] = df.groupby(
-        grouping_columns)["delta.hospitalized"].cumsum()
+    df.loc[:, "total.hospitalized"] = df.groupby(grouping_columns)["delta.hospitalized"].cumsum()
 
     # active cases by day
     df.loc[:, "delta.active"] = (
@@ -124,8 +129,6 @@ def extend_and_impute_metrics(
 
     # moving averages of some of our calculated columns
     for column in ['delta.positivity', 'delta.hospitalized', 'delta.active']:
-        df.loc[:, f'MA.21.{column}'] = _moving_average_grouped(df, grouping_columns,
-                                                               column,
-                                                               rolling_window)
+        df.loc[:, f'MA.21.{column}'] = _moving_average_grouped(df, grouping_columns, column, rolling_window)
 
     return df.reset_index()
