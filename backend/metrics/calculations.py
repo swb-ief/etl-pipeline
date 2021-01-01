@@ -99,10 +99,6 @@ def extend_and_impute_metrics(
     # TPR% per day
     df.loc[:, "delta.positivity"] = (df["delta.confirmed"] / df["delta.tested"]) * 100.0
 
-    # 21-Day MA of TPR%
-    df.loc[:, "MA.21.delta.positivity"] = _moving_average_grouped(df, grouping_columns, 'delta.positivity',
-                                                                  rolling_window)
-
     # daily percent case growth
     df.loc[:, "delta.percent.case.growth"] = df.groupby(
         grouping_columns)["delta.confirmed"].pct_change()
@@ -123,5 +119,11 @@ def extend_and_impute_metrics(
             - df["total.recovered"]
             - df["delta.other"]
     )
+
+    # moving averages of some of our calculated columns
+    for column in ['delta.positivity', 'delta.hospitalized', 'delta.active']:
+        df.loc[:, f'MA.21.{column}'] = _moving_average_grouped(df, grouping_columns,
+                                                               column,
+                                                               rolling_window)
 
     return df.reset_index()

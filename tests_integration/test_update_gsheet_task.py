@@ -33,7 +33,7 @@ class TestUpdateGSheetTask(unittest.TestCase):
 
         def my_store_dataframe(self, df: pd.DataFrame, storage_name, allow_create):
             results[storage_name] = df
-            df.to_csv(os.path.join(THIS_DIR, f'../tests/test output/test_update_{storage_name}.csv'))
+            df.to_csv(os.path.join(THIS_DIR, f'../tests/test output/test_update_full_run_{storage_name}.csv'))
 
         with patch.object(GSheetRepository, 'get_dataframe', new=my_get_dataframe), \
                 patch.object(GSheetRepository, 'store_dataframe', new=my_store_dataframe):

@@ -9,7 +9,7 @@ import logging
 from backend.data import ExtractCovid19IndiaData
 from backend.repository import GSheetRepository
 from backend.metrics.calculations import impute_hospitalization_percentages, extend_and_impute_metrics
-from tasks import FetchCovid19IndiaDataTask
+from .fetch_covid19_india_data_task import FetchCovid19IndiaDataTask
 
 log = logging.getLogger(__name__)
 
@@ -35,15 +35,14 @@ class UpdateGSheetTask(luigi.ExternalTask):
         'delta.percent.case.growth',
         'delta.positivity',
 
-        'spline.active',
-        'spline.deceased',
-        'spline.hospitalized',
-        'spline.recovered',
-
-        'total.deceased.levitt',  # this needs a better name
-
-        'MA.21.daily.tests',
+        'MA.21.delta.active',
+        'MA.21.delta.deceased',
+        'MA.21.delta.hospitalized',
+        'MA.21.delta.recovered',
         'MA.21.delta.positivity',
+        'MA.21.delta.tested',  # phase 1 name MA.21.daily.tests
+
+        'total.deceased.levitt',  # phase 1 name levitt.metric
     ]
     # Not yet added R generated metrics mean.mean, CI_lower.mean, CI_upper.mean, doubling.time
 
