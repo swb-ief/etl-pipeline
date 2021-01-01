@@ -9,7 +9,7 @@ moved to phase 1 archive
 
 ```
 │   .gitignore
-│   pytest.ini                                  [ Unittest configuration file ]
+│   pytest.ini                                  [ Unittest configuration file, includes which folders to check for tests]
 │   README.md                                   [ This is me ]
 │   requirements.txt
 │

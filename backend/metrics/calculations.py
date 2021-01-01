@@ -4,42 +4,6 @@ from numpy import random
 from scipy.interpolate import CubicSpline
 
 
-def impute_column(column: pd.Series) -> np.ndarray:
-    """
-    Uniformly distributes the accumulated figures over days with zero values.
-
-    Input- Column that needs to be imputed
-    Output- Numpy imputed column
-
-    For e.g if there are non tested reported on Day1,2 and 3 and there are 400 on day 4, then imputation
-    spread it out to 100 each on Day1,2,3,4
-
-    Issue identified- Since the tested/decesed etc has to be whole numbers hence we are loosing some numbers in distribution.
-    For e.g If on Day 1,2,3 no testing reported and on Day 4,  27 tested then This will spread out as Day1-6 tested Day2- 6 tested
-    Day 3-6 tested Day 4-6 tested, which is equal to 24. Hnece we will loose out 3 tested.
-    Over a period of time it cumulates to large numbers.
-    """
-    column = pd.Series(np.where(column.values < 0, np.NaN, column))
-    pre_nan = (
-            column.isnull()
-            .astype(int)
-            .groupby(column.notnull().astype(int).cumsum())
-            .cumsum()
-            .shift(1)
-            + 1
-    )
-    avgs = np.round(column.values / pre_nan)
-    avgs = avgs.bfill()
-    avgs = np.where(np.logical_or(np.isnan(column), avgs < column), avgs, column)
-    avgs = pd.Series(avgs)
-
-    # TODO: Is this here in case avgs still has np.nan? If so make a test cases for this. Else remove this line
-    # and skip the conversion to series and back to numpy
-    avgs.fillna(np.round(avgs.mean()), inplace=True)
-
-    return avgs.to_numpy()
-
-
 def calculate_levitt_metric(column: pd.Series) -> pd.Series:
     """ calculate and return levitt metric for a column
     """
@@ -66,108 +30,98 @@ def impute_hospitalization_percentages(current_hospitalizations: pd.DataFrame, e
     return df.reset_index()
 
 
-def calculate_or_impute_hospitalizations(
+def calculate_hospitalizations(
         delta_confirmed: pd.DataFrame,
         hospitalization_ratios: pd.DataFrame) -> pd.DataFrame:
     """ :return: merged Dataframe with an extra column 'hospitalizations' with delta confirmed * ratio
             and if there is no ratio it will randomly estimate it between .12 and .16"""
 
     ratio_column = 'percentages'  # incorrectly named percentages but is actualy a value between 0 and 1
-    assert 'date' in delta_confirmed.columns
+    assert 'date' in delta_confirmed.index.names
     assert 'delta.confirmed' in delta_confirmed.columns
     assert 'date' in hospitalization_ratios.columns
     assert ratio_column in hospitalization_ratios.columns
 
-    df = delta_confirmed.merge(hospitalization_ratios, how='left', left_on='date', right_on='date')
+    indexed_ratios = hospitalization_ratios.set_index('date')
+
+    df = delta_confirmed.join(indexed_ratios, how='left')
 
     df['hospitalizations'] = df['delta.confirmed'] * df[ratio_column]
-    columns_to_drop = list(hospitalization_ratios.columns)
-    columns_to_drop.remove('date')
+    columns_to_drop = list(indexed_ratios.columns)
     df = df.drop(columns=columns_to_drop)
     return df
 
 
-def cubic_spline(column: pd.Series) -> np.array:
-    cs = CubicSpline(range(len(column)), column)
-    return cs(range(len(column)))
+def _moving_average_grouped(df: pd.DataFrame, group_columns: list[str], target_column: str, window_size) -> pd.Series:
+    """
+    :remarks: Does not sort the data
+    """
+    group_index_count = len(group_columns)
+    indexes_to_drop = list(range(group_index_count))
+    return df.groupby(level=group_columns)[target_column] \
+        .rolling(window_size) \
+        .mean() \
+        .reset_index(level=indexes_to_drop, drop=True)
 
 
 def extend_and_impute_metrics(
         raw_metrics: pd.DataFrame,
-        hospitalizations: pd.DataFrame = None,
+        hospitalizations: pd.DataFrame,
+        grouping_columns: list[str]
 ) -> (pd.DataFrame, pd.DataFrame):
     """
-    :returns: imputed metrics
+    :returns: extended and imputed metrics
     """
+
+    # we want to work with a nicely date sorted index
+    # the date ordering is important for the rolling means
+    # ordering by the other parts is for human readers
+    df = raw_metrics \
+        .set_index([*grouping_columns, 'date']) \
+        .sort_index()
+
     measurements = ['tested', 'confirmed', 'deceased', 'recovered', 'other']
-    mean_window = 21
+    rolling_window = 21
 
-    for measurement in measurements:
-        # TODO: argument for fillna still being considered not imputed
-        raw_metrics.loc[:, f'delta.{measurement}.non.impu'] = raw_metrics[f'delta.{measurement}'].fillna(value=0)
-        raw_metrics.loc[:, f'total.{measurement}.non.impu'] = raw_metrics[f'delta.{measurement}.non.impu'].cumsum()
+    for group in ['delta', 'total']:
+        for measurement in measurements:
+            # TODO: argument for fillna() still being considered not imputed?
+            df[f'{group}.{measurement}'] = df[f'{group}.{measurement}'].fillna(value=0)
 
-        raw_metrics.loc[:, f'delta.{measurement}'] = impute_column(raw_metrics[f'delta.{measurement}'])
-        raw_metrics.loc[:, f'total.{measurement}'] = raw_metrics[f'delta.{measurement}'].cumsum()
-
-        # TODO: move mean calculations here
+            df.loc[:, f'MA.21.{group}.{measurement}'] = _moving_average_grouped(df, grouping_columns,
+                                                                                f'{group}.{measurement}',
+                                                                                rolling_window)
 
     # generate Levitt Metric
-    raw_metrics.loc[:, "total.deceased.levitt"] = calculate_levitt_metric(raw_metrics["total.deceased"])
-
-    # 21-Day MA of daily tests
-    raw_metrics.loc[:, "MA.21.daily.tests"] = raw_metrics["delta.tested"].rolling(window=mean_window).mean()
+    # TODO needs to be grouped first
+    df.loc[:, "total.deceased.levitt"] = calculate_levitt_metric(df["total.deceased"])
 
     # TPR% per day
-    raw_metrics.loc[:, "delta.positivity"] = (raw_metrics["delta.confirmed"] / raw_metrics["delta.tested"]) * 100.0
+    df.loc[:, "delta.positivity"] = (df["delta.confirmed"] / df["delta.tested"]) * 100.0
 
     # 21-Day MA of TPR%
-    raw_metrics.loc[:, "MA.21.delta.positivity"] = raw_metrics["delta.positivity"].rolling(window=mean_window).mean()
+    df.loc[:, "MA.21.delta.positivity"] = _moving_average_grouped(df, grouping_columns, 'delta.positivity',
+                                                                  rolling_window)
 
     # daily percent case growth
-    raw_metrics.loc[:, "delta.percent.case.growth"] = raw_metrics["delta.confirmed"].pct_change()
+    df.loc[:, "delta.percent.case.growth"] = df.groupby(
+        grouping_columns)["delta.confirmed"].pct_change()
 
-    hospitalization_ratios_updated = calculate_or_impute_hospitalizations(raw_metrics,
-                                                                          hospitalizations)
+    hospitalization_ratios_updated = calculate_hospitalizations(df,
+                                                                hospitalizations)
 
-    # bit tricky this... we assume no kind of sorting happend
-    raw_metrics["delta.hospitalized"] = hospitalization_ratios_updated['hospitalizations'].values
-
-    hospitalization_ratios_updated = hospitalization_ratios_updated.drop(columns=['hospitalizations'])
+    df["delta.hospitalized"] = hospitalization_ratios_updated['hospitalizations'].values
 
     # total hospitalizations
-    raw_metrics.loc[:, "total.hospitalized"] = raw_metrics["delta.hospitalized"].cumsum()
+    df.loc[:, "total.hospitalized"] = df.groupby(
+        grouping_columns)["delta.hospitalized"].cumsum()
 
     # active cases by day
-    raw_metrics.loc[:, "delta.active"] = (
-            raw_metrics["total.confirmed"]
-            - raw_metrics["total.deceased"]
-            - raw_metrics["total.recovered"]
-            - raw_metrics["delta.other"]
+    df.loc[:, "delta.active"] = (
+            df["total.confirmed"]
+            - df["total.deceased"]
+            - df["total.recovered"]
+            - df["delta.other"]
     )
 
-    # cubic splines
-    raw_metrics.loc[:, "spline.active"] = cubic_spline(raw_metrics["delta.active"])
-    raw_metrics.loc[:, "spline.deceased"] = cubic_spline(raw_metrics["delta.deceased"])
-    raw_metrics.loc[:, "spline.hospitalized"] = cubic_spline(raw_metrics["delta.hospitalized"])
-    raw_metrics.loc[:, "spline.recovered"] = cubic_spline(raw_metrics["delta.recovered"])
-
-    # active cases by day non imputed
-    raw_metrics.loc[:, "delta.active.non.impu"] = (
-            raw_metrics["total.confirmed.non.impu"]
-            - raw_metrics["total.deceased.non.impu"]
-            - raw_metrics["total.recovered.non.impu"]
-            - raw_metrics["delta.other.non.impu"]
-    )
-
-    # 21 day moving average
-    raw_metrics.loc[:, "MA.21.daily.active.non.impu"] = raw_metrics["delta.active.non.impu"].rolling(
-        window=mean_window).mean()
-    raw_metrics.loc[:, "MA.21.daily.deceased.non.impu"] = raw_metrics["delta.deceased.non.impu"].rolling(
-        window=mean_window).mean()
-    # Hospitilasation function is picking data from imputed columns, hence will be created once imputed is replaced by non imputed
-    # df["MA.21.daily.hospitalized"] = df["delta.hospitalized"].rolling(window=mean_window).mean()
-    raw_metrics.loc[:, "MA.21.daily.recovered.non.impu"] = raw_metrics["delta.recovered.non.impu"].rolling(
-        window=mean_window).mean()
-
-    return raw_metrics
+    return df.reset_index()

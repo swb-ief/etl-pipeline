@@ -78,13 +78,15 @@ class UpdateGSheetTask(luigi.ExternalTask):
         state_data = state_data[state_data['date'] >= start_date]
         state_data = extend_and_impute_metrics(
             raw_metrics=state_data,
-            hospitalizations=hospitalizations_updated
+            hospitalizations=hospitalizations_updated,
+            grouping_columns=['state']
         )
 
         district_data = district_data[district_data['date'] >= start_date]
         district_data = extend_and_impute_metrics(
             raw_metrics=district_data,
             hospitalizations=hospitalizations_updated,
+            grouping_columns=['state', 'district']
         )
 
         # INSERT WARD PROCESSING HERE

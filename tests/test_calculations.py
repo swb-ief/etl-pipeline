@@ -1,48 +1,19 @@
 import os
 import unittest
+import pandas as pd
 from datetime import datetime
 
-from numpy.testing import assert_array_equal, assert_allclose
-from pandas._testing import assert_frame_equal
+import pytest
+from numpy.testing import assert_array_equal, assert_allclose, assert_array_almost_equal_nulp
+from pandas.testing import assert_frame_equal
 
 from backend.metrics.calculations import *
+from backend.metrics.calculations import _moving_average_grouped
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class TestCalculateMetrics(unittest.TestCase):
-    def test_cubic_spline(self):
-        # arrange
-        column_data = pd.Series([1, 2, 3])
-        expected = np.ndarray((3,), buffer=np.array([1., 2., 3.]))
-
-        # act
-        result = cubic_spline(column_data)
-
-        # assert
-        assert_array_equal(expected, result)
-
-    def test_impute_column(self):
-        data = pd.Series([2, 3, 4, 5, 6])
-        expected = np.array([2., 3., 4., 5., 6.])
-
-        result = impute_column(data)
-        assert_array_equal(expected, result)
-
-    def test_impute_missing_(self):
-        data = pd.Series([2, 3, 4, np.nan, 14, 7])
-        expected = np.array([2., 3., 4., 7., 7., 7.])
-
-        result = impute_column(data)
-        assert_array_equal(expected, result)
-
-    def test_impute_missing_with_rounding_error(self):
-        # we would have prefered 11 to be split in 5. and 6. but our current implementation is not capable of that
-        data = pd.Series([2, 3, 4, np.nan, 11, 7])
-        expected = np.array([2., 3., 4., 6., 6., 7.])
-
-        result = impute_column(data)
-        assert_array_equal(expected, result)
 
     def test_calculate_levitt_metric(self):
         data = pd.Series([2, 3, 4, 5, 6, 7])
@@ -70,12 +41,12 @@ class TestCalculateMetrics(unittest.TestCase):
         }
         df = pd.DataFrame(data=data)
 
-        result = calculate_or_impute_hospitalizations(
-            delta_confirmed=df.drop(columns=['hospitalizations', 'percentages']),
+        result = calculate_hospitalizations(
+            delta_confirmed=df.drop(columns=['hospitalizations', 'percentages']).set_index('date'),
             hospitalization_ratios=df.drop(columns=['hospitalizations', 'delta.confirmed'])
         )
 
-        assert_frame_equal(result, df.drop(columns=['percentages']))
+        assert_frame_equal(result, df.drop(columns=['percentages']).set_index('date'))
 
     def test_impute_hospitalization_percentages(self):
         np.random.seed(27)
@@ -130,11 +101,118 @@ class TestCalculateMetrics(unittest.TestCase):
         hospitalizations = impute_hospitalization_percentages(
             pd.DataFrame({'date': [datetime(2020, 10, 3)], 'percentages': [0.13]}), sample_df['date'])
 
-        expected_shape = (1170, 39)
+        expected_shape = (1170, 30)
 
         result = extend_and_impute_metrics(
             raw_metrics=sample_df,
-            hospitalizations=hospitalizations
+            hospitalizations=hospitalizations,
+            grouping_columns=['state', 'district']
         )
 
         self.assertEqual(expected_shape, result.shape)
+
+    def test__moving_average_grouped(self):
+        expected = [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, .3, .7, .3, .7]
+        mean_window = 4
+        measurements = 5
+        cities = 2
+        group_columns = ['state', 'district']
+
+        data = {
+            'date': [datetime(1900 + x, 1, 1) for x in range(measurements * cities)],
+            'state': ['my_state'] * measurements * cities,
+            'district': ['city_1', 'city_2'] * measurements,
+        }
+
+        for group in ['delta']:
+            for measurement in ['tested']:
+                raw_measurements = [0.3, 0.7] * measurements
+                data[f'{group}.{measurement}'] = raw_measurements
+
+        sample_df = pd.DataFrame(data)
+        df = sample_df.set_index(['date', *group_columns])
+        df = df.sort_index()
+
+        df['moving average'] = _moving_average_grouped(df, group_columns, 'delta.tested', mean_window)
+
+        data['moving average'] = expected
+        df_expected = pd.DataFrame(data).set_index(['date', *group_columns]).sort_index()
+
+        assert_frame_equal(df, df_expected)
+
+    @staticmethod
+    def _build_district_input(measurements, districts):
+
+        data = {
+            'date': [datetime(1900 + x, 1, 1) for x in range(measurements * districts)],
+            'state': ['my_state'] * measurements * districts,
+            'district': ['city_1', 'city_2'] * measurements,
+        }
+
+        for group in ['delta', 'total']:
+            for measurement in ['tested', 'confirmed', 'deceased', 'recovered', 'other']:
+                raw_measurements = [0.3, 0.7] * measurements
+                data[f'{group}.{measurement}'] = raw_measurements
+
+        df = pd.DataFrame(data)
+        return df
+
+    def test_mean_calculations(self):
+
+        sample_df = self._build_district_input(measurements=25, districts=2)
+
+        hospitalizations = impute_hospitalization_percentages(
+            pd.DataFrame({'date': [datetime(1900, 1, 1)], 'percentages': [0.13]}),
+            sample_df['date'])
+
+        # mean window is 21 so expect 20 np.nan's
+        expected_means = np.array(
+            [np.nan] * 20 + [0.3] * 5 +
+            [np.nan] * 20 + [0.7] * 5)
+
+        raw_result = extend_and_impute_metrics(
+            raw_metrics=sample_df,
+            hospitalizations=hospitalizations,
+            grouping_columns=['state', 'district']
+        )
+
+        ma_columns = [column for column in raw_result if column.startswith('MA.21')]
+        self.assertGreater(len(ma_columns), 0)
+
+        for column in ma_columns:
+            if 'positivity' in column:
+                continue  # we got a seperate test for that
+
+            result = raw_result[column].to_numpy()
+            assert_allclose(
+                expected_means,
+                result,
+                err_msg=f'Column {column} does not have the expected values')
+
+    def test_positivity(self):
+        input = self._build_district_input(measurements=25, districts=2)
+        hospitalizations = impute_hospitalization_percentages(
+            pd.DataFrame({'date': [datetime(1900, 1, 1)], 'percentages': [0.13]}),
+            input['date'])
+
+        fixed_tested = 53
+
+        input['delta.confirmed'] = [x for x in range(len(input))]
+        input['delta.tested'] = fixed_tested
+
+        expected = np.array([x / fixed_tested * 100 for x in range(len(input))])
+        input['expected'] = expected  # storing it in the dataframe becuase extend will also apply a sort
+
+        raw_result = extend_and_impute_metrics(
+            raw_metrics=input,
+            hospitalizations=hospitalizations,
+            grouping_columns=['state', 'district']
+        )
+
+        result = raw_result['delta.positivity'].to_numpy()
+
+        assert_allclose(raw_result['expected'].to_numpy(), result)
+
+    @pytest.mark.skip('test not implemented yet')
+    def test_percent_case_growth(self):
+        assert False
