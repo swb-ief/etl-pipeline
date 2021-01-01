@@ -129,40 +129,27 @@ class TestCalculateMetrics(unittest.TestCase):
         self.assertEqual(expected_shape, result.shape)
 
     def test__moving_average_grouped(self):
-        expected = [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, .3, .7, .3, .7]
         mean_window = 4
-        measurements = 5
-        cities = 2
         group_columns = ['state', 'district']
 
-        data = {
-            'date': [datetime(1900 + x, 1, 1) for x in range(measurements * cities)],
-            'state': ['my_state'] * measurements * cities,
-            'district': ['city_1', 'city_2'] * measurements,
-        }
-
-        for group in ['delta']:
-            for measurement in ['tested']:
-                raw_measurements = [0.3, 0.7] * measurements
-                data[f'{group}.{measurement}'] = raw_measurements
-
-        sample_df = pd.DataFrame(data)
+        sample_df = self._build_district_input(measurements=5, districts=2, values=[0.3, 0.7])
         df = sample_df.set_index(['date', *group_columns])
         df = df.sort_index()
 
-        df['moving average'] = _moving_average_grouped(df, group_columns, 'delta.tested', mean_window)
+        # the sort is a side effect, however it preserves the indexes so we don't care excpet when
+        # accessing raw values like this.
+        expected = np.array([np.nan, np.nan, np.nan, .3, .3, np.nan, np.nan, np.nan, .7, .7])
 
-        data['moving average'] = expected
-        df_expected = pd.DataFrame(data).set_index(['date', *group_columns]).sort_index()
+        result = _moving_average_grouped(df, group_columns, 'delta.tested', mean_window).to_numpy()
 
-        assert_frame_equal(df, df_expected)
+        assert_allclose(expected, result)
 
-    def test_mean_calculations(self):
+    def test_moving_average_calculations(self):
 
         sample_df = self._build_district_input(measurements=25, districts=2, values=[0.3, 0.7])
 
         hospitalizations = impute_hospitalization_percentages(
-            pd.DataFrame({'date': [datetime(1900, 1, 1)], 'percentages': [0.13]}),
+            pd.DataFrame({'date': [datetime(2000, 1, 1)], 'percentages': [0.13]}),
             sample_df['date'])
 
         # mean window is 21 so expect 20 np.nan's
