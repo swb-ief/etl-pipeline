@@ -54,21 +54,23 @@ def calculate_hospitalizations(
 
 def _moving_average_grouped(df: pd.DataFrame, group_columns: list[str], target_column: str, window_size) -> pd.Series:
     """
-    :remarks: Does not sort the data
+    :remarks: requires pandas 1.2 (there is a breaking api change in 1.x and 1.2)
     """
-    group_index_count = len(group_columns)
-    indexes_to_drop = list(range(group_index_count))
-    return df.groupby(level=group_columns)[target_column] \
-        .rolling(window_size) \
-        .mean() \
-        .reset_index(level=indexes_to_drop, drop=True)
+    assert 'date' in df.index.names
+
+    df_reset = df.reset_index()
+
+    return df_reset \
+        .groupby(group_columns) \
+        .rolling(window_size, on='date')[target_column] \
+        .mean()
 
 
 def extend_and_impute_metrics(
         raw_metrics: pd.DataFrame,
         hospitalizations: pd.DataFrame,
         grouping_columns: list[str]
-) -> (pd.DataFrame, pd.DataFrame):
+) -> pd.DataFrame:
     """
     :returns: extended and imputed metrics
     """

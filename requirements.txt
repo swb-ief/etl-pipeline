@@ -29,7 +29,7 @@ Wand==0.6.5
 gspread~=3.6.0
 luigi~=3.0.2
 numpy==1.19.3 # instead of 1.19.4 till https://developercommunity.visualstudio.com/content/problem/1207405/fmod-after-an-update-to-windows-2004-is-causing-a.html
-pandas
+pandas==1.2.0
 pytest
 requests==2.25.1
 scipy==1.6.0

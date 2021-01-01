@@ -112,16 +112,16 @@ class TestCalculateMetrics(unittest.TestCase):
         """ This is a tiny bit of an integration test. since we are using an other method to help us build
         our input """
 
-        sample_df = pd.read_csv(os.path.join(THIS_DIR, 'samples/Dashboard PDF SWB - city_stats.csv'),
-                                parse_dates=['date'])
+        input_df = pd.read_csv(os.path.join(THIS_DIR, 'samples/Dashboard PDF SWB - city_stats.csv'),
+                               parse_dates=['date'])
 
         hospitalizations = impute_hospitalization_percentages(
-            pd.DataFrame({'date': [datetime(2020, 10, 3)], 'percentages': [0.13]}), sample_df['date'])
+            pd.DataFrame({'date': [datetime(2020, 10, 3)], 'percentages': [0.13]}), input_df['date'])
 
         expected_shape = (1170, 32)
 
         result = extend_and_impute_metrics(
-            raw_metrics=sample_df,
+            raw_metrics=input_df,
             hospitalizations=hospitalizations,
             grouping_columns=['state', 'district']
         )
@@ -132,8 +132,8 @@ class TestCalculateMetrics(unittest.TestCase):
         mean_window = 4
         group_columns = ['state', 'district']
 
-        sample_df = self._build_district_input(measurements=5, districts=2, values=[0.3, 0.7])
-        df = sample_df.set_index(['date', *group_columns])
+        input_df = self._build_district_input(measurements=5, districts=2, values=[0.3, 0.7])
+        df = input_df.set_index(['date', *group_columns])
         df = df.sort_index()
 
         # the sort is a side effect, however it preserves the indexes so we don't care excpet when
@@ -146,11 +146,11 @@ class TestCalculateMetrics(unittest.TestCase):
 
     def test_moving_average_calculations(self):
 
-        sample_df = self._build_district_input(measurements=25, districts=2, values=[0.3, 0.7])
+        input_df = self._build_district_input(measurements=25, districts=2, values=[0.3, 0.7])
 
         hospitalizations = impute_hospitalization_percentages(
             pd.DataFrame({'date': [datetime(2000, 1, 1)], 'percentages': [0.13]}),
-            sample_df['date'])
+            input_df['date'])
 
         # mean window is 21 so expect 20 np.nan's
         expected_means = np.array(
@@ -158,7 +158,7 @@ class TestCalculateMetrics(unittest.TestCase):
             [np.nan] * 20 + [0.7] * 5)
 
         raw_result = extend_and_impute_metrics(
-            raw_metrics=sample_df,
+            raw_metrics=input_df,
             hospitalizations=hospitalizations,
             grouping_columns=['state', 'district']
         )
@@ -177,21 +177,21 @@ class TestCalculateMetrics(unittest.TestCase):
                 err_msg=f'Column {column} does not have the expected values')
 
     def test_positivity(self):
-        input = self._build_district_input(measurements=25, districts=2, values=[0.3, 0.7])
+        input_df = self._build_district_input(measurements=25, districts=2, values=[0.3, 0.7])
         hospitalizations = impute_hospitalization_percentages(
             pd.DataFrame({'date': [datetime(1900, 1, 1)], 'percentages': [0.13]}),
-            input['date'])
+            input_df['date'])
 
         fixed_tested = 53
 
-        input['delta.confirmed'] = [x for x in range(len(input))]
-        input['delta.tested'] = fixed_tested
+        input_df['delta.confirmed'] = [x for x in range(len(input_df))]
+        input_df['delta.tested'] = fixed_tested
 
-        expected = np.array([x / fixed_tested * 100 for x in range(len(input))])
-        input['expected'] = expected  # storing it in the dataframe becuase extend will also apply a sort
+        expected = np.array([x / fixed_tested * 100 for x in range(len(input_df))])
+        input_df['expected'] = expected  # storing it in the dataframe becuase extend will also apply a sort
 
         raw_result = extend_and_impute_metrics(
-            raw_metrics=input,
+            raw_metrics=input_df,
             hospitalizations=hospitalizations,
             grouping_columns=['state', 'district']
         )
@@ -221,10 +221,23 @@ class TestCalculateMetrics(unittest.TestCase):
 
         assert_allclose(raw_result['expected'].to_numpy(), result)
 
-    @pytest.mark.skip("Not yet implemented")
-    def test_hospitalized(self):
-        self.assertTrue(False)
+    def test_delta_hospitalized(self):
+        np.random.seed(27)
+        input_df = self._build_district_input(measurements=3, districts=2, values=[10, 20])
+        hospitalizations = impute_hospitalization_percentages(
+            pd.DataFrame({'date': [datetime(1900, 1, 1)], 'percentages': [0.13]}),
+            input_df['date'])
+        expected = np.array([1.3, 1.525833, 1.547201, 2.740577, 2.988318, 2.706705])
+
+        raw_result = extend_and_impute_metrics(
+            raw_metrics=input_df,
+            hospitalizations=hospitalizations,
+            grouping_columns=['state', 'district']
+        )
+        result = raw_result['delta.hospitalized'].values
+
+        assert_allclose(expected, result, rtol=1e-04)
 
     @pytest.mark.skip("Not yet implemented")
-    def test_active(self):
+    def test_delta_active(self):
         self.assertTrue(False)
