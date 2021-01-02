@@ -4,6 +4,8 @@ import numpy as np
 import os
 import logging
 
+from gspread_dataframe import set_with_dataframe, get_as_dataframe
+
 from backend.repository import Repository
 
 log = logging.getLogger(__name__)
@@ -58,14 +60,12 @@ class GSheetRepository(Repository):
 
         worksheet = self._get_worksheet(storage_location)
 
-        # create a list of lists with the first list the column names, followed by rows of data
-        clean_data = self._df_to_cleaned_data(df)
-
-        worksheet.update(clean_data)
+        set_with_dataframe(worksheet, df)
 
     def get_dataframe(self, storage_location: str) -> pd.DataFrame:
         worksheet = self._get_worksheet(storage_location)
-        return pd.DataFrame(worksheet.get_all_records())
+        return get_as_dataframe(worksheet, header=0)
+        # return pd.DataFrame(worksheet.get_all_records())
 
     def exists(self, storage_location: str) -> bool:
         spreadsheet = self._get_spreadsheet()
