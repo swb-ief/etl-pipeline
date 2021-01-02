@@ -1,6 +1,6 @@
 import os
 import unittest
-from datetime import datetime, timedelta
+from datetime import timedelta, date
 import pandas as pd
 
 import pytest
@@ -45,7 +45,7 @@ class TestGSheetRepository(unittest.TestCase):
 
     def test_store_dataframe(self):
         df = pd.DataFrame({
-            'date': [datetime.now() - timedelta(days=1), datetime.now()],
+            'date': [date.today() - timedelta(days=1), date.today()],
             'some_metric': [0.1, 3.2]
         })
 

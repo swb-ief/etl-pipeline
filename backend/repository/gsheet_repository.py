@@ -1,9 +1,10 @@
 import gspread
 import pandas as pd
-import numpy as np
 import os
 import logging
 
+# there is an alternative gspread_pandas but there it wraps arround gspread so credentials go trough it...
+# for security reasons I chose this simpler wrapper
 from gspread_dataframe import set_with_dataframe, get_as_dataframe
 
 from backend.repository import Repository
