@@ -77,7 +77,7 @@ class GSheetRepository(Repository):
             log.warning(f'Storage location {storage_location} already exists')
             return
 
-        _ = self._get_spreadsheet().add_worksheet(title=storage_location, rows=100, cols=20)
+        _ = self._get_spreadsheet().add_worksheet(title=storage_location, rows=2, cols=2)
 
     def create_repository(self, repository_name: str, admin_email: str) -> str:
         log.info(f'Creating a new Google Sheet "{repository_name}" as a repository')
