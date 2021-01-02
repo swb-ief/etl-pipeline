@@ -2,7 +2,6 @@ import os
 import unittest
 from datetime import datetime
 
-import pytest
 from numpy.testing import assert_allclose
 from pandas.testing import assert_frame_equal
 from backend.metrics.calculations import *

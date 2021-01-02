@@ -6,6 +6,7 @@ from datetime import datetime
 import pandas as pd
 import logging
 
+from backend.config import get_config
 from backend.data import ExtractCovid19IndiaData
 from backend.repository import GSheetRepository
 from backend.metrics.calculations import impute_hospitalization_percentages, extend_and_impute_metrics
@@ -53,10 +54,11 @@ class UpdateGSheetTask(luigi.ExternalTask):
     district_columns_needed_by_dashboard = district_keys + metrics_needed_by_dashboard
 
     def run(self):
-        # we are skipping older data since we only have low case numbers there.
-        start_date = datetime(2020, 4, 1)
+        config = get_config()
 
-        repository = GSheetRepository(GSheetRepository.get_worksheet_url_from_env())
+        # we are skipping older data since we only have low case numbers there.
+        start_date = datetime.strptime(config['dashboard']['start date'], '%Y-%m-%d')
+        repository = GSheetRepository(config['google sheets']['url production'])
 
         fetch_covid19_india_task = yield FetchCovid19IndiaDataTask()
 

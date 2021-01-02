@@ -8,7 +8,7 @@ Work in progress: This list should contain only that what we need for phase 2 ev
 moved to phase 1 archive
 
 ```
-│   .gitignore
+|   backend.ini                                 [ configuration file for the backend and currently also the luigi tasks]
 │   pytest.ini                                  [ Unittest configuration file, includes which folders to check for tests]
 │   README.md                                   [ This is me ]
 │   requirements.txt
@@ -16,40 +16,35 @@ moved to phase 1 archive
 ├───.github
 │   └───workflows
 │           code_quality.yml                    [ Code quality validation on push and pull requests ]
+│           create_infrastructure.yml           [ Creates the infrastructure needed for the dashboard ]
 │           update_dashboard.yml                [ Main action to update the dashboard ]
 ├───backend                                     [ Main package with all the code ]
-│   │   __init__.py
+│   │   config.py                               [ handles loading the configuration data ]
 │   │
 │   ├───data                                    [ data related classes and methods ]
 │   │   │   extract_covid19_india_data.py
-│   │   │   __init__.py
-│   │   │
-│   │   └───__pycache__
-│   │           extract_covid19_india_data.cpython-38.pyc
 │   │
 │   ├───metrics                                 [ covid 19 related metrics classes and methods ]
 │   │   │   calculations.py
-│   │   │   __init__.py
 │   │
 │   ├───repository                              [ repository related classes and methods ]
 │   │       gsheet_repository.py
 │   │       repository.py
-│   │       __init__.py
 │
 ├───phase 1 archive                             [ Temporarey storage for files no longer needed by both P1 & P2 ]
 ├───tasks                                       [ Luigie tasks executed by github workflow actions ]
 │   │   fetch_covid19_india_data_task.py
 │   │   update_gsheet_task.py
-│   │   __init__.py
+│   
 ├───tests                                       [ Unit tests ]
 │   │   test_calculations.py
+│   │   test_config.py
 │   │   test_extract_covid19_india_data.py
 │   │   test_gsheet_repository.py
-│   │   __init__.py
+│   │
 │   ├───integration_tests                       [ test interactions of components ]
 │   │       README.md
 │   │       test_gsheet_repository.py
-│   │       __init__.py
 │   │
 │   ├───samples                                 [ data files that are used by tests ]
 │   │       covid19india_data-all.json
@@ -57,19 +52,18 @@ moved to phase 1 archive
 │   │       Dashboard PDF SWB - city_stats.csv
 │   │
 │   ├───test output                             [ some test leave artefacts for human inspection ]
-│   │       .gitignore
-│   │       test_update_Phase 2 - Districts.csv
-│   │       test_update_Phase 2 - Hospitalization.csv
-│   │       test_update_Phase 2 - States.csv
 │
 ├───tests_integration                           [ Manual tests to help development ]
 │       README.md
 │       test_fetch_covid19_india_data_task.py
 │       test_update_gsheet_task.py
-│       __init__.py
 ```
 
-_generated with tree and manualy filtered + [manual comments]_
+_generated with tree and manually filtered + [manual comments]_
+
+# old documentation
+
+The documentation below is from phase 1 and needs to be updated to phase 2
 
 ## Configuring the project
 

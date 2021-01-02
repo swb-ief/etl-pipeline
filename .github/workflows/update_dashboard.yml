@@ -26,7 +26,6 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           pip install -r requirements.txt
 
-# Disabled for now, we don't want to accidentaly trigger it just yet till we switched to a dev sheet
-#      - name: Executing UpdateGSheetTask
-#        run: |
-#          python -m luigi --module tasks UpdateGSheetTask --local-scheduler
+      - name: Executing UpdateGSheetTask a luigi task
+        run: |
+          python -m luigi --module tasks UpdateGSheetTask --local-scheduler
