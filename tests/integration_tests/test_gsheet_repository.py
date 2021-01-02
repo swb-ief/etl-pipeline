@@ -6,7 +6,7 @@ from backend import GSheetRepository
 from backend.config import get_config
 
 
-@pytest.fixture()
+@pytest.fixture
 def url():
     print("setup")
     config = get_config()
