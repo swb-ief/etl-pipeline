@@ -11,11 +11,12 @@ from backend.data import ExtractCovid19IndiaData
 from backend.repository import GSheetRepository
 from backend.metrics.calculations import impute_hospitalization_percentages, extend_and_impute_metrics
 from .fetch_covid19_india_data_task import FetchCovid19IndiaDataTask
+from .fetch_ward_data import FetchWardData
 
 log = logging.getLogger(__name__)
 
 
-class UpdateGSheetTask(luigi.ExternalTask):
+class UpdateGSheetTask(luigi.Task):
     worksheet_hospitalizations = 'Phase 2 - Hospitalization'
     worksheet_districts = 'Phase 2 - Districts'
     worksheet_states = 'Phase 2 - States'
@@ -53,6 +54,12 @@ class UpdateGSheetTask(luigi.ExternalTask):
     state_columns_needed_by_dashboard = state_keys + metrics_needed_by_dashboard
     district_columns_needed_by_dashboard = district_keys + metrics_needed_by_dashboard
 
+    def requires(self):
+        return {
+            'ward_data': FetchWardData(),
+            'state_district_data': FetchCovid19IndiaDataTask()
+        }
+
     def run(self):
         config = get_config()
 
@@ -60,10 +67,7 @@ class UpdateGSheetTask(luigi.ExternalTask):
         start_date = datetime.strptime(config['dashboard']['start date'], '%Y-%m-%d')
         repository = GSheetRepository(config['google sheets']['url production'])
 
-        fetch_covid19_india_task = yield FetchCovid19IndiaDataTask()
-
-        # Kick off Ward data collection trough tasks
-        # See if luigi can parallelize these 'download' steps
+        fetch_covid19_india_task = self.input()['state_district_data']
 
         with fetch_covid19_india_task.open('r') as json_file:
             all_covid19india_data = json.load(json_file)
