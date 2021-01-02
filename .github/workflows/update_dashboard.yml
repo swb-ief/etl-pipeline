@@ -1,0 +1,32 @@
+name: Update Covid 19 dashboard
+
+on:
+  # manual for now
+  #schedule:
+  #  - cron:  '0 16 * * *'
+  workflow_dispatch:
+
+
+
+jobs:
+  update_dashboard:
+    name: Update dashboard data repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out etl-pipeline repo
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+
+# Disabled for now, we don't want to accidentaly trigger it just yet till we switched to a dev sheet
+#      - name: Executing UpdateGSheetTask
+#        run: |
+#          python -m luigi --module tasks UpdateGSheetTask --local-scheduler

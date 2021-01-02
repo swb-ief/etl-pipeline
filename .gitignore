@@ -138,7 +138,7 @@ dmypy.json
 cython_debug/
 
 .idea
-
+.ipynb_checkpoints
 v1/**/*.csv
 
 temp/
