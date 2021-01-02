@@ -45,12 +45,12 @@ class TestGSheetRepository(unittest.TestCase):
 
     def test_store_dataframe(self):
         df = pd.DataFrame({
-            'date': [datetime.now() - timedelta(days=1), datetime.now],
+            'date': [datetime.now() - timedelta(days=1), datetime.now()],
             'some_metric': [0.1, 3.2]
         })
 
         sut = GSheetRepository(self._url)
         sut.store_dataframe(df, 'for_unit_tests', allow_create=True)
 
-        result = sut.get_dataframe('for_unit_tests')
+        result = sut.get_dataframe('for_unit_tests').dropna(axis=0).dropna(axis=1)
         assert_frame_equal(df, result)
