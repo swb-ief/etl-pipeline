@@ -52,5 +52,6 @@ class TestGSheetRepository(unittest.TestCase):
         sut = GSheetRepository(self._url)
         sut.store_dataframe(df, 'for_unit_tests', allow_create=True)
 
-        result = sut.get_dataframe('for_unit_tests').dropna(axis=0).dropna(axis=1)
+        # want to ignore the empty columns and rows for now.. so just focus on what we just put in
+        result = sut.get_dataframe('for_unit_tests').iloc[0:2, 0:2]
         assert_frame_equal(df, result)
