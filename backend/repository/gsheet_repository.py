@@ -84,3 +84,18 @@ class GSheetRepository(Repository):
             return
 
         _ = self._get_spreadsheet().add_worksheet(title=storage_location, rows=100, cols=20)
+
+    def create_repository(self, repository_name: str, admin_email: str) -> str:
+        log.info(f'Creating a new Google Sheet "{repository_name}" as a repository')
+        client = self._get_gspread_client()
+
+        spreadsheet = client.create(repository_name)
+        log.info(f'Created sheet with id: {spreadsheet.id}')
+
+        self.base_url = spreadsheet.url
+        log.info(f'URL: {spreadsheet.url}')
+
+        spreadsheet.share(admin_email, perm_type='user', role='owner')
+        log.info(f'Assigned {admin_email} as owner')
+
+        return spreadsheet.id

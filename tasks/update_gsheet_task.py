@@ -90,6 +90,10 @@ class UpdateGSheetTask(luigi.ExternalTask):
 
         # INSERT WARD PROCESSING HERE
 
+        # Idea placeholder
+        # Calculate 'todays' top 20ish cities and add that top 20 as a tab in the google sheet so the dashboard can
+        # get access to it.
+
         # validate and filter
         self.states_is_valid = self._has_all_columns(state_data, self.state_columns_needed_by_dashboard)
         self.districts_is_valid = self._has_all_columns(district_data, self.district_columns_needed_by_dashboard)
