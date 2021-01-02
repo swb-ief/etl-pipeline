@@ -57,8 +57,8 @@ class UpdateGSheetTask(luigi.ExternalTask):
         config = get_config()
 
         # we are skipping older data since we only have low case numbers there.
-        start_date = datetime.strptime(config['dashboard']['start_date'], '%Y-%m-%d')
-        repository = GSheetRepository(config['gsheet']['url'])
+        start_date = datetime.strptime(config['dashboard']['start date'], '%Y-%m-%d')
+        repository = GSheetRepository(config['google sheets']['url production'])
 
         fetch_covid19_india_task = yield FetchCovid19IndiaDataTask()
 

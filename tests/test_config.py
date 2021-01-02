@@ -10,6 +10,7 @@ class TestConfig(unittest.TestCase):
 
     def test_config_gsheet(self):
         result = get_config()
-        self.assertTrue('gsheet' in result)
-        self.assertTrue('url' in result['gsheet'])
-      
+        self.assertTrue('google sheets' in result)
+        self.assertTrue('url production' in result['google sheets'])
+        self.assertTrue('url development' in result['google sheets'])
+     
