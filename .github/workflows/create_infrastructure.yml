@@ -1,8 +1,4 @@
 name: Code quality validation
-author: Marco van der Linden
-branding:
-  icon: 'plus-square'
-  color: 'blue'
 
 on:
   workflow_dispatch:
