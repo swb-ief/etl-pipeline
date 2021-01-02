@@ -6,7 +6,8 @@ from numpy import random
 def _calculate_levitt_metric(column: pd.Series) -> pd.Series:
     """ calculate and return levitt metric for a column
     """
-    shifted = column.shift(1)
+    # epsilon = 1e-7  # avoid divisions by zero
+    shifted = column.shift(1)  # + epsilon
     return np.log(column / shifted)
 
 

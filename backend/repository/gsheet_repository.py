@@ -1,4 +1,5 @@
 import gspread
+import numpy as np
 import pandas as pd
 import os
 import logging
@@ -51,6 +52,8 @@ class GSheetRepository(Repository):
                 raise ValueError('Storage location does not exists, create it or call this with allow_create=True')
 
         worksheet = self._get_worksheet(storage_location)
+
+        df = df.replace([np.inf, -np.inf], np.nan)
 
         set_with_dataframe(worksheet, df)
 
