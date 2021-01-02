@@ -1,6 +1,6 @@
 import os
 import unittest
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime
 import pandas as pd
 
 import pytest
@@ -44,8 +44,10 @@ class TestGSheetRepository(unittest.TestCase):
         self.assertFalse(result)
 
     def test_store_dataframe(self):
+        yesterday = datetime.combine(date.today() - timedelta(days=1), datetime.min.time())
+        today = datetime.combine(date.today(), datetime.min.time())
         df = pd.DataFrame({
-            'date': [date.today() - timedelta(days=1), date.today()],
+            'date': [yesterday, today],
             'some_metric': [0.1, 3.2]
         })
 
