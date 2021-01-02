@@ -10,12 +10,6 @@ log = logging.getLogger(__name__)
 
 
 class GSheetRepository(Repository):
-    default_worksheet = "https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k2ZraDb6DzgCOSXI0f0/edit#gid=0"
-
-    @classmethod
-    def get_worksheet_url_from_env(cls):
-        return os.getenv("SWB_WORKSHEET_URL", GSheetRepository.default_worksheet)
-
     def __init__(self, base_url: str):
         self.base_url = base_url
         self._gspread_client = None
