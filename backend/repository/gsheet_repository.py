@@ -41,15 +41,6 @@ class GSheetRepository(Repository):
         worksheet = sheet.worksheet(worksheet_name)
         return worksheet
 
-    @staticmethod
-    def _df_to_cleaned_data(df):
-        """ note it will convert int's to floats if it contains a field with an empty string.
-        Because of the np.nan it will inject
-        :remarks: '' to np.nan is a safe assumption the only string columns state/district/ward can't be empty
-        """
-        cleaned = [df.columns.values.tolist()] + df.replace("", np.nan).values.tolist()
-        return cleaned
-
     def store_dataframe(self, df: pd.DataFrame, storage_location: str, allow_create: bool) -> None:
         if not self.exists(storage_location):
             if allow_create:
@@ -64,7 +55,7 @@ class GSheetRepository(Repository):
 
     def get_dataframe(self, storage_location: str) -> pd.DataFrame:
         worksheet = self._get_worksheet(storage_location)
-        return get_as_dataframe(worksheet, header=0)
+        return get_as_dataframe(worksheet, parse_dates=['date'], header=0)
         # return pd.DataFrame(worksheet.get_all_records())
 
     def exists(self, storage_location: str) -> bool:
