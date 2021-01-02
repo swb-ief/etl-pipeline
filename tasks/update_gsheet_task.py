@@ -16,9 +16,9 @@ log = logging.getLogger(__name__)
 
 
 class UpdateGSheetTask(luigi.ExternalTask):
-    worksheet_hospitalizations = 'Phase 2 - Hospitalization'
-    worksheet_districts = 'Phase 2 - Districts'
-    worksheet_states = 'Phase 2 - States'
+    storage_hospitalizations = 'Phase 2 - Hospitalization'
+    storage_districts = 'Phase 2 - Districts'
+    storage_states = 'Phase 2 - States'
 
     states_is_valid = False
     districts_is_valid = False
@@ -73,7 +73,12 @@ class UpdateGSheetTask(luigi.ExternalTask):
         # we have access to the state metrics as well but not needed yet in the dashboard
         state_data, district_data = ExtractCovid19IndiaData().process(all_covid19india_data)
 
-        hospitalization_df = repository.get_dataframe(self.worksheet_hospitalizations)
+        # not the best location to create this, but it's ok for now
+        if not repository.exists(self.storage_hospitalizations):
+            df = pd.DataFrame({'date': [], 'percentages': []})
+            repository.store_dataframe(df, self.storage_hospitalizations)
+
+        hospitalization_df = repository.get_dataframe(self.storage_hospitalizations)
         hospitalizations_updated = impute_hospitalization_percentages(hospitalization_df, state_data['date'])
 
         state_data = state_data[state_data['date'] >= start_date]
@@ -103,9 +108,9 @@ class UpdateGSheetTask(luigi.ExternalTask):
         states_filtered = state_data[self.state_columns_needed_by_dashboard]
         districts_filtered = district_data[self.district_columns_needed_by_dashboard]
 
-        repository.store_dataframe(hospitalizations_updated, self.worksheet_hospitalizations, allow_create=True)
-        repository.store_dataframe(states_filtered, self.worksheet_states, allow_create=True)
-        repository.store_dataframe(districts_filtered, self.worksheet_districts, allow_create=True)
+        repository.store_dataframe(hospitalizations_updated, self.storage_hospitalizations, allow_create=True)
+        repository.store_dataframe(states_filtered, self.storage_states, allow_create=True)
+        repository.store_dataframe(districts_filtered, self.storage_districts, allow_create=True)
 
     @staticmethod
     def _has_all_columns(df: pd.DataFrame, columns: List[str]) -> bool:

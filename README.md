@@ -1,6 +1,8 @@
 # etl-pipeline
 
-![Luigi Pipeline Scheduled](https://github.com/swb-ief/etl-pipeline/workflows/LuigiPipelineSchedule/badge.svg)
+![Update Covid 19 dashboard](https://github.com/swb-ief/etl-pipeline/workflows/Update%20Covid%2019%20dashboard/badge.svg)
+
+![Phase 1 - Luigi Pipeline Scheduled](https://github.com/swb-ief/etl-pipeline/workflows/LuigiPipelineSchedule/badge.svg)
 
 # Structure [ Phase 2]
 
@@ -60,6 +62,11 @@ moved to phase 1 archive
 ```
 
 _generated with tree and manually filtered + [manual comments]_
+
+## Tips: testing luigi tasks
+
+When an integration test involving luigi fails it is almost alwasy hidden because luigi hides the exceptions in the
+pytest output for that test. So be sure to open the full test run output to find the actual problem.
 
 # old documentation
 
