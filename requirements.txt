@@ -7,7 +7,7 @@ click==7.1.2
 dropbox~=11.0.0
 packaging==20.8
 pdfminer.six==20200517 # 20200517 due to dependancy of pdfplumber
-pdfplumber==0.5.25
+
 Pillow
 pluggy==0.13.1
 py==1.10.0
@@ -33,3 +33,4 @@ pandas==1.2.0
 pytest
 requests==2.25.1
 scipy==1.6.0
+pdfplumber==0.5.25 # still checking though
