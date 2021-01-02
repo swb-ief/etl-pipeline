@@ -56,8 +56,13 @@ class GSheetRepository(Repository):
 
     def get_dataframe(self, storage_location: str) -> pd.DataFrame:
         worksheet = self._get_worksheet(storage_location)
-        return get_as_dataframe(worksheet, parse_dates=['date'], header=0)
-        # return pd.DataFrame(worksheet.get_all_records())
+
+        headers = worksheet.row_values(1)  # 1 indexed
+
+        if 'date' in headers:
+            return get_as_dataframe(worksheet, parse_dates=['date'], header=0)
+
+        return get_as_dataframe(worksheet, header=0)
 
     def exists(self, storage_location: str) -> bool:
         spreadsheet = self._get_spreadsheet()
