@@ -76,7 +76,7 @@ class UpdateGSheetTask(luigi.ExternalTask):
         # not the best location to create this, but it's ok for now
         if not repository.exists(self.storage_hospitalizations):
             df = pd.DataFrame({'date': [], 'percentages': []})
-            repository.store_dataframe(df, self.storage_hospitalizations)
+            repository.store_dataframe(df, self.storage_hospitalizations, allow_create=True)
 
         hospitalization_df = repository.get_dataframe(self.storage_hospitalizations)
         hospitalizations_updated = impute_hospitalization_percentages(hospitalization_df, state_data['date'])
