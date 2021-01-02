@@ -1,4 +1,4 @@
-name: Code quality validation
+name: Create dashboard infrastructure
 
 on:
   workflow_dispatch:
