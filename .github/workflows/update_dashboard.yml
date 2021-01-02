@@ -1,9 +1,8 @@
 name: Update Covid 19 dashboard
 
 on:
-  # manual for now
-  #schedule:
-  #  - cron:  '0 16 * * *'
+  schedule:
+    - cron: '0 22 * * *' # 22:00 Utc with the aim to be finished at 24:00 utc in 2 hours (5:30am India [IST])
   workflow_dispatch:
 
 

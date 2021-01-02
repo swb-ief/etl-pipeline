@@ -61,7 +61,7 @@ class GSheetRepository(Repository):
         # create a list of lists with the first list the column names, followed by rows of data
         clean_data = self._df_to_cleaned_data(df)
 
-        worksheet.update(values=clean_data)
+        worksheet.update(clean_data)
 
     def get_dataframe(self, storage_location: str) -> pd.DataFrame:
         worksheet = self._get_worksheet(storage_location)
