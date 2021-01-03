@@ -68,11 +68,14 @@ class UpdateGSheetTask(luigi.Task):
         repository = GSheetRepository(config['google sheets']['url production'])
 
         fetch_covid19_india_task = self.input()['state_district_data']
+        fetch_wards_task = self.input()['ward_data']
 
         with fetch_covid19_india_task.open('r') as json_file:
             all_covid19india_data = json.load(json_file)
 
+        # cleanup
         fetch_covid19_india_task.remove()
+        fetch_wards_task.remove()
 
         # we have access to the state metrics as well but not needed yet in the dashboard
         state_data, district_data = ExtractCovid19IndiaData().process(all_covid19india_data)

@@ -1,4 +1,4 @@
-from datetime import datetime, date, timedelta
+from datetime import date
 
 import luigi
 
@@ -16,10 +16,11 @@ class FetchMumbaiWardsTask(luigi.Task):
 
         df.to_csv(self.output().path, index=False)
 
+        # cleanup
+        self.input().remove()
 
-def output(self):
-    return luigi.LocalTarget(f'mumbai_{date.today()}.csv')
+    def output(self):
+        return luigi.LocalTarget(f'mumbai_{date.today()}.csv')  # TODO this can fail if the run is very close 23:59
 
-
-def complete(self):
-    return self.output().exists()
+    def complete(self):
+        return self.output().exists()

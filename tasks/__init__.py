@@ -1,2 +1,3 @@
 from .update_gsheet_task import UpdateGSheetTask
 from .fetch_covid19_india_data_task import FetchCovid19IndiaDataTask
+from .fetch_ward_data import FetchWardDataTask

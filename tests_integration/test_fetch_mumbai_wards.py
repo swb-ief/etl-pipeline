@@ -3,7 +3,6 @@ import unittest
 import luigi
 
 from tasks.districts import FetchMumbaiWardsTask
-from tasks.update_gsheet_task import FetchCovid19IndiaDataTask
 
 
 class TestFetchMumbaiWards(unittest.TestCase):

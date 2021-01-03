@@ -2,8 +2,12 @@ import os
 import unittest
 from unittest.mock import patch
 
+import luigi
+import pandas as pd
+
 from backend import GSheetRepository
 from tasks.districts.DownloadFileTask import DownloadFileTask
+from tasks.fetch_ward_data import FetchWardDataTask
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -11,12 +15,6 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 class TestFetchWardData(unittest.TestCase):
     def test_fetch_ward_data_run(self):
         results = dict()
-
-        def my_get_dataframe(self, storage_name):
-            if storage_name == 'raw_ward_data':
-                return pd.read_csv(
-                    os.path.join(THIS_DIR, '../samples/Dashboard PDF Development - hospitalization.csv'))
-            raise ValueError(f'Did not expect {storage_name=}')
 
         def my_store_dataframe(self, df: pd.DataFrame, storage_name, allow_create):
             results[storage_name] = df
@@ -42,10 +40,12 @@ class TestFetchWardData(unittest.TestCase):
         def my_output(self):
             return DownloadOutputMock()
 
-        with patch.object(GSheetRepository, 'get_dataframe', new=my_get_dataframe), \
+        with patch.object(GSheetRepository, 'exists', return_value=False), \
                 patch.object(GSheetRepository, 'store_dataframe', new=my_store_dataframe), \
                 patch.object(DownloadFileTask, 'output', new=my_output):
-            sut = FetchWardData()
+            sut = FetchWardDataTask()
             worker = luigi.worker.Worker()
             worker.add(sut)
             worker.run()
+
+        self.assertIsNotNone(results['raw_ward_data'])
