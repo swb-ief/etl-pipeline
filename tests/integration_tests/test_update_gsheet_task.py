@@ -19,13 +19,13 @@ class TestUpdateGSheetTask(unittest.TestCase):
         """
         results = dict()
         expected_results = {
-            UpdateGSheetTask.worksheet_hospitalizations: (307, 2),
-            UpdateGSheetTask.worksheet_states: (9790, 16),
-            UpdateGSheetTask.worksheet_districts: (156697, 17)  # +1 column for district
+            UpdateGSheetTask.storage_hospitalizations: (307, 2),
+            UpdateGSheetTask.storage_states: (9790, 16),
+            UpdateGSheetTask.storage_districts: (156697, 17)  # +1 column for district
         }
 
         def my_get_dataframe(self, storage_name):
-            if storage_name == UpdateGSheetTask.worksheet_hospitalizations:
+            if storage_name == UpdateGSheetTask.storage_hospitalizations:
                 return pd.read_csv(
                     os.path.join(THIS_DIR, '../samples/Dashboard PDF Development - hospitalization.csv'))
             raise ValueError(f'Did not expect {storage_name=}')
@@ -52,6 +52,7 @@ class TestUpdateGSheetTask(unittest.TestCase):
 
         with patch.object(GSheetRepository, 'get_dataframe', new=my_get_dataframe), \
                 patch.object(GSheetRepository, 'store_dataframe', new=my_store_dataframe), \
+                patch.object(GSheetRepository, 'exists', return_value=True), \
                 patch.object(FetchCovid19IndiaDataTask, 'run', return_value=None), \
                 patch.object(FetchCovid19IndiaDataTask, 'output', new=my_output):
 

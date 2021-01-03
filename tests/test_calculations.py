@@ -39,7 +39,7 @@ class TestCalculateMetrics(unittest.TestCase):
 
         result = _calculate_levitt_metric(data)
 
-        assert_allclose(expected, result, rtol=1e-04)
+        assert_allclose(expected, result, rtol=1e-06)
 
     def test_calculate_levitt_group(self):
         df = self._build_district_input(3, 2, [3, 7]).set_index(['state', 'district'])
@@ -48,7 +48,7 @@ class TestCalculateMetrics(unittest.TestCase):
 
         result = calculate_levitt_group(df, ['state', 'district'], 'TARGET')
 
-        assert_allclose(expected, result)
+        assert_allclose(expected, result, rtol=1e-06)
 
     def test_total_deceased_levitt(self):
         np.random.seed(27)  # make tests reproducible, would be better to mock np.random
