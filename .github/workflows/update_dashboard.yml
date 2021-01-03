@@ -35,4 +35,4 @@ jobs:
 
       - name: Executing UpdateGSheetTask a luigi task
         run: |
-          python -m luigi --module tasks UpdateGSheetTask --local-scheduler
+          python -m luigi --module tasks UpdateDashboardTask --local-scheduler

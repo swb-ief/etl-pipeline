@@ -2,7 +2,6 @@ import os
 import unittest
 from unittest.mock import patch
 import pandas as pd
-
 import luigi
 
 from backend.repository.gsheet_repository import GSheetRepository
