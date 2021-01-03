@@ -137,8 +137,6 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+# for this project
 .idea
-.ipynb_checkpoints
-v1/**/*.csv
-
 temp/
