@@ -34,7 +34,7 @@ def impute_hospitalization_percentages(current_hospitalizations: pd.DataFrame, e
     expected_dates = expected_dates.drop_duplicates()
     current_hospitalizations = current_hospitalizations.set_index('date')
 
-    ratio_column = 'percentages'  # incorrectly named percentages but is actualy a value between 0 and 1
+    ratio_column = 'percentages'  # incorrectly named percentages but is actually a value between 0 and 1
     df = expected_dates.to_frame().set_index('date')
     df = df.merge(current_hospitalizations, how='left', left_index=True, right_index=True)
     df[ratio_column] = df[ratio_column].apply(lambda x: random.uniform(0.12, 0.16) if pd.isnull(x) else x)
@@ -45,7 +45,9 @@ def calculate_hospitalizations(
         delta_confirmed: pd.DataFrame,
         hospitalization_ratios: pd.DataFrame) -> pd.DataFrame:
     """ :return: merged Dataframe with an extra column 'hospitalizations' with delta confirmed * ratio
-            and if there is no ratio it will randomly estimate it between .12 and .16"""
+            and if there is no ratio it will randomly estimate it between .12 and .16
+        :remark: Has the side effect of sorting the date index... due to the join.
+        """
 
     ratio_column = 'percentages'  # incorrectly named percentages but is actualy a value between 0 and 1
     assert 'date' in delta_confirmed.index.names
@@ -55,7 +57,7 @@ def calculate_hospitalizations(
 
     indexed_ratios = hospitalization_ratios.set_index('date')
 
-    df = delta_confirmed.join(indexed_ratios, how='left')
+    df = delta_confirmed.join(indexed_ratios, how='left', sort=False)
 
     df['hospitalizations'] = df['delta.confirmed'] * df[ratio_column]
     columns_to_drop = list(indexed_ratios.columns)

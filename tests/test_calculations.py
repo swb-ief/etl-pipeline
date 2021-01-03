@@ -92,6 +92,36 @@ class TestCalculateMetrics(unittest.TestCase):
 
         assert_frame_equal(result, df.drop(columns=['percentages']).set_index('date'))
 
+    def test_calculate_hospitalizations(self):
+        np.random.seed(27)  # make tests reproducible, would be better to mock np.random
+        dates = [
+            datetime(2020, 10, 2),
+            datetime(2020, 10, 3),
+            datetime(2020, 10, 4),
+            datetime(2020, 10, 5),
+            datetime(2020, 10, 6),
+            datetime(2020, 10, 7),
+        ]
+
+        df_percentages = pd.DataFrame({
+            'date': dates,
+            'percentages': [.125, .125, .125, .125, .125, .125]
+        })
+
+        df_confirmed = pd.DataFrame({
+            'date': dates * 2,
+            'delta.confirmed': [2, 3, 4, 5, 6, 7] * 2
+        })
+
+        result = calculate_hospitalizations(
+            delta_confirmed=df_confirmed.set_index('date'),
+            hospitalization_ratios=df_percentages
+        )
+
+        df_confirmed['hospitalizations'] = [0.25, 0.375, 0.5, 0.625, 0.75, 0.875] * 2
+        df_confirmed = df_confirmed.set_index('date').sort_index()
+        assert_frame_equal(result, df_confirmed)
+
     def test_impute_hospitalization_percentages(self):
         np.random.seed(27)  # make tests reproducible, would be better to mock np.random
         data = {
@@ -112,6 +142,32 @@ class TestCalculateMetrics(unittest.TestCase):
 
         df['percentages'] = expected_ratios
         assert_frame_equal(result, df)
+
+    def test_impute_hospitalization_percentages_multi_city(self):
+        np.random.seed(27)  # make tests reproducible, would be better to mock np.random
+        dates = [
+            datetime(2020, 10, 2),
+            datetime(2020, 10, 3),
+            datetime(2020, 10, 4),
+            datetime(2020, 10, 5),
+            datetime(2020, 10, 6),
+            datetime(2020, 10, 7),
+            datetime(2020, 10, 2),  # duplicate
+        ]
+
+        data = {
+            'date': dates[:-1],
+            'percentages': [.15, .15, np.nan, np.nan, np.nan, .15]
+        }
+        df_old = pd.DataFrame(data=data)
+
+        df_new_dates = pd.DataFrame(data={'date': dates})
+
+        expected_ratios = [0.15, 0.15, 0.13702885642075582, 0.1525833496197821, 0.14941589160798718, 0.15]
+        result = impute_hospitalization_percentages(df_old, df_new_dates['date'])
+
+        df_old['percentages'] = expected_ratios
+        assert_frame_equal(result, df_old)
 
     def test_extend_hospitalization_percentages(self):
         np.random.seed(27)  # make tests reproducible, would be better to mock np.random
