@@ -1,6 +1,10 @@
 import os
 import unittest
+from datetime import timedelta, date, datetime
+import pandas as pd
+
 import pytest
+from pandas.testing import assert_frame_equal
 
 from backend import GSheetRepository
 from backend.config import get_config
@@ -39,6 +43,17 @@ class TestGSheetRepository(unittest.TestCase):
         result = sut.exists('Fake_Name_should_not_exist')
         self.assertFalse(result)
 
-    @pytest.mark.skip("Need a dev sheet in google sheets to safely test this.")
     def test_store_dataframe(self):
-        assert False
+        yesterday = datetime.combine(date.today() - timedelta(days=1), datetime.min.time())
+        today = datetime.combine(date.today(), datetime.min.time())
+        df = pd.DataFrame({
+            'date': [yesterday, today],
+            'some_metric': [0.1, 3.2]
+        })
+
+        sut = GSheetRepository(self._url)
+        sut.store_dataframe(df, 'for_unit_tests', allow_create=True)
+
+        # want to ignore the empty columns and rows for now.. so just focus on what we just put in
+        result = sut.get_dataframe('for_unit_tests').iloc[0:2, 0:2]
+        assert_frame_equal(df, result)

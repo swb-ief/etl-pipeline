@@ -1,8 +1,12 @@
 import gspread
-import pandas as pd
 import numpy as np
+import pandas as pd
 import os
 import logging
+
+# there is an alternative gspread_pandas but there it wraps arround gspread so credentials go trough it...
+# for security reasons I chose this simpler wrapper
+from gspread_dataframe import set_with_dataframe, get_as_dataframe
 
 from backend.repository import Repository
 
@@ -39,15 +43,6 @@ class GSheetRepository(Repository):
         worksheet = sheet.worksheet(worksheet_name)
         return worksheet
 
-    @staticmethod
-    def _df_to_cleaned_data(df):
-        """ note it will convert int's to floats if it contains a field with an empty string.
-        Because of the np.nan it will inject
-        :remarks: '' to np.nan is a safe assumption the only string columns state/district/ward can't be empty
-        """
-        cleaned = [df.columns.values.tolist()] + df.replace("", np.nan).values.tolist()
-        return cleaned
-
     def store_dataframe(self, df: pd.DataFrame, storage_location: str, allow_create: bool) -> None:
         if not self.exists(storage_location):
             if allow_create:
@@ -58,14 +53,19 @@ class GSheetRepository(Repository):
 
         worksheet = self._get_worksheet(storage_location)
 
-        # create a list of lists with the first list the column names, followed by rows of data
-        clean_data = self._df_to_cleaned_data(df)
+        df = df.replace([np.inf, -np.inf], np.nan)
 
-        worksheet.update(values=clean_data)
+        set_with_dataframe(worksheet, df)
 
     def get_dataframe(self, storage_location: str) -> pd.DataFrame:
         worksheet = self._get_worksheet(storage_location)
-        return pd.DataFrame(worksheet.get_all_records())
+
+        headers = worksheet.row_values(1)  # 1 indexed
+
+        if 'date' in headers:
+            return get_as_dataframe(worksheet, parse_dates=['date'], header=0)
+
+        return get_as_dataframe(worksheet, header=0)
 
     def exists(self, storage_location: str) -> bool:
         spreadsheet = self._get_spreadsheet()
@@ -77,7 +77,7 @@ class GSheetRepository(Repository):
             log.warning(f'Storage location {storage_location} already exists')
             return
 
-        _ = self._get_spreadsheet().add_worksheet(title=storage_location, rows=100, cols=20)
+        _ = self._get_spreadsheet().add_worksheet(title=storage_location, rows=2, cols=2)
 
     def create_repository(self, repository_name: str, admin_email: str) -> str:
         log.info(f'Creating a new Google Sheet "{repository_name}" as a repository')

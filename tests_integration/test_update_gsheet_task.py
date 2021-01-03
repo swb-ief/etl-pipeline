@@ -20,13 +20,13 @@ class TestUpdateGSheetTask(unittest.TestCase):
         """
         results = dict()
         expected_results = {
-            UpdateGSheetTask.worksheet_hospitalizations: (308, 2),
-            UpdateGSheetTask.worksheet_states: (9826, 16),
-            UpdateGSheetTask.worksheet_districts: (157350, 17)  # +1 column for district
+            UpdateGSheetTask.storage_hospitalizations: (308, 2),
+            UpdateGSheetTask.storage_states: (9826, 16),
+            UpdateGSheetTask.storage_districts: (157350, 17)  # +1 column for district
         }
 
         def my_get_dataframe(self, storage_name):
-            if storage_name == UpdateGSheetTask.worksheet_hospitalizations:
+            if storage_name == UpdateGSheetTask.storage_hospitalizations:
                 return pd.read_csv(
                     os.path.join(THIS_DIR, '../tests/samples/Dashboard PDF Development - hospitalization.csv'))
             raise ValueError(f'Did not expect {storage_name=}')
