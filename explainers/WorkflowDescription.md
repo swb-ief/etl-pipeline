@@ -68,6 +68,13 @@
 ### 2) Ward data
 Ward-wise Time series for Daily confirmed cases, Daily deaths, Daily Tests, Cumulative cases, Cumulative Deaths.
 
+**code call structure**
+```
+-- population of ward_metrics tab in google sheet
+
+
+```
+
 **source:** gsheet <br />
 - not available from any source other than google sheet
 
@@ -86,8 +93,12 @@ call's
 - [input/output google sheet](https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k2ZraDb6DzgCOSXI0f0/edit#gid=0)
 
 **code call structure**
-
 ```
+populating of city_stats tab of input/output google sheet (source data api?)
+-> etl-pipeline/pipeline/pipeline/tasks/spreadsheets
+  -> etl-pipeline/pipeline/pipeline/config 
+    -> WORKSHEET_URL = os.getenv("SWB_WORKSHEET_URL", DEFAULT_WORKSHEET_URL)
+
 .github/workflows/Run_rt_calcs.yml (with call: python R_scripts/push_Rt_to_gsheets.py)
   -> run R_scripts/Rt_calcs.R
     -> read data from city_stats sheet in input/output google sheet
