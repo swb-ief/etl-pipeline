@@ -2,11 +2,11 @@ import luigi
 import requests
 
 
-class DownloadFile(luigi.Task):
+class DownloadFileTask(luigi.Task):
     file_url = luigi.Parameter()
 
     def __init__(self, *args, **kwargs):
-        super(DownloadFile, self).__init__(*args, **kwargs)
+        super(DownloadFileTask, self).__init__(*args, **kwargs)
 
         # don't see  a better way to fix the name of the temp file.. if we do this in output it changes on each call
         self._temp_file = luigi.LocalTarget(is_tmp=True)

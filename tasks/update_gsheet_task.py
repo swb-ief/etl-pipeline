@@ -11,7 +11,7 @@ from backend.data import ExtractCovid19IndiaData
 from backend.repository import GSheetRepository
 from backend.metrics.calculations import impute_hospitalization_percentages, extend_and_impute_metrics
 from .fetch_covid19_india_data_task import FetchCovid19IndiaDataTask
-from .fetch_ward_data import FetchWardData
+from .fetch_ward_data import FetchWardDataTask
 
 log = logging.getLogger(__name__)
 
@@ -56,7 +56,7 @@ class UpdateGSheetTask(luigi.Task):
 
     def requires(self):
         return {
-            'ward_data': FetchWardData(),
+            'ward_data': FetchWardDataTask(),
             'state_district_data': FetchCovid19IndiaDataTask()
         }
 
