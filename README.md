@@ -4,7 +4,11 @@
 
 ![Phase 1 - Luigi Pipeline Scheduled](https://github.com/swb-ief/etl-pipeline/workflows/LuigiPipelineSchedule/badge.svg)
 
-# Structure [ Phase 2]
+# Flow [ Phase 2 ]
+
+![Task Flow](./readme/Task diagram.svg "Overview")
+
+# Structure [ Phase 2 ]
 
 Work in progress: This list should contain only that what we need for phase 2 everything else can be deleted or first
 moved to phase 1 archive
@@ -34,9 +38,9 @@ moved to phase 1 archive
 │   │       repository.py
 │
 ├───phase 1 archive                             [ Temporarey storage for files no longer needed by both P1 & P2 ]
-├───tasks                                       [ Luigie tasks executed by github workflow actions ]
+├───tasks                                       [ Luigie orgestration tasks executed by github workflow actions ]
 │   │   fetch_covid19_india_data_task.py
-│   │   update_gsheet_task.py
+│   │   update_gsheet_task.py                   [ Main entrypoint for all the tasks]
 │   
 ├───tests                                       [ Unit tests ]
 │   │   test_calculations.py
@@ -62,6 +66,12 @@ moved to phase 1 archive
 ```
 
 _generated with tree and manually filtered + [manual comments]_
+
+### Tasks vs Backend
+
+Task are lightweight python scripts that manages orgestration of work. As soon as there is a need for more than that
+like computations then the actual computation is implemented in the backend python package and the orgestrator just
+calls the needed methods to do the work, retaining its orchestration nature
 
 ## Tips: testing luigi tasks
 
