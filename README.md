@@ -213,7 +213,7 @@ restricted to certain IPs.
 
 Currently the script just makes fetch the spreadsheet and echo the results, for an example on how to treat the response
 to do other things like _write a csv_ look at the
-[spreadsheets_fetcher/sheets_to_csv.py](spreadsheets_fetcher/sheets_to_csv.py) file.
+[spreadsheets_fetcher/sheets_to_csv.py](phase 1 archive/spreadsheets_fetcher/sheets_to_csv.py) file.
 
 In the future we plan to write the data from the csv to another data storage.
 
