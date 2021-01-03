@@ -75,10 +75,23 @@ Task are lightweight python scripts that manages orgestration of work. As soon a
 like computations then the actual computation is implemented in the backend python package and the orgestrator just
 calls the needed methods to do the work, retaining its orchestration nature
 
-## Tips: testing luigi tasks
+### Tips: testing luigi tasks
 
 When an integration test involving luigi fails it is almost alwasy hidden because luigi hides the exceptions in the
 pytest output for that test. So be sure to open the full test run output to find the actual problem.
+
+## Google Sheets
+
+Sheets with pythonic names (underscores as spaces) are only used by the backend. Sheets with more human readable names
+are used by powerBI frontend
+
+|Sheet|Description|
+|---|---|
+|raw_ward_data|storage of raw historic data. For some wards we need to do this ourselves and is not done by the source|
+|Phase 2 - States|Metrics at State level for the dashboard|
+|Phase 2 - Districts|Metrics at District level for the dashboard|
+|Phase 2 - Wards|Metrics at Ward level for the dashboard|
+|Phase 2 - Important| **Work in progress** - top x states/districts/wards|
 
 # old documentation
 

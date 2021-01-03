@@ -6,7 +6,7 @@ import pandas as pd
 import luigi
 
 from backend.repository.gsheet_repository import GSheetRepository
-from tasks.update_gsheet_task import UpdateGSheetTask
+from tasks.update_dashboard_task import UpdateDashboardTask
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -20,13 +20,13 @@ class TestUpdateGSheetTask(unittest.TestCase):
         """
         results = dict()
         expected_results = {
-            UpdateGSheetTask.storage_hospitalizations: (308, 2),
-            UpdateGSheetTask.storage_states: (9826, 16),
-            UpdateGSheetTask.storage_districts: (157350, 17)  # +1 column for district
+            UpdateDashboardTask.storage_hospitalizations: (308, 2),
+            UpdateDashboardTask.storage_states: (9826, 16),
+            UpdateDashboardTask.storage_districts: (157350, 17)  # +1 column for district
         }
 
         def my_get_dataframe(self, storage_name):
-            if storage_name == UpdateGSheetTask.storage_hospitalizations:
+            if storage_name == UpdateDashboardTask.storage_hospitalizations:
                 return pd.read_csv(
                     os.path.join(THIS_DIR, '../tests/samples/Dashboard PDF Development - hospitalization.csv'))
             raise ValueError(f'Did not expect {storage_name=}')
@@ -37,7 +37,7 @@ class TestUpdateGSheetTask(unittest.TestCase):
 
         with patch.object(GSheetRepository, 'get_dataframe', new=my_get_dataframe), \
                 patch.object(GSheetRepository, 'store_dataframe', new=my_store_dataframe):
-            sut = UpdateGSheetTask()
+            sut = UpdateDashboardTask()
             worker = luigi.worker.Worker()
             worker.add(sut)
             worker.run()

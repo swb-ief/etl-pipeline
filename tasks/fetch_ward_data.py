@@ -17,6 +17,9 @@ class FetchWardDataTask(luigi.Task):
         }
 
     def run(self):
+        # TODO: it needs to partialy fail if one of its dependencies fails
+        # as in it should continue processing all the other wards even if a few failed.
+
         ward_storage_location = 'raw_ward_data'
         config = get_config()
         repository = GSheetRepository(config['google sheets']['url production'])

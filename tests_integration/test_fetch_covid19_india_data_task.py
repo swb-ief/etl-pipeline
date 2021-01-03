@@ -2,7 +2,7 @@ import unittest
 
 import luigi
 
-from tasks.update_gsheet_task import FetchCovid19IndiaDataTask
+from tasks.update_dashboard_task import FetchCovid19IndiaDataTask
 
 
 class TestFetchCovid19IndiaDataTask(unittest.TestCase):

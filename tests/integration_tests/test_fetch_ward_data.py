@@ -48,4 +48,7 @@ class TestFetchWardData(unittest.TestCase):
             worker.add(sut)
             worker.run()
 
+            # cleanup
+            sut.output().remove()
+
         self.assertIsNotNone(results['raw_ward_data'])

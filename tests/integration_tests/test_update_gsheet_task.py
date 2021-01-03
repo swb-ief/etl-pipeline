@@ -7,30 +7,36 @@ import luigi
 
 from backend.repository.gsheet_repository import GSheetRepository
 from tasks import FetchCovid19IndiaDataTask
-from tasks.update_gsheet_task import UpdateGSheetTask
+from tasks.districts import DownloadFileTask
+from tasks.update_dashboard_task import UpdateDashboardTask
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class TestUpdateGSheetTask(unittest.TestCase):
 
-    def test_update_gsheet_run(self):
+    def test_update_dashboard_run(self):
         """ This will run local parts only using files from sample etc...
         """
         results = dict()
         expected_results = {
-            UpdateGSheetTask.storage_hospitalizations: (307, 2),
-            UpdateGSheetTask.storage_states: (9790, 16),
-            UpdateGSheetTask.storage_districts: (156697, 17)  # +1 column for district
+            UpdateDashboardTask.storage_hospitalizations: (307, 2),
+            UpdateDashboardTask.storage_states: (9790, 16),
+            UpdateDashboardTask.storage_districts: (156697, 17)  # +1 column for district
         }
 
-        def my_get_dataframe(self, storage_name):
-            if storage_name == UpdateGSheetTask.storage_hospitalizations:
+        def mock_exists(self, storage_name):
+            if storage_name == 'raw_ward_data':
+                return False
+            return True
+
+        def mock_get_dataframe(self, storage_name):
+            if storage_name == UpdateDashboardTask.storage_hospitalizations:
                 return pd.read_csv(
                     os.path.join(THIS_DIR, '../samples/Dashboard PDF Development - hospitalization.csv'))
             raise ValueError(f'Did not expect {storage_name=}')
 
-        def my_store_dataframe(self, df: pd.DataFrame, storage_name, allow_create):
+        def mock_store_dataframe(self, df: pd.DataFrame, storage_name, allow_create):
             results[storage_name] = df
             df.to_csv(os.path.join(THIS_DIR, f'../test output/test_update_run_{storage_name}.csv'))
 
@@ -47,16 +53,39 @@ class TestUpdateGSheetTask(unittest.TestCase):
             def remove():
                 return
 
-        def my_output(self):
+        def mock_output(self):
             return OutputMock()
 
-        with patch.object(GSheetRepository, 'get_dataframe', new=my_get_dataframe), \
-                patch.object(GSheetRepository, 'store_dataframe', new=my_store_dataframe), \
-                patch.object(GSheetRepository, 'exists', return_value=True), \
-                patch.object(FetchCovid19IndiaDataTask, 'run', return_value=None), \
-                patch.object(FetchCovid19IndiaDataTask, 'output', new=my_output):
+        class DownloadOutputMock:
+            @staticmethod
+            def open(*args):
+                return open(os.path.join(THIS_DIR, '../samples/mumbai_dashboard.pdf'))
 
-            sut = UpdateGSheetTask()
+            @staticmethod
+            def exists():
+                return True
+
+            @staticmethod
+            def remove():
+                return
+
+            @property
+            def path(self):
+                return os.path.join(THIS_DIR, '../samples/mumbai_dashboard.pdf')
+
+        def mock_download_task_output(self):
+            return DownloadOutputMock()
+
+        # patch.object(FetchCovid19IndiaDataTask, 'run', return_value=None), \
+        # patch.object(DownloadFileTask, 'run', return_value=None), \
+
+        with patch.object(GSheetRepository, 'get_dataframe', new=mock_get_dataframe), \
+                patch.object(GSheetRepository, 'store_dataframe', new=mock_store_dataframe), \
+                patch.object(GSheetRepository, 'exists', new=mock_exists), \
+                patch.object(FetchCovid19IndiaDataTask, 'output', new=mock_output), \
+                patch.object(DownloadFileTask, 'output', new=mock_download_task_output):
+
+            sut = UpdateDashboardTask()
             worker = luigi.worker.Worker()
             worker.add(sut)
             worker.run()
