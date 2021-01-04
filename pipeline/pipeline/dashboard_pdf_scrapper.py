@@ -170,10 +170,12 @@ def scrap_positive_wards_to_df(source_file_path, page=20):
     pdf = read_pdf(source_file_path)
     positive_cases_page = pdf.pages[page]
     breakdown_date_string = extract_breakdown_positive_cases_date(positive_cases_page)
+    
+    # ward_pdf_data = extract_wards_data_from_page(positive_cases_page)
+    # ward_positive_df = pdf_data_to_pandas_df(ward_pdf_data)
+    
     #! ALTERED 
-    ward_pdf_data = extract_wards_data_from_page(positive_cases_page)
-    ward_positive_df = pdf_data_to_pandas_df(ward_pdf_data)
-    ward_positive_df = 
+    ward_positive_df = _extract_wards_data_from_page(positive_cases_page)
 
     breakdown_date = datetime.strptime(breakdown_date_string, "As of %b %d, %Y")
     ward_positive_df["as_of"] = breakdown_date.strftime("%Y-%m-%d")
