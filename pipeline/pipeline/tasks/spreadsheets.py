@@ -44,7 +44,12 @@ class ExtractWardPositiveBreakdownGSheetTask(luigi.ExternalTask):
             "ab+"
         ) as named_tmp_file:
             named_tmp_file.write(textio2binary(input_file))
+
+            # =======================
+            #! OLD METHOD --> CAUSES BREAKAGE due to improper scrape of PDF
+            #! REPLACING W/ PHASE 2 IMPLEMENTATION: see /etl-pipeline/pipeline/pipeline/dashboard_pdf_scrapper.py
             scrap_df = scrap_positive_wards_to_df(named_tmp_file, page=self.page_index)
+            
             scrap_df["downloaded_for"] = self.date.strftime("%Y-%m-%d")
             result_df = pandas.concat([positive_breakdown_df, scrap_df])
             self.response = worksheet.update(
@@ -143,7 +148,7 @@ class ExtractElderlyTableGSheetTask(luigi.ExternalTask):
         return self.response is not None
 
 
-class ExtractDataFromPdfDashboardGSheetWrapper(luigi.WrapperTask):
+class ExtractDataFromPdfDashboardGSheetWrapper(luigi.WrapperTask): #? USED?
     date = luigi.DateParameter(default=date.today())
     # elderly_page = luigi.IntParameter(default=22)
     daily_case_growth_page = luigi.IntParameter(default=23)
@@ -170,15 +175,17 @@ class AllDataGSheetTask(luigi.WrapperTask):
         yield ExtractWardPositiveBreakdownGSheetTask(
             date=self.date, page_index=self.positive_breakdown_index
         )
-        yield ExtractCaseGrowthTableGSheetTask(
-            date=self.date, page=self.daily_case_growth_page
-        )
-        yield HospitalizationSheetGSheetTask(
-            date=self.date, states_and_districts=self.states_and_districts
-        )
-        yield ExtractGlanceWardWisePositiveCases(
-            date=self.date, page_index=self.glance_page_index
-        )
+        #! ====== TEMPORARY START ==========
+        # yield ExtractCaseGrowthTableGSheetTask(
+        #     date=self.date, page=self.daily_case_growth_page
+        # )
+        # yield HospitalizationSheetGSheetTask(
+        #     date=self.date, states_and_districts=self.states_and_districts
+        # )
+        # yield ExtractGlanceWardWisePositiveCases(
+        #     date=self.date, page_index=self.glance_page_index
+        # )
+        #! ====== TEMPORARY END ==========
 
 
 class HospitalizationSheetGSheetTask(luigi.ExternalTask):
