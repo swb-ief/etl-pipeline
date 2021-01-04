@@ -178,13 +178,12 @@ class AllDataGSheetTask(luigi.WrapperTask):
         yield ExtractCaseGrowthTableGSheetTask(
             date=self.date, page=self.daily_case_growth_page
         )
-        #! ====== TEMPORARY START ==========
-        # yield HospitalizationSheetGSheetTask(
-        #     date=self.date, states_and_districts=self.states_and_districts
-        # )
-        # yield ExtractGlanceWardWisePositiveCases(
-        #     date=self.date, page_index=self.glance_page_index
-        # )
+        yield HospitalizationSheetGSheetTask(
+            date=self.date, states_and_districts=self.states_and_districts
+        )
+        yield ExtractGlanceWardWisePositiveCases(
+            date=self.date, page_index=self.glance_page_index
+        )
         #! ====== TEMPORARY END ==========
 
 
