@@ -8,7 +8,7 @@
 
 # Flow [ Phase 2 ]
 
-![Task Flow](./readme/Task diagram.svg "Overview")
+![Task Flow](readme/Task_diagram.svg "Overview")
 
 # Structure [ Phase 2 ]
 
