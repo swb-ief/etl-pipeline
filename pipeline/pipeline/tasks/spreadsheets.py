@@ -111,6 +111,9 @@ class ExtractCaseGrowthTableGSheetTask(luigi.ExternalTask):
             scrap_df = scrape_case_growth_to_df(named_tmp_file.name, page=self.page)
             scrap_df["downloaded_for"] = self.date.strftime("%Y-%m-%d")
             result_df = pandas.concat([daily_case_growth_df, scrap_df])
+
+            print(result_df)
+
             self.response = worksheet.update(
                 [result_df.columns.values.tolist()] + result_df.values.tolist()
             )
