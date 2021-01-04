@@ -1,9 +1,9 @@
 name: R_proc
 
 on:
-  workflow_dispatch: 
+  workflow_dispatch:
   schedule:
-    - cron:  '30 18 * * *'
+    - cron: '30 18 * * *'
 
 jobs:
   setup_run_r:
@@ -15,22 +15,22 @@ jobs:
     steps:
       - name: checkout this repo
         uses: actions/checkout@v2
-        with: 
+        with:
           ref: ${{ github.head_ref }}
-      - name:  setup R
+      - name: setup R
         uses: r-lib/actions/setup-r@master
         with:
           r-version: '3.6.3'
       - name: update apt-get
         run: sudo apt-get update -y
       - name: install v8
-        run: sudo apt-get install libv8-dev libcurl4-openssl-dev  -y 
+        run: sudo apt-get install libv8-dev libcurl4-openssl-dev  -y
       - name: Download the input CSV
         run: |
           echo "trying to create a direcotry"
           sudo mkdir /usr/data/
           echo "created directory"
-          sudo chmod -R 777 /usr/data/
+          sudo chmod -R 644 /usr/data/
           wget  -O /usr/data/city_stats.csv $CSV_DATA_SOURCE
           echo "downloaded the file to machine"
       - name: Install remotes devtools, googlesheets4, httpuv
@@ -66,10 +66,10 @@ jobs:
 
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
-         version: '290.0.1'
-         service_account_key: ${{ secrets.GCP_SA_KEY }}
-         service_account_email: ${{ secrets.GCP_SA_EMAIL }}
-         export_default_credentials: true
+          version: '290.0.1'
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          service_account_email: ${{ secrets.GCP_SA_EMAIL }}
+          export_default_credentials: true
       - run: gcloud info
 
       - name: Set up Python
@@ -80,7 +80,7 @@ jobs:
         run: |
 
           pip install pandas gspread  numpy luigi
-          
+
       - name: Run py script
         run: |
           python R_scripts/push_Rt_to_gsheets.py
