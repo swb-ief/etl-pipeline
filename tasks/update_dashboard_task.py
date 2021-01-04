@@ -11,17 +11,20 @@ from backend.data import ExtractCovid19IndiaData
 from backend.repository import GSheetRepository
 from backend.metrics.calculations import impute_hospitalization_percentages, extend_and_impute_metrics
 from .fetch_covid19_india_data_task import FetchCovid19IndiaDataTask
+from .fetch_ward_data import FetchWardDataTask
 
 log = logging.getLogger(__name__)
 
 
-class UpdateGSheetTask(luigi.ExternalTask):
+class UpdateDashboardTask(luigi.Task):
     storage_hospitalizations = 'Phase 2 - Hospitalization'
     storage_districts = 'Phase 2 - Districts'
     storage_states = 'Phase 2 - States'
+    storage_wards = 'Phase 2 - Wards'
 
     states_is_valid = False
     districts_is_valid = False
+    wards_is_valid = False
 
     metrics_needed_by_dashboard = [
         # updated 2020-12-28 Phase 1
@@ -53,6 +56,12 @@ class UpdateGSheetTask(luigi.ExternalTask):
     state_columns_needed_by_dashboard = state_keys + metrics_needed_by_dashboard
     district_columns_needed_by_dashboard = district_keys + metrics_needed_by_dashboard
 
+    def requires(self):
+        return {
+            'ward_data': FetchWardDataTask(),
+            'state_district_data': FetchCovid19IndiaDataTask()
+        }
+
     def run(self):
         config = get_config()
 
@@ -60,15 +69,17 @@ class UpdateGSheetTask(luigi.ExternalTask):
         start_date = datetime.strptime(config['dashboard']['start date'], '%Y-%m-%d')
         repository = GSheetRepository(config['google sheets']['url production'])
 
-        fetch_covid19_india_task = yield FetchCovid19IndiaDataTask()
-
-        # Kick off Ward data collection trough tasks
-        # See if luigi can parallelize these 'download' steps
+        fetch_covid19_india_task = self.input()['state_district_data']
+        fetch_wards_task = self.input()['ward_data']
 
         with fetch_covid19_india_task.open('r') as json_file:
             all_covid19india_data = json.load(json_file)
 
+        all_ward_data = pd.read_csv(fetch_wards_task.path, parse_dates=['date'])
+
+        # cleanup
         fetch_covid19_india_task.remove()
+        fetch_wards_task.remove()
 
         # we have access to the state metrics as well but not needed yet in the dashboard
         state_data, district_data = ExtractCovid19IndiaData().process(all_covid19india_data)
@@ -95,7 +106,13 @@ class UpdateGSheetTask(luigi.ExternalTask):
             grouping_columns=['state', 'district']
         )
 
-        # INSERT WARD PROCESSING HERE
+        ward_data = all_ward_data[all_ward_data['date'] >= start_date]
+        # disabled because we are missing some columns like all the delta. columns that extend_and_impute expects
+        # ward_data = extend_and_impute_metrics(
+        #     raw_metrics=ward_data,
+        #     hospitalizations=hospitalizations_updated,
+        #     grouping_columns=['state', 'district', 'ward']
+        # )
 
         # Idea placeholder
         # Calculate 'todays' top 20ish cities and add that top 20 as a tab in the google sheet so the dashboard can
@@ -104,6 +121,7 @@ class UpdateGSheetTask(luigi.ExternalTask):
         # validate and filter
         self.states_is_valid = self._has_all_columns(state_data, self.state_columns_needed_by_dashboard)
         self.districts_is_valid = self._has_all_columns(district_data, self.district_columns_needed_by_dashboard)
+        self.wards_is_valid = True  # TODO
 
         states_filtered = state_data[self.state_columns_needed_by_dashboard]
         districts_filtered = district_data[self.district_columns_needed_by_dashboard]
@@ -111,6 +129,7 @@ class UpdateGSheetTask(luigi.ExternalTask):
         repository.store_dataframe(hospitalizations_updated, self.storage_hospitalizations, allow_create=True)
         repository.store_dataframe(states_filtered, self.storage_states, allow_create=True)
         repository.store_dataframe(districts_filtered, self.storage_districts, allow_create=True)
+        repository.store_dataframe(ward_data, self.storage_wards, allow_create=True)
 
     @staticmethod
     def _has_all_columns(df: pd.DataFrame, columns: List[str]) -> bool:
@@ -121,4 +140,4 @@ class UpdateGSheetTask(luigi.ExternalTask):
         return True
 
     def complete(self):
-        return self.states_is_valid and self.districts_is_valid
+        return self.states_is_valid and self.districts_is_valid and self.wards_is_valid

@@ -2,13 +2,14 @@ import unittest
 
 import luigi
 
-from tasks.update_dashboard_task import FetchCovid19IndiaDataTask
+from tasks.districts import FetchMumbaiWardsTask
 
 
-class TestFetchCovid19IndiaDataTask(unittest.TestCase):
+class TestFetchMumbaiWards(unittest.TestCase):
 
-    def test_fetch_covid19inda_run(self):
-        sut = FetchCovid19IndiaDataTask()
+    def test_fetch_mumbai_wards_run(self):
+        sut = FetchMumbaiWardsTask()
+
         worker = luigi.worker.Worker()
         worker.add(sut)
         self.assertTrue(worker.run())

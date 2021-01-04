@@ -1,10 +1,16 @@
-# etl-pipeline
+# Backend Covid 19 Dashboard
+
+## status
 
 ![Update Covid 19 dashboard](https://github.com/swb-ief/etl-pipeline/workflows/Update%20Covid%2019%20dashboard/badge.svg)
 
 ![Phase 1 - Luigi Pipeline Scheduled](https://github.com/swb-ief/etl-pipeline/workflows/LuigiPipelineSchedule/badge.svg)
 
-# Structure [ Phase 2]
+# Flow [ Phase 2 ]
+
+![Task Flow](./readme/Task diagram.svg "Overview")
+
+# Structure [ Phase 2 ]
 
 Work in progress: This list should contain only that what we need for phase 2 everything else can be deleted or first
 moved to phase 1 archive
@@ -34,9 +40,9 @@ moved to phase 1 archive
 │   │       repository.py
 │
 ├───phase 1 archive                             [ Temporarey storage for files no longer needed by both P1 & P2 ]
-├───tasks                                       [ Luigie tasks executed by github workflow actions ]
+├───tasks                                       [ Luigie orgestration tasks executed by github workflow actions ]
 │   │   fetch_covid19_india_data_task.py
-│   │   update_gsheet_task.py
+│   │   update_gsheet_task.py                   [ Main entrypoint for all the tasks]
 │   
 ├───tests                                       [ Unit tests ]
 │   │   test_calculations.py
@@ -63,10 +69,30 @@ moved to phase 1 archive
 
 _generated with tree and manually filtered + [manual comments]_
 
-## Tips: testing luigi tasks
+### Tasks vs Backend
+
+Task are lightweight python scripts that manages orgestration of work. As soon as there is a need for more than that
+like computations then the actual computation is implemented in the backend python package and the orgestrator just
+calls the needed methods to do the work, retaining its orchestration nature
+
+### Tips: testing luigi tasks
 
 When an integration test involving luigi fails it is almost alwasy hidden because luigi hides the exceptions in the
 pytest output for that test. So be sure to open the full test run output to find the actual problem.
+
+## Google Sheets
+
+Sheets with pythonic names (underscores as spaces) are only used by the backend. Sheets with more human readable names
+are used by powerBI frontend
+
+|Sheet|Description|
+|---|---|
+|raw_ward_data|storage of raw historic data. For some wards we need to do this ourselves and is not done by the source|
+|for_unit_tests|a sheet used during integration tests|
+|Phase 2 - States|Metrics at State level for the dashboard|
+|Phase 2 - Districts|Metrics at District level for the dashboard|
+|Phase 2 - Wards|Metrics at Ward level for the dashboard|
+|Phase 2 - Important| **Work in progress** - top x states/districts/wards|
 
 # old documentation
 
