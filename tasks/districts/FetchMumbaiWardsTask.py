@@ -12,8 +12,11 @@ class FetchMumbaiWardsTask(luigi.Task):
             file_url='http://stopcoronavirus.mcgm.gov.in/assets/docs/Dashboard.pdf')
 
     def run(self):
+        # We can also create a backup of the just downloaded PDF here
+        
         df = scrape_mumbai_pdf(self.input().path)
-
+        
+        
         df.to_csv(self.output().path, index=False)
 
         # cleanup
