@@ -123,12 +123,20 @@ def _extract_wards_data_from_page(positive_cases_pdf_page) -> pd.DataFrame:
     deaths_active_boundary = 700
 
     # switching to our naming convention
+    # boxes = {
+    #     'ward': (240, 79.2, 350, 504),  # ward abbreviation
+    #     'total.confirmed': (350, 79.2, total_discharged_boundary, 504),  # cases
+    #     'total.recovered': (total_discharged_boundary, 79.2, discharged_deaths_boundary, 504),  # Discharged column
+    #     'total.deceased': (discharged_deaths_boundary, 79.2, deaths_active_boundary, 504),  # deaths column
+    #     'total.active': (deaths_active_boundary, 79.2, 800, 504),  # active column
+    # }
+
     boxes = {
         'Ward_Name': (240, 79.2, 350, 504),  # ward abbreviation
-        'total.confirmed': (350, 79.2, total_discharged_boundary, 504),  # cases
-        'total.recovered': (total_discharged_boundary, 79.2, discharged_deaths_boundary, 504),  # Discharged column
-        'total.deceased': (discharged_deaths_boundary, 79.2, deaths_active_boundary, 504),  # deaths column
-        'total.active': (deaths_active_boundary, 79.2, 800, 504),  # active column
+        'Total_Positive_Cases': (350, 79.2, total_discharged_boundary, 504),  # cases
+        'Total_Discharged': (total_discharged_boundary, 79.2, discharged_deaths_boundary, 504),  # Discharged column
+        'Total_Deaths': (discharged_deaths_boundary, 79.2, deaths_active_boundary, 504),  # deaths column
+        'Total_Active': (deaths_active_boundary, 79.2, 800, 504),  # active column
     }
 
     data = dict()
@@ -145,7 +153,7 @@ def _extract_wards_data_from_page(positive_cases_pdf_page) -> pd.DataFrame:
     df = pd.DataFrame(data)
 
     # numeric_columns = ['total.confirmed', 'total.recovered', 'total.deceased', 'total.active']
-    numeric_columns = ['total.confirmed', 'total.recovered', 'total.deceased', 'total.active']
+    numeric_columns = ['Total_Positive_Cases', 'Total_Discharged', 'Total_Deaths', 'Total_Active']
     for column in numeric_columns:
         data[column] = pd.to_numeric(df[column])
 
