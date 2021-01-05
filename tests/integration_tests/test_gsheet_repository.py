@@ -52,7 +52,7 @@ class TestGSheetRepository(unittest.TestCase):
         })
 
         sut = GSheetRepository(self._url)
-        sut.store_dataframe(df, 'for_unit_tests', allow_create=True)
+        sut.store_dataframe(df, 'for_unit_tests', allow_create=True, store_index=False)
 
         # want to ignore the empty columns and rows for now.. so just focus on what we just put in
         result = sut.get_dataframe('for_unit_tests').iloc[0:2, 0:2]
@@ -71,4 +71,4 @@ class TestGSheetRepository(unittest.TestCase):
 
         # want to ignore the empty columns and rows for now.. so just focus on what we just put in
         result = sut.get_dataframe('for_unit_tests').iloc[0:2, 0:2]
-        assert_frame_equal(df, result)
+        assert_frame_equal(df.reset_index(), result)

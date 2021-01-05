@@ -54,12 +54,9 @@ class GSheetRepository(Repository):
 
         worksheet = self._get_worksheet(storage_location)
 
-        if store_index:
-            df = df.reset_index()
-
         df = df.replace([np.inf, -np.inf], np.nan)
 
-        set_with_dataframe(worksheet, df)
+        set_with_dataframe(worksheet, df, include_index=store_index, resize=True)
 
     def get_dataframe(self, storage_location: str) -> pd.DataFrame:
         worksheet = self._get_worksheet(storage_location)
