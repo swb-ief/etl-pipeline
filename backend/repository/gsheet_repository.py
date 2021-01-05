@@ -44,7 +44,7 @@ class GSheetRepository(Repository):
         return worksheet
 
     def store_dataframe(self, df: pd.DataFrame, storage_location: str, allow_create: bool,
-                        store_index: bool = True) -> None:
+                        store_index: bool = False) -> None:
         if not self.exists(storage_location):
             if allow_create:
                 log.info(f'Created storage location {storage_location}')

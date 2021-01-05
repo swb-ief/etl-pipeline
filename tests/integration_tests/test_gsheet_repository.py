@@ -57,3 +57,18 @@ class TestGSheetRepository(unittest.TestCase):
         # want to ignore the empty columns and rows for now.. so just focus on what we just put in
         result = sut.get_dataframe('for_unit_tests').iloc[0:2, 0:2]
         assert_frame_equal(df, result)
+
+    def test_store_dataframe_with_index(self):
+        yesterday = datetime.combine(date.today() - timedelta(days=1), datetime.min.time())
+        today = datetime.combine(date.today(), datetime.min.time())
+        df = pd.DataFrame({
+            'date': [yesterday, today],
+            'some_metric': [0.1, 3.2]
+        }).set_index('date')
+
+        sut = GSheetRepository(self._url)
+        sut.store_dataframe(df, 'for_unit_tests', allow_create=True, store_index=True)
+
+        # want to ignore the empty columns and rows for now.. so just focus on what we just put in
+        result = sut.get_dataframe('for_unit_tests').iloc[0:2, 0:2]
+        assert_frame_equal(df, result)
