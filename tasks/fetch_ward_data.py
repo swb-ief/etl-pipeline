@@ -34,7 +34,7 @@ class FetchWardDataTask(luigi.Task):
             log.info(f'Processing: {district}')
 
             with ward_task.open('r') as json_file:
-                ward_task = pd.read_csv(json_file)
+                ward_task = pd.read_csv(json_file, parse_dates=['date'])
                 ward_task = ward_task.set_index(['state', 'district', 'ward', 'date'])
 
             # This needs to support overwriting existing data as well as adding new data
@@ -42,7 +42,7 @@ class FetchWardDataTask(luigi.Task):
             if all_wards is None:
                 all_wards = ward_task
             else:
-                all_wards.concat(ward_task, axis=1)
+                all_wards = all_wards.combine_first(ward_task)  # update old values and add new values
 
         # cleanup
         for task in self.input().values():
