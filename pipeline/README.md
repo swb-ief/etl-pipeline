@@ -270,7 +270,7 @@ ls *.pdf | xargs -L1 python ./move_file_with_first_page_date.py
 Or if you only want to rename and copy one file you can execute the following
 
 ```sh
-python ./move_file_with_first_page_date.py mumbai_dashboard.pdf
+python ./move_file_with_first_page_date.py mumbai_dashboard_2020_01_02.pdf
 ```
 
 #### `pipeline/scripts/scrap_old_pdfs_to_gsheet.py`

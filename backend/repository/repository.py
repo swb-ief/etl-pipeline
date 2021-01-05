@@ -12,8 +12,13 @@ class Repository(ABC):
         pass
 
     @abstractmethod
-    def store_dataframe(self, df: pd.DataFrame, storage_location: str, allow_create: bool) -> None:
-        """ store a dataframe in the repository with given storage location"""
+    def store_dataframe(self, df: pd.DataFrame, storage_location: str, allow_create: bool, store_index: bool) -> None:
+        """ store a dataframe in the repository with given storage location
+        :param df: dataframe to store
+        :param storage_location: location to store the data in
+        :param allow_create: if the storage location exists, should it be created?
+        :param store_index: Next to the values should the dataframe index also be stored?
+        """
         pass
 
     @abstractmethod

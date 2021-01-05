@@ -43,7 +43,8 @@ class GSheetRepository(Repository):
         worksheet = sheet.worksheet(worksheet_name)
         return worksheet
 
-    def store_dataframe(self, df: pd.DataFrame, storage_location: str, allow_create: bool) -> None:
+    def store_dataframe(self, df: pd.DataFrame, storage_location: str, allow_create: bool,
+                        store_index: bool = True) -> None:
         if not self.exists(storage_location):
             if allow_create:
                 log.info(f'Created storage location {storage_location}')
@@ -52,6 +53,9 @@ class GSheetRepository(Repository):
                 raise ValueError('Storage location does not exists, create it or call this with allow_create=True')
 
         worksheet = self._get_worksheet(storage_location)
+
+        if store_index:
+            df = df.reset_index()
 
         df = df.replace([np.inf, -np.inf], np.nan)
 

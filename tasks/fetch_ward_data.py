@@ -49,7 +49,7 @@ class FetchWardDataTask(luigi.Task):
             task.remove()
 
         # store the raw data, no imputation done yet
-        repository.store_dataframe(all_wards, ward_storage_location, allow_create=True)
+        repository.store_dataframe(all_wards, ward_storage_location, allow_create=True, store_index=True)
 
         # impute delta's atleast for Mumbai this is needed it only provides totals
         all_wards.to_csv(self.output().path, index=True)
