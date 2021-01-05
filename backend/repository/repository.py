@@ -30,3 +30,8 @@ class Repository(ABC):
     def create_storage_location(self, storage_location: str) -> None:
         """ Creates the storage location for future use. This could internaly be an empty file or empty table, etc.."""
         pass
+
+    @abstractmethod
+    def delete_storage_location(self, storage_location: str) -> None:
+        """ Creates the storage location for future use. This could internaly be an empty file or empty table, etc.."""
+        pass

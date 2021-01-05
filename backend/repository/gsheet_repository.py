@@ -14,6 +14,7 @@ log = logging.getLogger(__name__)
 
 
 class GSheetRepository(Repository):
+
     def __init__(self, base_url: str):
         self.base_url = base_url
         self._gspread_client = None
@@ -79,6 +80,14 @@ class GSheetRepository(Repository):
             return
 
         _ = self._get_spreadsheet().add_worksheet(title=storage_location, rows=2, cols=2)
+
+    def delete_storage_location(self, storage_location: str) -> None:
+        if not self.exists(storage_location):
+            log.warning(f'storage location {storage_location} requested for deletion did not exist:')
+            return
+
+        worksheet = self._get_worksheet(storage_location)
+        self._get_spreadsheet().del_worksheet(worksheet)
 
     def create_repository(self, repository_name: str, admin_email: str) -> str:
         log.info(f'Creating a new Google Sheet "{repository_name}" as a repository')
