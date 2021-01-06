@@ -157,6 +157,7 @@ def _extract_wards_data_from_page(positive_cases_pdf_page) -> pd.DataFrame:
     for column in numeric_columns:
         df[column] = pd.to_numeric(df[column])
 
+    # df['date'] = date
     df['as_of'] = date
     # df['district'] = 'Mumbai'
     # df['state'] = 'MH'

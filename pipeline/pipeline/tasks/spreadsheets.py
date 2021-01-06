@@ -50,13 +50,21 @@ class ExtractWardPositiveBreakdownGSheetTask(luigi.ExternalTask):
             #! REPLACING W/ PHASE 2 IMPLEMENTATION: see /etl-pipeline/pipeline/pipeline/dashboard_pdf_scrapper.py
             scrap_df = scrap_positive_wards_to_df(named_tmp_file, page=self.page_index)
             
-            print("--test--")
+            print("----test----")
             print(scrap_df.head())
+            print(scrap_df.columns)
+
             print(positive_breakdown_df.head())
+            print(positive_breakdown_df.columns)
+
 
             scrap_df["downloaded_for"] = self.date.strftime("%Y-%m-%d")
             result_df = pandas.concat([positive_breakdown_df, scrap_df])
+            
             print(result_df.head())
+            print(result_df.columns)
+
+
             self.response = worksheet.update(
                 [result_df.columns.values.tolist()] + result_df.values.tolist()
             )
