@@ -51,11 +51,12 @@ class ExtractWardPositiveBreakdownGSheetTask(luigi.ExternalTask):
             scrap_df = scrap_positive_wards_to_df(named_tmp_file, page=self.page_index)
             
             print("--test--")
-            print(scrap_df)
-            print(positive_breakdown_df)
+            print(scrap_df.head())
+            print(positive_breakdown_df.head())
 
             scrap_df["downloaded_for"] = self.date.strftime("%Y-%m-%d")
             result_df = pandas.concat([positive_breakdown_df, scrap_df])
+            print(result_df.head())
             self.response = worksheet.update(
                 [result_df.columns.values.tolist()] + result_df.values.tolist()
             )
