@@ -157,9 +157,9 @@ def _extract_wards_data_from_page(positive_cases_pdf_page) -> pd.DataFrame:
     for column in numeric_columns:
         df[column] = pd.to_numeric(df[column])
 
-    df['date'] = date
-    df['district'] = 'Mumbai'
-    df['state'] = 'MH'
+    # df['date'] = date
+    # df['district'] = 'Mumbai'
+    # df['state'] = 'MH'
 
     return df
 
@@ -173,7 +173,6 @@ def scrap_positive_wards_to_df(source_file_path, page=20):
     
     # ward_pdf_data = extract_wards_data_from_page(positive_cases_page)
     # ward_positive_df = pdf_data_to_pandas_df(ward_pdf_data)
-    
     #! ALTERED 
     ward_positive_df = _extract_wards_data_from_page(positive_cases_page)
 
