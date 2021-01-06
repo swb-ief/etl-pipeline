@@ -157,7 +157,7 @@ def _extract_wards_data_from_page(positive_cases_pdf_page) -> pd.DataFrame:
     for column in numeric_columns:
         df[column] = pd.to_numeric(df[column])
 
-    # df['date'] = date
+    df['as_of'] = date
     # df['district'] = 'Mumbai'
     # df['state'] = 'MH'
 
@@ -177,8 +177,8 @@ def scrap_positive_wards_to_df(source_file_path, page=20):
     ward_positive_df = _extract_wards_data_from_page(positive_cases_page)
 
     # ALTERED: replaced with date col
-    breakdown_date = datetime.strptime(breakdown_date_string, "As of %b %d, %Y")
-    ward_positive_df["as_of"] = breakdown_date.strftime("%Y-%m-%d")
+    # breakdown_date = datetime.strptime(breakdown_date_string, "As of %b %d, %Y")
+    # ward_positive_df["as_of"] = breakdown_date.strftime("%Y-%m-%d")
     ward_positive_df["imputed"] = 0
     return ward_positive_df.copy()
 
