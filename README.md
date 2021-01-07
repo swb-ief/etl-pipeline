@@ -8,7 +8,7 @@
 
 # Flow [ Phase 2 ]
 
-![Task Flow](./readme/Task diagram.svg "Overview")
+![Task Flow](readme/Task_diagram.svg "Overview")
 
 # Structure [ Phase 2 ]
 
@@ -39,8 +39,8 @@ moved to phase 1 archive
 │   │       gsheet_repository.py
 │   │       repository.py
 │
-├───phase 1 archive                             [ Temporarey storage for files no longer needed by both P1 & P2 ]
-├───tasks                                       [ Luigie orgestration tasks executed by github workflow actions ]
+├───phase 1 archive                             [ Temporarey storage for files no longer needed ]
+├───tasks                                       [ Luigie orgestration tasks executed by github workflow ]
 │   │   fetch_covid19_india_data_task.py
 │   │   update_gsheet_task.py                   [ Main entrypoint for all the tasks]
 │   
