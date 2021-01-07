@@ -8,7 +8,7 @@ from backend.metrics.calculations import *
 import pandas as pd
 import numpy as np
 
-from backend.metrics.calculations import _calculate_levitt_metric, _moving_average_grouped
+from backend.metrics.calculations import _moving_average_grouped
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -32,23 +32,6 @@ class TestCalculateMetrics(unittest.TestCase):
 
         df = pd.DataFrame(data)
         return df
-
-    def test__calculate_levitt_metric(self):
-        data = pd.Series([2, 3, 4, 5, 6, 7])
-        expected = np.array([np.nan, 0.40546511, 0.28768207, 0.22314355, 0.18232156, 0.15415068])
-
-        result = _calculate_levitt_metric(data)
-
-        assert_allclose(expected, result, rtol=1e-06)
-
-    def test_calculate_levitt_group(self):
-        df = self._build_district_input(3, 2, [3, 7]).set_index(['state', 'district'])
-        df['TARGET'] = [2, 5, 3, 6, 4, 7]
-        expected = np.array([np.nan, np.nan, 0.40546511, 0.18232156, 0.28768207, 0.15415068])
-
-        result = calculate_levitt_group(df, ['state', 'district'], 'TARGET')
-
-        assert_allclose(expected, result, rtol=1e-06)
 
     def test_total_deceased_levitt(self):
         np.random.seed(27)  # make tests reproducible, would be better to mock np.random
@@ -92,7 +75,7 @@ class TestCalculateMetrics(unittest.TestCase):
 
         assert_frame_equal(result, df.drop(columns=['percentages']).set_index('date'))
 
-    def test_calculate_hospitalizations(self):
+    def test_calculate_hospitalizations_multi_district(self):
         np.random.seed(27)  # make tests reproducible, would be better to mock np.random
         dates = [
             datetime(2020, 10, 2),
@@ -108,6 +91,7 @@ class TestCalculateMetrics(unittest.TestCase):
             'percentages': [.125, .125, .125, .125, .125, .125]
         })
 
+        # * 2 to simulate multi district input
         df_confirmed = pd.DataFrame({
             'date': dates * 2,
             'delta.confirmed': [2, 3, 4, 5, 6, 7] * 2
@@ -219,7 +203,7 @@ class TestCalculateMetrics(unittest.TestCase):
         df = input_df.set_index(['date', *group_columns])
         df = df.sort_index()
 
-        # the sort is a side effect, however it preserves the indexes so we don't care excpet when
+        # the sort is a side effect, however it preserves the indexes so we don't care except when
         # accessing raw values like this.
         expected = np.array([np.nan, np.nan, np.nan, .3, .3, np.nan, np.nan, np.nan, .7, .7])
 
@@ -251,7 +235,7 @@ class TestCalculateMetrics(unittest.TestCase):
 
         for column in ma_columns:
             if 'positivity' in column or 'hospitalized' in column or 'active' in column:
-                continue  # we got a seperate test for these
+                continue  # we got a separate test for these
 
             result = raw_result[column].to_numpy()
             assert_allclose(
@@ -271,7 +255,7 @@ class TestCalculateMetrics(unittest.TestCase):
         input_df['delta.tested'] = fixed_tested
 
         expected = np.array([x / fixed_tested * 100 for x in range(len(input_df))])
-        input_df['expected'] = expected  # storing it in the dataframe becuase extend will also apply a sort
+        input_df['expected'] = expected  # storing it in the dataframe because extend will also apply a sort
 
         raw_result = extend_and_impute_metrics(
             raw_metrics=input_df,
@@ -283,7 +267,7 @@ class TestCalculateMetrics(unittest.TestCase):
 
         assert_allclose(raw_result['expected'].to_numpy(), result)
 
-    def test_detla_percent_case_growth(self):
+    def test_delta_percent_case_growth(self):
         input_df = self._build_district_input(measurements=25, districts=1, values=[.3])
         hospitalizations = impute_hospitalization_percentages(
             pd.DataFrame({'date': [datetime(1900, 1, 1)], 'percentages': [0.13]}),
@@ -292,7 +276,7 @@ class TestCalculateMetrics(unittest.TestCase):
         input_df['delta.confirmed'] = [x for x in range(len(input_df))]
 
         expected = input_df['delta.confirmed'].pct_change()
-        input_df['expected'] = expected  # storing it in the dataframe becuase extend will also apply a sort
+        input_df['expected'] = expected  # storing it in the dataframe because extend will also apply a sort
 
         raw_result = extend_and_impute_metrics(
             raw_metrics=input_df,

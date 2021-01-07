@@ -29,7 +29,7 @@ def calculate_hospitalizations(
         :remark: Has the side effect of sorting the date index... due to the join.
         """
 
-    ratio_column = 'percentages'  # incorrectly named percentages but is actualy a value between 0 and 1
+    ratio_column = 'percentages'  # incorrectly named percentages but is actually a value between 0 and 1
     assert 'date' in delta_confirmed.index.names
     assert 'delta.confirmed' in delta_confirmed.columns
     assert 'date' in hospitalization_ratios.columns, 'Known issue, if an empty sheet was created delete it first'
