@@ -1,26 +1,5 @@
-import numpy as np
 import pandas as pd
 from numpy import random
-
-
-def _calculate_levitt_metric(column: pd.Series) -> pd.Series:
-    """ calculate and return levitt metric for a column
-    source: https://www.medrxiv.org/content/10.1101/2020.06.26.20140814v2
-    """
-    # epsilon = 1e-7  # avoid divisions by zero
-    shifted = column.shift(1)  # + epsilon
-    return np.log(column / shifted)
-
-
-def calculate_levitt_group(df: pd.DataFrame, group_columns: list[str], target_column: str) -> pd.Series:
-    """ apply levitt on subgroups of the data
-     :returns: levitt series preserved index """
-    index_columns = df.index.names
-    df_no_index = df.reset_index()
-
-    df_no_index['levitt'] = df_no_index.groupby(group_columns)[target_column].transform(_calculate_levitt_metric)
-    df = df_no_index.set_index(index_columns)
-    return df['levitt']
 
 
 def impute_hospitalization_percentages(current_hospitalizations: pd.DataFrame, expected_dates: pd.Series):
@@ -106,9 +85,6 @@ def extend_and_impute_metrics(
             df.loc[:, f'MA.21.{group}.{measurement}'] = _moving_average_grouped(df, grouping_columns,
                                                                                 f'{group}.{measurement}',
                                                                                 rolling_window)
-
-    # generate Levitt Metric for total deceased
-    df.loc[:, "total.deceased.levitt"] = calculate_levitt_group(df, grouping_columns, "total.deceased")
 
     # TPR% per day
     df.loc[:, "delta.positivity"] = (df["delta.confirmed"] / df["delta.tested"]) * 100.0
