@@ -34,7 +34,7 @@ class FetchWardDataTask(luigi.Task):
             log.info(f'Processing: {district}')
 
             with ward_task.open('r') as json_file:
-                ward_task = pd.read_csv(json_file)
+                ward_task = pd.read_csv(json_file, parse_dates=['date'])
                 ward_task = ward_task.set_index(['state', 'district', 'ward', 'date'])
 
             # This needs to support overwriting existing data as well as adding new data
@@ -42,14 +42,14 @@ class FetchWardDataTask(luigi.Task):
             if all_wards is None:
                 all_wards = ward_task
             else:
-                all_wards.concat(ward_task, axis=1)
+                all_wards = all_wards.combine_first(ward_task)  # update old values and add new values
 
         # cleanup
         for task in self.input().values():
             task.remove()
 
         # store the raw data, no imputation done yet
-        repository.store_dataframe(all_wards, ward_storage_location, allow_create=True)
+        repository.store_dataframe(all_wards, ward_storage_location, allow_create=True, store_index=True)
 
         # impute delta's atleast for Mumbai this is needed it only provides totals
         all_wards.to_csv(self.output().path, index=True)

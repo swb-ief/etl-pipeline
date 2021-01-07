@@ -35,7 +35,7 @@ class TestUpdateGSheetTask(unittest.TestCase):
                     os.path.join(THIS_DIR, '../samples/Dashboard PDF Development - hospitalization.csv'))
             raise ValueError(f'Did not expect {storage_name=}')
 
-        def mock_store_dataframe(self, df: pd.DataFrame, storage_name, allow_create):
+        def mock_store_dataframe(self, df: pd.DataFrame, storage_name, allow_create, store_index=True):
             results[storage_name] = df
             df.to_csv(os.path.join(THIS_DIR, f'../test output/test_update_run_{storage_name}.csv'))
 
@@ -58,7 +58,7 @@ class TestUpdateGSheetTask(unittest.TestCase):
         class DownloadOutputMock:
             @staticmethod
             def open(*args):
-                return open(os.path.join(THIS_DIR, '../samples/mumbai_dashboard.pdf'))
+                return open(os.path.join(THIS_DIR, '../samples/mumbai_dashboard_2020_01_02.pdf'))
 
             @staticmethod
             def exists():
@@ -70,13 +70,10 @@ class TestUpdateGSheetTask(unittest.TestCase):
 
             @property
             def path(self):
-                return os.path.join(THIS_DIR, '../samples/mumbai_dashboard.pdf')
+                return os.path.join(THIS_DIR, '../samples/mumbai_dashboard_2020_01_02.pdf')
 
         def mock_download_task_output(self):
             return DownloadOutputMock()
-
-        # patch.object(FetchCovid19IndiaDataTask, 'run', return_value=None), \
-        # patch.object(DownloadFileTask, 'run', return_value=None), \
 
         with patch.object(GSheetRepository, 'get_dataframe', new=mock_get_dataframe), \
                 patch.object(GSheetRepository, 'store_dataframe', new=mock_store_dataframe), \

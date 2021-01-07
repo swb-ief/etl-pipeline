@@ -5,6 +5,7 @@ from numpy import random
 
 def _calculate_levitt_metric(column: pd.Series) -> pd.Series:
     """ calculate and return levitt metric for a column
+    source: https://www.medrxiv.org/content/10.1101/2020.06.26.20140814v2
     """
     # epsilon = 1e-7  # avoid divisions by zero
     shifted = column.shift(1)  # + epsilon

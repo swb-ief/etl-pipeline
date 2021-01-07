@@ -13,7 +13,7 @@ from .stop_covid_dashboard_scrapper import scrap_pdf_to_csv
     default="http://stopcoronavirus.mcgm.gov.in/assets/docs/Dashboard.pdf",
     show_default=True,
 )
-@click.option("--output", default="stopcovid-mumbai_dashboard.pdf", show_default=True)
+@click.option("--output", default="stopcovid-mumbai_dashboard_2020_01_02.pdf", show_default=True)
 def download_pdf(dashboard_pdf_url, output):
     datetime_suffix = pd.Timestamp.utcnow().isoformat()
     click.echo(f"Fetching {dashboard_pdf_url} into {output}")
