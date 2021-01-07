@@ -33,24 +33,6 @@ class TestCalculateMetrics(unittest.TestCase):
         df = pd.DataFrame(data)
         return df
 
-    def test_total_deceased_levitt(self):
-        np.random.seed(27)  # make tests reproducible, would be better to mock np.random
-        input_df = self._build_district_input(measurements=3, districts=2, values=[10, 20])
-        hospitalizations = impute_hospitalization_percentages(
-            pd.DataFrame({'date': [datetime(1900, 1, 1)], 'percentages': [0.13]}),
-            input_df['date'])
-        input_df['total.deceased'] = [2, 5, 3, 6, 4, 7]
-        expected = np.array([np.nan, 0.40546511, 0.28768207, np.nan, 0.18232156, 0.15415068])
-
-        raw_result = extend_and_impute_metrics(
-            raw_metrics=input_df,
-            hospitalizations=hospitalizations,
-            grouping_columns=['state', 'district']
-        )
-        result = raw_result['total.deceased.levitt'].values
-
-        assert_allclose(expected, result, rtol=1e-04)
-
     def test_calculate_hospitalizations(self):
         np.random.seed(27)  # make tests reproducible, would be better to mock np.random
         data = {
@@ -185,7 +167,7 @@ class TestCalculateMetrics(unittest.TestCase):
         hospitalizations = impute_hospitalization_percentages(
             pd.DataFrame({'date': [datetime(2020, 10, 3)], 'percentages': [0.13]}), input_df['date'])
 
-        expected_shape = (1170, 32)
+        expected_shape = (1170, 31)
 
         result = extend_and_impute_metrics(
             raw_metrics=input_df,
