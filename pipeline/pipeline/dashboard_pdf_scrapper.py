@@ -148,7 +148,8 @@ def _extract_wards_data_from_page(positive_cases_pdf_page) -> pd.DataFrame:
     # contains 'Ward-wise breakdown of positive cases' instead of hard coded page numbers
     date_box = (50, 70, 200, 120)
     raw_date = positive_cases_pdf_page.within_bbox(date_box).extract_text().strip()
-    date = datetime.strptime(raw_date, '%b %d, %Y')
+    #date = datetime.strptime(raw_date, '%b %d, %Y')
+    date = datetime.strptime(raw_date, '%b %d, %Y').strftime("%Y-%m-%d")
 
     df = pd.DataFrame(data)
 
