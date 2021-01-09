@@ -11,7 +11,6 @@ dropbox_client = DropboxClient(DROPBOX_TOKEN)
 GSPREAD_CLIENT = None
 DEFAULT_WORKSHEET_URL = "https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k2ZraDb6DzgCOSXI0f0/edit#gid=0"
 
-
 WORKSHEET_URL = os.getenv("SWB_WORKSHEET_URL", DEFAULT_WORKSHEET_URL)
 
 try:
