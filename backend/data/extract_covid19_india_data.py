@@ -41,11 +41,16 @@ class ExtractCovid19IndiaData:
                         district_dict['date'] = measurement_date
                         district_dict['state'] = state
                         district_dict['district'] = district
+
                         if 'delta' in district_data:
                             self._add_metrics(district_dict, district_data['delta'], self.metric_columns, 'delta.')
 
                         if 'total' in district_data:
                             self._add_metrics(district_dict, district_data['total'], self.metric_columns, 'total.')
+
+                        if 'meta' in district_data:
+                            self._add_metrics(district_dict, district_data['meta'], self.meta_columns, '')
+
                         district_list.append(district_dict)
 
         df_state = pd.DataFrame(state_list)
