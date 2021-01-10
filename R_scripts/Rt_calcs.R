@@ -12,11 +12,7 @@
 # first load all the libraries needed.
 
 options(warn = -1)
-options(message = -1)
-# install.packages("drat")
-# drat:::add("epiforecasts")
-# install.packages("rstan")
-# install.packages("EpiNow2")
+options(message = -1)s
 
 suppressMessages(library("lubridate"))
 suppressMessages(library("tidyverse"))
@@ -37,12 +33,15 @@ suppressMessages(library(googlesheets4))
 # to make the code acceptable for multiple
 # cites, we need to keep the name of the df constant
 # and then keep a placeholder for that specific city.
+
 # then run the code where x will be replaced by the name of the city.
 # column names need to be used for the code, but need to be kept the same always.
 # have used the col names from the google sheet.
+
 # to check the code I have created a toy dataset where the two cities are mumbai and pune.
 # I have randomly assigned the two cities into another column - city.
 # this code can be used to calculate rt and dt for each city separately
+
 # need to provide value for x and then run the code without any changes.
 # we can provide a path to the folder with the city name to make sure that the
 # results are saved in that folder.
@@ -55,34 +54,17 @@ sheets_url <- "https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k
 
 df<- read_sheet(sheets_url,sheet="city_stats")
 
-
 # decide city or district to calculate for.
 # enter the city or district name as x.
-
-# x <- cityname # insert city name here without " "
 x <- 'Mumbai'
-
-# load the dataframe.
-# df <- read_csv("path/here.csv") #
-
-
 
 # filter to keep data from only city of interest.
 # here in the toy dataset have created a col - city with two values - mumbai , pune.
 # we can change this small code according to the data-set colname that we are actually using
-
-# df2 <- df %>% filter(city == x) # now to only keep city of interest.
-
-
 df2 <- df %>% filter(district == x)
-
-# check the df2 
-
-glimpse(df2)
 
 # ensure that there is no missing data for the columns here.
 # we need only 5 columns for the calculation - 
-
 df2 = df2 %>% dplyr::select(date, district, total.confirmed, total.deceased, total.recovered) # keep only col needed.
 
 df2 = df2[complete.cases(df2), ] # remove rows with NA to allow for calculation.
@@ -91,55 +73,39 @@ df2$delta_case = df2$total.confirmed - df2$total.deceased - df2$total.recovered
 
 date <- as_date(df2$date)
 
-# delta_case <- df2$Confirmed + df2$Active - df2$Recovered - df2$Deceased #
-
 # column names have changed. also active column is not present in the present table. so, using the columns present...
-
 delta_case = df2$total.confirmed - df2$total.deceased - df2$total.recovered
 
 date <- as_date(df2$date)
 
 confirm <- df2$delta_case
 
-df3 <- tibble(date, confirm) # the colnames need to be
-# exactly this for the epinow function to work.
-
-glimpse(df3)
-
+# the colnames need to be exactly this for the epinow function to work.
+df3 <- tibble(date, confirm) 
 
 # now the 2 columns needed for the Rt calculations are decided.
 # to make the Rt calculation for that cityname
 # need to get the generation_time and then the incubation_period.
 
-
 # get the generation and incubation time from the new EpiNow2 package.
-
 generation_time <- 
 get_generation_time(disease = "SARS-CoV-2", source = "ganyani")
-
 
 incubation_period <- 
 get_incubation_period(disease = "SARS-CoV-2", source = "lauer")
 
-
-
-
 ## model parameters as default##
 ## note that parameters about generation_time,
 # incubation_period, and reporting_delay are set as default in the package.
-
 reporting_delay <- EpiNow2::bootstrapped_dist_fit(rlnorm(100, log(6), 1))
 
 ## Set max allowed delay to 30 days to truncate computation
-
 reporting_delay$max <- 30
 
 # values for generation time and incubation period have been defined now.
 # the code below is for v 1.3.0 package.
 # set credible interval as 0.95 
-
-
- rt <- 
+rt <- 
   EpiNow2::epinow(reported_cases = df3, 
   generation_time = generation_time,
   delays = delay_opts(incubation_period, reporting_delay),
@@ -148,26 +114,19 @@ reporting_delay$max <- 30
   verbose = TRUE,
   CrIs = 0.95)
 
-
-#
 # get the summary estimates with the credible intervals.
-
 rt <- summary(rt, type = "parameters", params = "R")  
-
 
 # this is the summary estimate for the city specified in the beginning.
 # here I have pasted the results back to google-sheets and created a new sheet named 'rt'.
-
-
-
 # sheet_write(rt, sheet = string_c(x, "rt", sep = "_"))
 
+# ============================
+# Doubling time
 
 # doubling time function does not depend upon any package.
 # so that can be used it is. 
 # paste the doubling time function here first...
-
-
 compute_doubling_time <- function(total_cases, case_dates, time.gap, alpha=0.05){
   suppressMessages(require(dplyr))
   
@@ -179,6 +138,9 @@ compute_doubling_time <- function(total_cases, case_dates, time.gap, alpha=0.05)
   
   t.gap = time.gap
   
+
+  # is this code block below needed?
+  # ======================================
   #	dbl_timr <- function(dat,  t.gap = time.gap) {
   
   #if (is.null(end_date)) {
@@ -197,6 +159,7 @@ compute_doubling_time <- function(total_cases, case_dates, time.gap, alpha=0.05)
   #    t.end   <- data %>% filter(date == as.Date(end_date, origin="1970-01-01")) %>% pull(tot_cases)
   #t.end <- as.Date(data$date[-seq(1, time)], origin="1970-01-01")
   # }
+  # ======================================
   
   
   end.time   <- dat$date + t.gap
@@ -242,14 +205,10 @@ compute_doubling_time <- function(total_cases, case_dates, time.gap, alpha=0.05)
 total_cases <- df3$confirm
 cases_dates <- df3$date
 
-
-
 db <- compute_doubling_time(total_cases, cases_dates, time.gap = 7, alpha = 0.95)
 
 # right now using the same code provided by @krishna for saving both rt and doubling_time results.
-
 write.csv(rt,'/usr/data/epinow2_out.csv')
-
 write.csv(db,'/usr/data/doubling_time.csv')
 
 
