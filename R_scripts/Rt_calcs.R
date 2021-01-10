@@ -112,6 +112,8 @@ rt <-
   verbose = TRUE,
   CrIs = 0.95)
 
+print(rt.head())
+
 # get the summary estimates with the credible intervals.
 # rt <- summary(rt, type = "parameters", params = "R")  
 
