@@ -59,8 +59,7 @@ df<- read_sheet(sheets_url,sheet="city_stats")
 # decide city or district to calculate for.
 # enter the city or district name as x.
 
-x <- cityname # insert city name here without " "
-
+# x <- cityname # insert city name here without " "
 x <- 'Mumbai'
 
 # load the dataframe.
