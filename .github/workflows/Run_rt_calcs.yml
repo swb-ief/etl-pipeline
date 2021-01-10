@@ -60,6 +60,7 @@ jobs:
           install.packages("readr")
           install.packages("knitr")
           install.packages("dplyr")
+          install.packages("tidyverse")
         shell: Rscript {0}
       - name: Run R script
         run: Rscript  R_scripts/Rt_calcs.R
