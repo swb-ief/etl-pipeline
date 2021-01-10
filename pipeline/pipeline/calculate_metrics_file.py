@@ -95,6 +95,7 @@ def calculate_metrics(
     df["spline.hospitalized"] = df["delta.hospitalized"].rolling(window=21).mean()
     df["spline.recovered"] = df["delta.recovered"].rolling(window=21).mean()
 
+
     df = df.replace([np.inf, -np.inf], np.nan)
 
     df.to_csv(output_city_metrics_csv, mode="w" if header else "a", header=header)
