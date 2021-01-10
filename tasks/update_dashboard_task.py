@@ -24,9 +24,9 @@ class UpdateDashboardTask(luigi.Task):
     storage_wards = 'Phase 2 - Wards'
 
     # data for which we do not track a history
-    storage_states_static = 'States - Static data'
-    storage_districts_static = 'Districts - Static data'
-    storage_wards_static = 'Wards - Static data'
+    storage_states_static = 'Phase 2 - States - Static data'
+    storage_districts_static = 'Phase 2 - Districts - Static data'
+    storage_wards_static = 'Phase 2 - Wards - Static data'  # Not yet implemented
 
     states_is_valid = False
     districts_is_valid = False
