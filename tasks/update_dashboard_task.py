@@ -148,9 +148,7 @@ class UpdateDashboardTask(luigi.Task):
     def complete(self):
         return self.states_is_valid and self.districts_is_valid and self.wards_is_valid
 
-    def update_population_sheets(self, all_covid19india_data: dict, repository: Repository):
-
-        population_states, population_districts = ExtractCovid19IndiaPopulationData().process(all_covid19india_data)
+    def update_population_sheets(self, state: pd.DataFrame, district: pd.DataFrame, repository: Repository):
 
         repository.store_dataframe(population_states, self.storage_states_static, allow_create=True)
         repository.store_dataframe(population_districts, self.storage_districts_static, allow_create=True)
