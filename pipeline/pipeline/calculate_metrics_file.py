@@ -90,10 +90,10 @@ def calculate_metrics(
         - df["delta.other"]
     )
 
-    df["MA.21.daily.active"] = df["delta.active"].rolling(window=21).mean()
-    df["MA.21.daily.deceased"] = df["delta.deceased"].rolling(window=21).mean()
-    df["MA.21.daily.hospitalized"] = df["delta.hospitalized"].rolling(window=21).mean()
-    df["MA.21.daily.recovered"] = df["delta.recovered"].rolling(window=21).mean()
+    df["spline.active"] = df["delta.active"].rolling(window=21).mean()
+    df["spline.deceased"] = df["delta.deceased"].rolling(window=21).mean()
+    df["spline.hospitalized"] = df["delta.hospitalized"].rolling(window=21).mean()
+    df["spline.recovered"] = df["delta.recovered"].rolling(window=21).mean()
 
     df = df.replace([np.inf, -np.inf], np.nan)
 
