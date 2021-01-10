@@ -3,8 +3,7 @@ import json
 from typing import List
 
 
-class ExtractCovid19IndiaData:
-    """ Extract data from api.covid19india.org """
+class ExtractCovid19IndiaPopulationData:
     metric_columns = ['confirmed', 'deceased', 'recovered', 'tested', 'other']
     meta_columns = ['population', 'tested']  # 'tested': { 'last_updated': "2020-09-19", 'source': '_url_'}
 
@@ -14,7 +13,6 @@ class ExtractCovid19IndiaData:
             current[f'{prefix}{column}'] = metrics.get(column, 0)
 
     def process(self, json_dict: dict) -> (pd.DataFrame, pd.DataFrame):
-        """ Extract the metrics from the API Jason"""
         state_list = []
         district_list = []
 
