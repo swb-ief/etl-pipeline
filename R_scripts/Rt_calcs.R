@@ -88,14 +88,12 @@ df3 <- tibble(date, confirm)
 # need to get the generation_time and then the incubation_period.
 
 # get the generation and incubation time from the new EpiNow2 package.
-generation_time <- 
-get_generation_time(disease = "SARS-CoV-2", source = "ganyani")
+generation_time <- get_generation_time(disease = "SARS-CoV-2", source = "ganyani")
 
-incubation_period <- 
-get_incubation_period(disease = "SARS-CoV-2", source = "lauer")
+incubation_period <- get_incubation_period(disease = "SARS-CoV-2", source = "lauer")
 
-## model parameters as default##
-## note that parameters about generation_time,
+# model parameters as default
+# note that parameters about generation_time,
 # incubation_period, and reporting_delay are set as default in the package.
 reporting_delay <- EpiNow2::bootstrapped_dist_fit(rlnorm(100, log(6), 1))
 
@@ -115,11 +113,13 @@ rt <-
   CrIs = 0.95)
 
 # get the summary estimates with the credible intervals.
-rt <- summary(rt, type = "parameters", params = "R")  
+# rt <- summary(rt, type = "parameters", params = "R")  
 
 # this is the summary estimate for the city specified in the beginning.
 # here I have pasted the results back to google-sheets and created a new sheet named 'rt'.
 # sheet_write(rt, sheet = string_c(x, "rt", sep = "_"))
+
+
 
 # ============================
 # Doubling time
