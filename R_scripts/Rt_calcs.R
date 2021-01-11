@@ -12,7 +12,7 @@
 # first load all the libraries needed.
 
 options(warn = -1)
-options(message = -1)s
+options(message = -1)
 
 suppressMessages(library("lubridate"))
 suppressMessages(library("tidyverse"))
