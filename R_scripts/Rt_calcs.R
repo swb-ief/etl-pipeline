@@ -108,11 +108,12 @@ rt <-
   generation_time = generation_time,
   delays = delay_opts(incubation_period, reporting_delay),
   rt = rt_opts(prior = list(mean = 2, sd = 0.2)), 
-  stan = stan_opts(cores = 4, samples = 100),
+  #stan = stan_opts(cores = 4, samples = 100),
+  stan = stan_opts(cores = 4, samples = 5),
   verbose = TRUE,
   CrIs = 0.95)
 
-print(rt.head())
+print(rt)
 
 # get the summary estimates with the credible intervals.
 # rt <- summary(rt, type = "parameters", params = "R")  
