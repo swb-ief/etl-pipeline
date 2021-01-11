@@ -8,7 +8,8 @@ import logging
 
 from backend.config import get_config
 from backend.data import ExtractCovid19IndiaData
-from backend.repository import GSheetRepository
+from backend.data.utility import last_values_by_date
+from backend.repository import GSheetRepository, Repository
 from backend.metrics.calculations import impute_hospitalization_percentages, extend_and_impute_metrics
 from .fetch_covid19_india_data_task import FetchCovid19IndiaDataTask
 from .fetch_ward_data import FetchWardDataTask
@@ -21,6 +22,11 @@ class UpdateDashboardTask(luigi.Task):
     storage_districts = 'Phase 2 - Districts'
     storage_states = 'Phase 2 - States'
     storage_wards = 'Phase 2 - Wards'
+
+    # data for which we do not track a history
+    storage_states_static = 'Phase 2 - States - Static data'
+    storage_districts_static = 'Phase 2 - Districts - Static data'
+    storage_wards_static = 'Phase 2 - Wards - Static data'  # Not yet implemented
 
     states_is_valid = False
     districts_is_valid = False
@@ -79,7 +85,6 @@ class UpdateDashboardTask(luigi.Task):
         fetch_covid19_india_task.remove()
         fetch_wards_task.remove()
 
-        # we have access to the state metrics as well but not needed yet in the dashboard
         state_data, district_data = ExtractCovid19IndiaData().process(all_covid19india_data)
 
         # not the best location to create this, but it's ok for now
@@ -112,6 +117,8 @@ class UpdateDashboardTask(luigi.Task):
         #     grouping_columns=['state', 'district', 'ward']
         # )
 
+        self.update_population_sheets(state_data, district_data, repository)
+
         # Idea placeholder
         # Calculate 'todays' top 20ish cities and add that top 20 as a tab in the google sheet so the dashboard can
         # get access to it.
@@ -139,3 +146,14 @@ class UpdateDashboardTask(luigi.Task):
 
     def complete(self):
         return self.states_is_valid and self.districts_is_valid and self.wards_is_valid
+
+    def update_population_sheets(self, state: pd.DataFrame, district: pd.DataFrame, repository: Repository):
+        basic_column_filter = ['date', 'population']
+        state = state[['state'] + basic_column_filter]
+        district = district[['state', 'district'] + basic_column_filter]
+
+        state = last_values_by_date(state)
+        district = last_values_by_date(district)
+
+        repository.store_dataframe(state, self.storage_states_static, allow_create=True)
+        repository.store_dataframe(district, self.storage_districts_static, allow_create=True)

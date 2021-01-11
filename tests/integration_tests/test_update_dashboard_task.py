@@ -24,6 +24,19 @@ class TestUpdateGSheetTask(unittest.TestCase):
             UpdateDashboardTask.storage_districts: (156697, 16)  # +1 column for district
         }
 
+        storage_prefix = 'test_update_run_'
+        expected_output_files = [storage_prefix + storage for storage in [
+            UpdateDashboardTask.storage_hospitalizations,
+
+            UpdateDashboardTask.storage_states,
+            UpdateDashboardTask.storage_districts,
+            UpdateDashboardTask.storage_wards,
+
+            UpdateDashboardTask.storage_states_static,
+            UpdateDashboardTask.storage_districts_static,
+        ]
+                                 ]
+
         def mock_exists(self, storage_name):
             if storage_name == 'raw_ward_data':
                 return False
@@ -94,3 +107,7 @@ class TestUpdateGSheetTask(unittest.TestCase):
             self.assertEqual(result_rows, expected_rows, f'Expected more rows for worksheet {worksheet}')
             self.assertEqual(result_columns, expected_columns,
                              f'Number of columns does not match expectations for {worksheet}')
+
+        for file in expected_output_files:
+            path = os.path.join(THIS_DIR, f'../test output/{file}.csv')
+            self.assertTrue(os.path.exists(path), f'Expected {path} to exist')
