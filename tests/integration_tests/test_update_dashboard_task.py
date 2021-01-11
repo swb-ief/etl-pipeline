@@ -20,8 +20,8 @@ class TestUpdateGSheetTask(unittest.TestCase):
         results = dict()
         expected_results = {
             UpdateDashboardTask.storage_hospitalizations: (307, 2),
-            UpdateDashboardTask.storage_states: (9790, 16),
-            UpdateDashboardTask.storage_districts: (156697, 17)  # +1 column for district
+            UpdateDashboardTask.storage_states: (9790, 15),
+            UpdateDashboardTask.storage_districts: (156697, 16)  # +1 column for district
         }
 
         def mock_exists(self, storage_name):

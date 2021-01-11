@@ -45,8 +45,6 @@ class UpdateDashboardTask(luigi.Task):
         'MA.21.delta.recovered',
         'MA.21.delta.positivity',
         'MA.21.delta.tested',  # phase 1 name MA.21.daily.tests
-
-        'total.deceased.levitt',  # phase 1 name levitt.metric
     ]
     # Not yet added R generated metrics mean.mean, CI_lower.mean, CI_upper.mean, doubling.time
 

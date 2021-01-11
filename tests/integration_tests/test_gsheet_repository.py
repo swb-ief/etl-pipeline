@@ -90,6 +90,12 @@ class TestGSheetRepository(unittest.TestCase):
         sut = GSheetRepository(self._url)
         sut.store_dataframe(df, storage_location, allow_create=True, store_index=True)
 
-        # want to ignore the empty columns and rows for now.. so just focus on what we just put in
         result = sut.get_dataframe(storage_location)
-        assert_frame_equal(df.reset_index(), result)
+
+        expected = df.reset_index()
+
+        # debug
+        print(result.head())
+        print(expected.head())
+
+        assert_frame_equal(expected, result)
