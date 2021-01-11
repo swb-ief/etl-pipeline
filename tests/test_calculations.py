@@ -15,19 +15,24 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class TestCalculateMetrics(unittest.TestCase):
     @staticmethod
-    def _build_district_input(measurements, districts, values: list):
+    def _build_district_input(measurements, districts, district_values: list):
         """ Quickly create a df that has all the required columns, and a few districts to test grouping """
+        assert len(
+            district_values) == districts, 'We expect a valueu for each district to give them each a unique value'
         district_names = [f'city_{x}' for x in range(districts)]
 
         data = {
             'date': [datetime(1900 + x, 1, 1) for x in range(measurements * districts)],
             'state': ['my_state'] * measurements * districts,
             'district': district_names * measurements,
+
+            # each city a different population 1m+ but fixed for each city
+            'population': np.array(list(range(1, len(district_names) + 1)) * measurements) * 1_000_000
         }
 
         for group in ['delta', 'total']:
             for measurement in ['tested', 'confirmed', 'deceased', 'recovered', 'other']:
-                raw_measurements = values * measurements
+                raw_measurements = district_values * measurements
                 data[f'{group}.{measurement}'] = raw_measurements
 
         df = pd.DataFrame(data)
@@ -161,13 +166,27 @@ class TestCalculateMetrics(unittest.TestCase):
         """ This is a tiny bit of an integration test. since we are using an other method to help us build
         our input """
 
-        input_df = pd.read_csv(os.path.join(THIS_DIR, 'samples/Dashboard PDF SWB - city_stats.csv'),
-                               parse_dates=['date'])
+        measurements = 25
+        districts = 4
+        district_values = [.3, .7, 10, 25]
+        input_df = self._build_district_input(measurements=measurements, districts=districts,
+                                              district_values=district_values)
 
         hospitalizations = impute_hospitalization_percentages(
             pd.DataFrame({'date': [datetime(2020, 10, 3)], 'percentages': [0.13]}), input_df['date'])
 
-        expected_shape = (1170, 31)
+        expected_columns = ['state', 'district', 'date', 'population', 'delta.tested', 'delta.confirmed',
+                            'delta.deceased', 'delta.recovered', 'delta.other', 'total.tested',
+                            'total.confirmed', 'total.deceased', 'total.recovered', 'total.other',
+                            'MA.21.delta.tested', 'MA.21.delta.confirmed', 'MA.21.delta.deceased',
+                            'MA.21.delta.recovered', 'MA.21.delta.other', 'MA.21.total.tested',
+                            'MA.21.total.confirmed', 'MA.21.total.deceased', 'MA.21.total.recovered',
+                            'MA.21.total.other', 'delta.positivity', 'delta.percent.case.growth',
+                            'delta.hospitalized', 'total.hospitalized', 'delta.active',
+                            'delta.confirmed.ratio_per_million', 'delta.deceased.ratio_per_million',
+                            'total.confirmed.ratio_per_million', 'total.deceased.ratio_per_million',
+                            'MA.21.delta.positivity', 'MA.21.delta.hospitalized', 'MA.21.delta.active']
+        expected_shape = (measurements * districts, len(expected_columns))
 
         result = extend_and_impute_metrics(
             raw_metrics=input_df,
@@ -175,13 +194,16 @@ class TestCalculateMetrics(unittest.TestCase):
             grouping_columns=['state', 'district']
         )
 
+        for column in expected_columns:
+            assert column in result
+
         self.assertEqual(expected_shape, result.shape)
 
     def test__moving_average_grouped(self):
         mean_window = 4
         group_columns = ['state', 'district']
 
-        input_df = self._build_district_input(measurements=5, districts=2, values=[0.3, 0.7])
+        input_df = self._build_district_input(measurements=5, districts=2, district_values=[0.3, 0.7])
         df = input_df.set_index(['date', *group_columns])
         df = df.sort_index()
 
@@ -195,7 +217,7 @@ class TestCalculateMetrics(unittest.TestCase):
 
     def test_moving_average_calculations(self):
 
-        input_df = self._build_district_input(measurements=25, districts=2, values=[0.3, 0.7])
+        input_df = self._build_district_input(measurements=25, districts=2, district_values=[0.3, 0.7])
 
         hospitalizations = impute_hospitalization_percentages(
             pd.DataFrame({'date': [datetime(2000, 1, 1)], 'percentages': [0.13]}),
@@ -226,7 +248,7 @@ class TestCalculateMetrics(unittest.TestCase):
                 err_msg=f'Column {column} does not have the expected values')
 
     def test_positivity(self):
-        input_df = self._build_district_input(measurements=25, districts=2, values=[0.3, 0.7])
+        input_df = self._build_district_input(measurements=25, districts=2, district_values=[0.3, 0.7])
         hospitalizations = impute_hospitalization_percentages(
             pd.DataFrame({'date': [datetime(1900, 1, 1)], 'percentages': [0.13]}),
             input_df['date'])
@@ -250,7 +272,7 @@ class TestCalculateMetrics(unittest.TestCase):
         assert_allclose(raw_result['expected'].to_numpy(), result)
 
     def test_delta_percent_case_growth(self):
-        input_df = self._build_district_input(measurements=25, districts=1, values=[.3])
+        input_df = self._build_district_input(measurements=25, districts=1, district_values=[.3])
         hospitalizations = impute_hospitalization_percentages(
             pd.DataFrame({'date': [datetime(1900, 1, 1)], 'percentages': [0.13]}),
             input_df['date'])
@@ -272,7 +294,7 @@ class TestCalculateMetrics(unittest.TestCase):
 
     def test_delta_hospitalized(self):
         np.random.seed(27)  # make tests reproducible, would be better to mock np.random
-        input_df = self._build_district_input(measurements=3, districts=2, values=[10, 20])
+        input_df = self._build_district_input(measurements=3, districts=2, district_values=[10, 20])
         hospitalizations = impute_hospitalization_percentages(
             pd.DataFrame({'date': [datetime(1900, 1, 1)], 'percentages': [0.13]}),
             input_df['date'])
@@ -297,7 +319,7 @@ class TestCalculateMetrics(unittest.TestCase):
         expected_city_2 = value_city_2 - value_city_2 - value_city_2 - value_city_2
 
         input_df = self._build_district_input(measurements=measurements, districts=2,
-                                              values=[value_city_1, value_city_2])
+                                              district_values=[value_city_1, value_city_2])
         hospitalizations = impute_hospitalization_percentages(
             pd.DataFrame({'date': [datetime(1900, 1, 1)], 'percentages': [0.13]}),
             input_df['date'])
