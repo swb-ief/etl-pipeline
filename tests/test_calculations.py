@@ -333,3 +333,26 @@ class TestCalculateMetrics(unittest.TestCase):
         result = raw_result['delta.active'].values
 
         assert_allclose(expected, result, rtol=1e-04)
+
+    def test_ratio_per_million(self):
+        value_city_1 = 20
+        value_city_2 = 20
+        measurements = 3
+
+        input_df = self._build_district_input(measurements=measurements, districts=2,
+                                              district_values=[value_city_1, value_city_2])
+        hospitalizations = impute_hospitalization_percentages(
+            pd.DataFrame({'date': [datetime(1900, 1, 1)], 'percentages': [0.13]}),
+            input_df['date'])
+
+        # there is a sort happening due to a group.
+        expected = [20., 20., 20., 10., 10., 10.]
+
+        raw_result = extend_and_impute_metrics(
+            raw_metrics=input_df,
+            hospitalizations=hospitalizations,
+            grouping_columns=['state', 'district']
+        )
+        result = raw_result['delta.deceased.ratio_per_million'].values
+
+        assert_allclose(expected, result, rtol=1e-04)
