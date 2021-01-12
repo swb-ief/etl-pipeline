@@ -32,14 +32,19 @@ dt_worksheet, dt_df = worksheet_as_df_by_url(WORKSHEET_URL, "doubling_time")
 # Read the existing Rt out file by the R Script
 new_Rt_df = pd.read_csv("/usr/data/epinow2_out.csv")
 new_Rt_df["city"] = "Mumbai"
+print(new_Rt_df.columns)
+new_Rt_df = new_Rt_df.drop('variable', 1)
 print(new_Rt_df)
-# new_Rt_df = new_Rt_df.drop('strat', 1)
+
 
 # Read the existing doubling time numbers in days
 # new_dt_df = pd.read_csv("/usr/data/dt.csv")
 new_dt_df = pd.read_csv("/usr/data/doubling_time.csv")
 new_dt_df["city"] = "Mumbai"
-new_dt_df = new_dt_df.drop("r", 1)
+print(new_dt_df.columns)
+# new_dt_df = new_dt_df.drop("r", 1)
+cols = ['Unnamed: 0', 'date', 'doubling.time', 'city']
+new_dt_df = new_dt_df[cols]
 print(new_dt_df)
 
 # populate the googlesheets
