@@ -95,7 +95,8 @@ incubation_period <- get_incubation_period(disease = "SARS-CoV-2", source = "lau
 # model parameters as default
 # note that parameters about generation_time,
 # incubation_period, and reporting_delay are set as default in the package.
-reporting_delay <- EpiNow2::bootstrapped_dist_fit(rlnorm(100, log(6), 1))
+#reporting_delay <- EpiNow2::bootstrapped_dist_fit(rlnorm(100, log(6), 1))
+reporting_delay <- EpiNow2::bootstrapped_dist_fit(rlnorm(5, log(6), 1))
 
 ## Set max allowed delay to 30 days to truncate computation
 reporting_delay$max <- 30
@@ -112,6 +113,8 @@ rt <-
   stan = stan_opts(cores = 4, samples = 5),
   verbose = TRUE,
   CrIs = 0.95)
+
+rt <- summary(rt, type = "parameters", params = "R")  
 
 print(rt)
 
