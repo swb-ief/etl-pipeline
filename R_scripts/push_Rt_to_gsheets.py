@@ -43,8 +43,9 @@ new_dt_df = pd.read_csv("/usr/data/doubling_time.csv")
 new_dt_df["city"] = "Mumbai"
 print(new_dt_df.columns)
 # new_dt_df = new_dt_df.drop("r", 1)
-cols = ['Unnamed: 0', 'date', 'doubling.time', 'city']
+cols = ['Unnamed: 0', 'date', 'dt', 'city']
 new_dt_df = new_dt_df[cols]
+new_dt_df.columns = ['Unnamed: 0', 'date', 'doubling.time', 'city']
 print(new_dt_df)
 
 # populate the googlesheets
