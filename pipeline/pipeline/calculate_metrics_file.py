@@ -69,6 +69,7 @@ def calculate_metrics(
 
     # TPR% per day
     df["delta.positivity"] = (df["delta.confirmed"] / df["delta.tested"]) * 100.0
+    df["delta.positivity"] = df["delta.positivity"].replace([np.inf, -np.inf], 0)
 
     # 21-Day MA of TPR%
     df["MA.21.delta.positivity"] = df["delta.positivity"].rolling(window=21).mean()
