@@ -1,5 +1,5 @@
 import gspread
-import numpy
+import numpy as np
 import pandas as pd
 import os
 import logging
@@ -33,7 +33,14 @@ dt_worksheet, dt_df = worksheet_as_df_by_url(WORKSHEET_URL, "doubling_time")
 # Read the existing Rt out file by the R Script
 new_Rt_df = pd.read_csv("/usr/data/epinow2_out.csv")
 new_Rt_df["city"] = "Mumbai"
-new_Rt_df = new_Rt_df.drop('variable', 1)
+
+# TODO --> TEMPORARY UNTIL SCHEMA IN OUTPUT GOOGLE SHEET IS CHANGED
+new_Rt_df["lower"] = np.nan
+new_Rt_df["upper"] = np.nan
+
+new_Rt_df = new_Rt_df.drop(['variable', 'strat'], 1)
+print(new_Rt_df.columns)
+
 cols = ['Unnamed: 0', 'date', 'type', 'median', 'lower', 'upper', 'mean', 'lower_95', 'upper_95', 'city']
 new_Rt_df = new_Rt_df[cols]
 new_Rt_df.columns = ['Unnamed: 0', 'date', 'type', 'median', 'lower', 'upper', 'mean.mean', 'CI_lower.mean', 'CI_upper.mean', 'city']
