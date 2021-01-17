@@ -5,4 +5,4 @@ def test_get_static_ward_data():
     expected = 'population'
     result = get_static_ward_data()
 
-    assert expected in result.columns
+    assert expected in result
