@@ -38,6 +38,9 @@ class UpdateDashboardTask(luigi.Task):
         'delta.hospitalized',
         'delta.percent.case.growth',
         'delta.positivity',
+        
+        'total.confirmed',
+        'total.deceased',
 
         'MA.21.delta.active',
         'MA.21.delta.deceased',

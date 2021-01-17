@@ -18,10 +18,14 @@ class TestUpdateGSheetTask(unittest.TestCase):
         """ This will run local parts only using files from sample etc...
         """
         results = dict()
+
+        metrics_count = len(UpdateDashboardTask.metrics_needed_by_dashboard)
+
         expected_results = {
             UpdateDashboardTask.storage_hospitalizations: (307, 2),
-            UpdateDashboardTask.storage_states: (9790, 15),
-            UpdateDashboardTask.storage_districts: (156697, 16)  # +1 column for district
+            UpdateDashboardTask.storage_states: (9790, metrics_count + 2),  # + 2 date, state
+            UpdateDashboardTask.storage_districts: (156697, metrics_count + 3)  # +3 date, state, district
+            # TODO UpdateDashboardTask.storage_wards: (10, metrics_count + 4)  # +4 date, state, district, wards
         }
 
         def mock_exists(self, storage_name):
