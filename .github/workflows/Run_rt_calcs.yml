@@ -38,6 +38,15 @@ jobs:
           wget  -O /usr/data/city_stats.csv $CSV_DATA_SOURCE
           echo "downloaded the file to machine"
 
+      - name: Dependency Cache
+          id: cache
+          uses: actions/cache@v2
+          with:
+            path: ~/.local/share/renv
+            key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+            restore-keys: |
+                ${{ runner.os }}-renv-
+
       - name: Install remotes devtools, googlesheets4, httpuv
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
