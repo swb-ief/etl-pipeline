@@ -107,6 +107,11 @@ def extend_and_impute_metrics(
             - df["delta.other"]
     )
 
+    # ratios per million
+    ratios_needed_for = ['delta.confirmed', 'delta.deceased', 'total.confirmed', 'total.deceased']
+    for column in ratios_needed_for:
+        df.loc[:, f'{column}.ratio_per_million'] = df[column] / (df['population'] / 1_000_000)
+
     # moving averages of some of our calculated columns
     for column in ['delta.positivity', 'delta.hospitalized', 'delta.active']:
         df.loc[:, f'MA.21.{column}'] = _moving_average_grouped(df, grouping_columns, column, rolling_window)
