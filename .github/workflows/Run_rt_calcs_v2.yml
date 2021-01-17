@@ -1,4 +1,4 @@
-name: R_proc
+name: R_proc_v2
 
 on:
   workflow_dispatch: 
@@ -37,6 +37,15 @@ jobs:
           sudo chmod -R 777 /usr/data/
           wget  -O /usr/data/city_stats.csv $CSV_DATA_SOURCE
           echo "downloaded the file to machine"
+
+      - name: Dependency Cache
+        id: cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.local/share/renv
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: |
+              ${{ runner.os }}-renv-
 
       - name: Install remotes devtools, googlesheets4, httpuv
         if: steps.cache.outputs.cache-hit != 'true'
