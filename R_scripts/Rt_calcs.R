@@ -54,14 +54,17 @@ sheets_url <- "https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k
 
 df<- read_sheet(sheets_url,sheet="city_stats")
 
+args = commandArgs(trailingOnly=TRUE)
+
 # decide city or district to calculate for.
 # enter the city or district name as x.
-x <- 'Mumbai'
+#x <- 'Mumbai'
+city <- args[1]
 
 # filter to keep data from only city of interest.
 # here in the toy dataset have created a col - city with two values - mumbai , pune.
 # we can change this small code according to the data-set colname that we are actually using
-df2 <- df %>% filter(district == x)
+df2 <- df %>% filter(district == city)
 
 # ensure that there is no missing data for the columns here.
 # we need only 5 columns for the calculation - 
