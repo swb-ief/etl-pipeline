@@ -1,0 +1,39 @@
+name: FetchSpreadsheets
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  fetch_spreadsheets:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out this repo
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.head_ref }}
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install Python dependencies
+      run: |
+        pip install -r requirements.txt
+    - name: Run spreadsheet fetch
+      env:
+        SPREADSHEET_API_KEY: ${{ secrets.SPREADSHEET_API_KEY }}
+        SPREADSHEET_IDS: ${{ secrets.SPREADSHEET_IDS }}
+        OUTPUT_DIR: './v1/spreadsheets/'
+      run: python -m spreadsheets_fetcher $SPREADSHEET_IDS $OUTPUT_DIR
+    - uses: actions/upload-artifact@v2
+      with:
+        name: csv
+        path: v1/spreadsheets
+    - run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git checkout gh-pages
+          git pull --no-edit origin gh-pages
+          git add v1/*
+          git commit -m "pushing result csv"
+          git push origin gh-pages

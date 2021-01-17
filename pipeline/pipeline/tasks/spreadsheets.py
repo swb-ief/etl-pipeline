@@ -44,9 +44,12 @@ class ExtractWardPositiveBreakdownGSheetTask(luigi.ExternalTask):
             "ab+"
         ) as named_tmp_file:
             named_tmp_file.write(textio2binary(input_file))
+
             scrap_df = scrap_positive_wards_to_df(named_tmp_file, page=self.page_index)
+
             scrap_df["downloaded_for"] = self.date.strftime("%Y-%m-%d")
             result_df = pandas.concat([positive_breakdown_df, scrap_df])
+            
             self.response = worksheet.update(
                 [result_df.columns.values.tolist()] + result_df.values.tolist()
             )
@@ -106,6 +109,9 @@ class ExtractCaseGrowthTableGSheetTask(luigi.ExternalTask):
             scrap_df = scrape_case_growth_to_df(named_tmp_file.name, page=self.page)
             scrap_df["downloaded_for"] = self.date.strftime("%Y-%m-%d")
             result_df = pandas.concat([daily_case_growth_df, scrap_df])
+
+            print(result_df)
+
             self.response = worksheet.update(
                 [result_df.columns.values.tolist()] + result_df.values.tolist()
             )
@@ -170,9 +176,7 @@ class AllDataGSheetTask(luigi.WrapperTask):
         yield ExtractWardPositiveBreakdownGSheetTask(
             date=self.date, page_index=self.positive_breakdown_index
         )
-        yield ExtractCaseGrowthTableGSheetTask(
-            date=self.date, page=self.daily_case_growth_page
-        )
+
         yield HospitalizationSheetGSheetTask(
             date=self.date, states_and_districts=self.states_and_districts
         )

@@ -1,0 +1,38 @@
+name: Update Covid 19 dashboard
+
+on:
+  schedule:
+    - cron: '0 22 * * *' # 22:00 Utc with the aim to be finished at 24:00 utc in 2 hours (5:30am India [IST])
+  workflow_dispatch:
+
+
+
+jobs:
+  update_dashboard:
+    name: Update dashboard data repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out etl-pipeline repo
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+
+      - name: Set up Cloud SDK for access to google sheets
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          version: '290.0.1'
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          service_account_email: ${{ secrets.GCP_SA_EMAIL }}
+          export_default_credentials: true
+
+      - name: Executing UpdateGSheetTask a luigi task
+        run: |
+          python -m luigi --module tasks UpdateDashboardTask --local-scheduler

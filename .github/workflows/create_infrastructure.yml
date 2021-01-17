@@ -1,0 +1,40 @@
+name: Create dashboard infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      repositoryName:
+        description: 'Repository name'
+        required: true
+      adminEmail:
+        description: 'Email address administrator'
+        required: true
+
+jobs:
+  create_repository:
+    name: Create Repository
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Python 3
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+
+      - name: Set up Cloud SDK for access to google sheets
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          version: '290.0.1'
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          service_account_email: ${{ secrets.GCP_SA_EMAIL }}
+          export_default_credentials: true
+
+      - name: Creating the repository
+        run: python -m infrastructure.create_repository "${{ github.event.inputs.repositoryName }}" "${{ github.event.inputs.adminEmail }}"
