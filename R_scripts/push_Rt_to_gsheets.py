@@ -5,8 +5,8 @@ import os
 import logging
 
 GSPREAD_CLIENT = None
-#DEFAULT_WORKSHEET_URL = "https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k2ZraDb6DzgCOSXI0f0/edit#gid=0"
-DEFAULT_WORKSHEET_URL = "https://docs.google.com/spreadsheets/d/1fkPkvIowcd2hob3qvq20iPhVGowquqLygLDTJt3aPQU/edit#gid=1452119190"
+DEFAULT_WORKSHEET_URL = "https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k2ZraDb6DzgCOSXI0f0/edit#gid=0"
+# test purposes --> DEFAULT_WORKSHEET_URL = "https://docs.google.com/spreadsheets/d/1fkPkvIowcd2hob3qvq20iPhVGowquqLygLDTJt3aPQU/edit#gid=1452119190"
 
 
 WORKSHEET_URL = os.getenv("SWB_WORKSHEET_URL", DEFAULT_WORKSHEET_URL)
@@ -32,6 +32,7 @@ dt_worksheet, dt_df = worksheet_as_df_by_url(WORKSHEET_URL, "doubling_time")
 
 # Read the existing Rt out file by the R Script
 new_Rt_df = pd.read_csv("/usr/data/epinow2_out.csv")
+# TODO p2 --> input from critical cities tab for RT calcs, all cities/districts for DT
 new_Rt_df["city"] = "Mumbai"
 
 # TODO --> TEMPORARY UNTIL SCHEMA IN OUTPUT GOOGLE SHEET IS CHANGED
@@ -39,23 +40,18 @@ new_Rt_df["lower"] = ""
 new_Rt_df["upper"] = ""
 
 new_Rt_df = new_Rt_df.drop(['variable', 'strat'], 1)
-print(new_Rt_df.columns)
 
 cols = ['Unnamed: 0', 'date', 'type', 'median', 'lower', 'upper', 'mean', 'lower_95', 'upper_95', 'city']
 new_Rt_df = new_Rt_df[cols]
 new_Rt_df.columns = ['Unnamed: 0', 'date', 'type', 'median', 'lower', 'upper', 'mean.mean', 'CI_lower.mean', 'CI_upper.mean', 'city']
-print(new_Rt_df)
-
 
 # Read the existing doubling time numbers in days
 # new_dt_df = pd.read_csv("/usr/data/dt.csv")
 new_dt_df = pd.read_csv("/usr/data/doubling_time.csv")
 new_dt_df["city"] = "Mumbai"
-print(new_dt_df.columns)
 cols = ['Unnamed: 0', 'date', 'dt', 'city']
 new_dt_df = new_dt_df[cols]
 new_dt_df.columns = ['Unnamed: 0', 'date', 'doubling.time', 'city']
-print(new_dt_df)
 
 # populate the googlesheets
 rt_worksheet.update([new_Rt_df.columns.values.tolist()] + new_Rt_df.values.tolist())

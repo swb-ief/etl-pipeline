@@ -56,19 +56,6 @@ jobs:
           install.packages("httpuv")
         shell: Rscript {0}
 
-      - name: Install Epinow2
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          require(devtools)
-          install.packages("EpiNow2")
-        shell: Rscript {0}
-
-      - name: Install Rstan
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          install.packages("rstan")
-        shell: Rscript {0}
-
       - name: Install deps
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
@@ -84,8 +71,24 @@ jobs:
           install.packages("EpiEstim")
         shell: Rscript {0}
 
-      - name: Run R script
-        run: Rscript  R_scripts/Rt_calcs.R
+      - name: Run R DT script
+        run: Rscript  R_scripts/ph2_Dt_calcs.R
+
+      - name: Install Epinow2
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          require(devtools)
+          install.packages("EpiNow2")
+        shell: Rscript {0}
+
+      - name: Install Rstan
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          install.packages("rstan")
+        shell: Rscript {0}
+
+      - name: Run R RT script
+        run: Rscript  R_scripts/ph2_Rt_calcs.R
 
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:

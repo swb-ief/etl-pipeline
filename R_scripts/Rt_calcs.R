@@ -54,13 +54,11 @@ sheets_url <- "https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k
 
 df<- read_sheet(sheets_url,sheet="city_stats")
 
-# todo v2 --> args = commandArgs(trailingOnly=TRUE)
-
 # decide city or district to calculate for.
 # enter the city or district name as x.
 city <- 'Mumbai'
 # todo v2 --> city <- args[1]
-# todo v2 --> command line args or simply read from results of city criteria filters 
+# todo v2 --> command line args or simply read from results of city criteria filters for RT and all districts for DT
 
 # filter to keep data from only city of interest.
 # here in the toy dataset have created a col - city with two values - mumbai , pune.
@@ -107,7 +105,6 @@ reporting_delay$max <- 30
 # values for generation time and incubation period have been defined now.
 # the code below is for v 1.3.0 package.
 # set credible interval as 0.95 
-
 rt <- 
   EpiNow2::epinow(reported_cases = df3, 
   generation_time = generation_time,
@@ -119,20 +116,6 @@ rt <-
 
 # get the summary estimates with the credible intervals.
 rt <- summary(rt, type = "parameters", params = "R")  
-
-date <- c('2021-01-15', '2021-01-16','2021-01-17','2021-01-18','2021-01-19')
-variable <- c('R','R','R','R','R')
-strat <- c(NA,NA,NA,NA,NA)
-type <- c('forecast','forecast','forecast','forecast','forecast')
-median <- c(.959,.959,.959,.959,.959)
-mean <- c(.968,.968,.968,.968,.968)
-sd <- c(.131,.131,.131,.131,.131 )
-lower_95 <- c(.76,.76,.76,.76,.76)
-upper_95 <- c(1.14,1.14,1.14,1.14,1.14)
-rt_test <- data.frame(date, variable, strat, type, median, mean, sd, lower_95, upper_95)
-
-print(rt)
-print(rt_test)
 
 # ============================
 # Doubling time
