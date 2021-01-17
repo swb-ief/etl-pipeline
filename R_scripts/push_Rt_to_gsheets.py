@@ -35,8 +35,8 @@ new_Rt_df = pd.read_csv("/usr/data/epinow2_out.csv")
 new_Rt_df["city"] = "Mumbai"
 
 # TODO --> TEMPORARY UNTIL SCHEMA IN OUTPUT GOOGLE SHEET IS CHANGED
-new_Rt_df["lower"] = np.nan
-new_Rt_df["upper"] = np.nan
+new_Rt_df["lower"] = ""
+new_Rt_df["upper"] = ""
 
 new_Rt_df = new_Rt_df.drop(['variable', 'strat'], 1)
 print(new_Rt_df.columns)
@@ -52,7 +52,6 @@ print(new_Rt_df)
 new_dt_df = pd.read_csv("/usr/data/doubling_time.csv")
 new_dt_df["city"] = "Mumbai"
 print(new_dt_df.columns)
-# new_dt_df = new_dt_df.drop("r", 1)
 cols = ['Unnamed: 0', 'date', 'dt', 'city']
 new_dt_df = new_dt_df[cols]
 new_dt_df.columns = ['Unnamed: 0', 'date', 'doubling.time', 'city']
