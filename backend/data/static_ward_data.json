@@ -1,0 +1,39 @@
+{
+  "MH": {
+    "Mumbai": {
+      "last_manual_update": "2021-01-17",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Administrative_divisions_of_Mumbai"
+      ],
+      "wards": {
+        "A": {
+          "population": 210926
+        },
+        "B": {
+          "population": 140480
+        },
+        "C": {
+          "population": 191670
+        },
+        "D": {
+          "population": 378610
+        },
+        "E": {
+          "population": 439390
+        },
+        "F": {
+          "population": 430406
+        },
+        "G": {
+          "population": 537032
+        },
+        "H": {
+          "population": 478413
+        },
+        "I": {
+          "population": 516552
+        }
+      }
+    }
+  }
+}
