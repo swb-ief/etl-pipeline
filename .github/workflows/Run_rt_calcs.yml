@@ -17,14 +17,18 @@ jobs:
         uses: actions/checkout@v2
         with: 
           ref: ${{ github.head_ref }}
+
       - name:  setup R
         uses: r-lib/actions/setup-r@master
         with:
           r-version: '3.6.3'
+      
       - name: update apt-get
         run: sudo apt-get update -y
+
       - name: install v8
         run: sudo apt-get install libv8-dev libcurl4-openssl-dev  -y 
+
       - name: Download the input CSV
         run: |
           echo "trying to create a direcotry"
@@ -33,24 +37,40 @@ jobs:
           sudo chmod -R 777 /usr/data/
           wget  -O /usr/data/city_stats.csv $CSV_DATA_SOURCE
           echo "downloaded the file to machine"
+
+      - name: Dependency Cache
+        id: cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.local/share/renv
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: |
+              ${{ runner.os }}-renv-
+
       - name: Install remotes devtools, googlesheets4, httpuv
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           install.packages("remotes", repos = c("CRAN" = Sys.getenv("CRAN_REPO")))
           install.packages("devtools")
           install.packages("googlesheets4")
           install.packages("httpuv")
         shell: Rscript {0}
+
       - name: Install Epinow2
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           require(devtools)
           install.packages("EpiNow2")
         shell: Rscript {0}
+
       - name: Install Rstan
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           install.packages("rstan")
         shell: Rscript {0}
 
       - name: Install deps
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           install.packages("drat")
           drat:::add("epiforecasts")
@@ -63,6 +83,7 @@ jobs:
           install.packages("tidyverse")
           install.packages("EpiEstim")
         shell: Rscript {0}
+
       - name: Run R script
         run: Rscript  R_scripts/Rt_calcs.R
 
