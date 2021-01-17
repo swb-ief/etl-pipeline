@@ -1,4 +1,4 @@
-name: R_proc_v2
+name: phase2_rt_df
 
 on:
   workflow_dispatch: 
