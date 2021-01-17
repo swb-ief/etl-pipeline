@@ -6,8 +6,6 @@ import logging
 
 GSPREAD_CLIENT = None
 DEFAULT_WORKSHEET_URL = "https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k2ZraDb6DzgCOSXI0f0/edit#gid=0"
-# test purposes --> DEFAULT_WORKSHEET_URL = "https://docs.google.com/spreadsheets/d/1fkPkvIowcd2hob3qvq20iPhVGowquqLygLDTJt3aPQU/edit#gid=1452119190"
-
 
 WORKSHEET_URL = os.getenv("SWB_WORKSHEET_URL", DEFAULT_WORKSHEET_URL)
 
@@ -46,7 +44,6 @@ new_Rt_df = new_Rt_df[cols]
 new_Rt_df.columns = ['Unnamed: 0', 'date', 'type', 'median', 'lower', 'upper', 'mean.mean', 'CI_lower.mean', 'CI_upper.mean', 'city']
 
 # Read the existing doubling time numbers in days
-# new_dt_df = pd.read_csv("/usr/data/dt.csv")
 new_dt_df = pd.read_csv("/usr/data/doubling_time.csv")
 new_dt_df["city"] = "Mumbai"
 cols = ['Unnamed: 0', 'date', 'dt', 'city']

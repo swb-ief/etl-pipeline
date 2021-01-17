@@ -2,15 +2,7 @@
 ##                    Multiple City-Rscript                    #
 ################################################################
 
-# COVID 19 multiple city pipeline code
-# Aim:
-# 1. Convert code for V 1.3
-# 2. Change code to allow for multiple cities.
-# 3. import data from google sheet, calculate rt and doubling time, then upload the result as sheets
-# back into the google drive.
-
 # first load all the libraries needed.
-
 options(warn = -1)
 options(message = -1)
 
@@ -54,16 +46,10 @@ sheets_url <- "https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k
 
 df<- read_sheet(sheets_url,sheet="city_stats")
 
-# decide city or district to calculate for.
-# enter the city or district name as x.
 city <- 'Mumbai'
+df2 <- df %>% filter(district == city)
 # todo v2 --> city <- args[1]
 # todo v2 --> command line args or simply read from results of city criteria filters for RT and all districts for DT
-
-# filter to keep data from only city of interest.
-# here in the toy dataset have created a col - city with two values - mumbai , pune.
-# we can change this small code according to the data-set colname that we are actually using
-df2 <- df %>% filter(district == city)
 
 # ensure that there is no missing data for the columns here.
 # we need only 5 columns for the calculation - 
