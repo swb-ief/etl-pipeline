@@ -172,7 +172,9 @@ total_cases <- d2[[1]]$total_cases
 
 cases_dates <- d2[[1]]$cases_dates
 
-db2 <- compute_doubling_time(total_cases, cases_dates, time.gap = 7, alpha = 0.95)
+db2 <- compute_doubling_time(total_cases, cases_dates,
+    time.gap = 7, alpha = 0.95
+)
 
 db2$group <- 1
 
