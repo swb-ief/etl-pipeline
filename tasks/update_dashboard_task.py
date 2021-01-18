@@ -22,6 +22,7 @@ class UpdateDashboardTask(luigi.Task):
     storage_districts = 'Phase 2 - Districts'
     storage_states = 'Phase 2 - States'
     storage_wards = 'Phase 2 - Wards'
+    # add def for city_stats
 
     # data for which we do not track a history
     storage_states_static = 'Phase 2 - States - Static data'
