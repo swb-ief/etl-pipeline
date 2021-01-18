@@ -164,7 +164,7 @@ db1 <- compute_doubling_time(total_cases,
     time.gap = 7, alpha = 0.95
 )
 
-db1$group <- 0
+db1$group <- d1[[1]]$group[1] # insert the value for group placeholder.
 
 d2 <- a2[2]
 
@@ -176,7 +176,7 @@ db2 <- compute_doubling_time(total_cases, cases_dates,
     time.gap = 7, alpha = 0.95
 )
 
-db2$group <- 1
+db2$group <- d2[[1]]$group[1] # insert the value for the group placeholder.
 
 comp_db_time <- rbind(db1, db2)
 
