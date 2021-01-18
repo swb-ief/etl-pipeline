@@ -181,3 +181,22 @@ db2$group <- d2[[1]]$group[1] # insert the value for the group placeholder.
 comp_db_time <- rbind(db1, db2)
 
 comp_db_time # now this dataframe contains the doubling time for both groups 0/1.
+
+# going to test this code with group as character rather than number.
+# change that after using sample code in df3.
+# pick up after inserting that col in df3.
+# run after line 83.
+
+
+df3$group <- factor(df3$group,
+    levels = c(0, 1),
+    labels = c("Pune", "Nagpur")
+)
+
+
+df3 %>% count(group)
+
+# ran the rest of the code and it works.
+# creates a final dataaset comp_db_time that contains the grouping variable
+# as a column in the results dataset.
+# this can then be exported for graphing as needed.
