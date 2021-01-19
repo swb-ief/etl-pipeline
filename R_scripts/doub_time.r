@@ -200,3 +200,52 @@ df3 %>% count(group)
 # creates a final dataaset comp_db_time that contains the grouping variable
 # as a column in the results dataset.
 # this can then be exported for graphing as needed.
+
+
+# maybe a better way would be to prepare a function
+# that can run the doubling time within it.
+
+calc_db <- function(df) {
+    a <- df %>% group_by(group)
+
+    a2 <- group_split(a)
+
+    str(a2)
+
+
+
+
+    d1 <- a2[1]
+
+    total_cases <- d1[[1]]$total_cases
+
+    cases_dates <- d1[[1]]$cases_dates
+
+    db1 <- compute_doubling_time(total_cases,
+        cases_dates,
+        time.gap = 7, alpha = 0.95
+    )
+
+    db1$group <- d1[[1]]$group[1] # insert the value for group placeholder.
+
+    d2 <- a2[2]
+
+    total_cases <- d2[[1]]$total_cases
+
+    cases_dates <- d2[[1]]$cases_dates
+
+    db2 <- compute_doubling_time(total_cases, cases_dates,
+        time.gap = 7, alpha = 0.95
+    )
+
+    db2$group <- d2[[1]]$group[1] # insert the value for the group placeholder.
+
+    comp_db_time <- rbind(db1, db2)
+
+    return(data.frame(comp_db_time))
+    # now this dataframe contains the doubling time for both groups 0/1.
+}
+
+db_res <- calc_db(df3)
+
+db_res <- data.frame(db_res)
