@@ -1,1 +1,2 @@
 from .extract_covid19_india_data import ExtractCovid19IndiaData
+from .static_ward_data import get_static_ward_data
