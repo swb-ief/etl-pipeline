@@ -29,15 +29,15 @@ jobs:
       - name: install v8
         run: sudo apt-get install libv8-dev libcurl4-openssl-dev  -y 
 
-      - name: Download the input CSV
-        run: |
-          echo "trying to create a direcotry"
-          sudo mkdir /usr/data/
-          echo "created directory"
-          sudo chmod -R 644 /usr/data/
-          echo "ran chmod"
-          wget  -O /usr/data/city_stats.csv $CSV_DATA_SOURCE
-          echo "downloaded the file to machine"
+      # - name: Download the input CSV
+      #   run: |
+      #     echo "trying to create a direcotry"
+      #     sudo mkdir /usr/data/
+      #     echo "created directory"
+      #     sudo chmod -R 644 /usr/data/
+      #     echo "ran chmod"
+      #     wget  -O /usr/data/city_stats.csv $CSV_DATA_SOURCE
+      #     echo "downloaded the file to machine"
 
       - name: Install remotes devtools, googlesheets4, httpuv
         if: steps.cache.outputs.cache-hit != 'true'
