@@ -8,7 +8,7 @@ def _read_pdf(source_file_path):
 
 
 def _extract_wards_data_from_page(positive_cases_pdf_page) -> pd.DataFrame:
-    total_discharged_boundary = 610
+    total_discharged_boundary = 618
     discharged_deaths_boundary = 650
     deaths_active_boundary = 700
 
