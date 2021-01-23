@@ -35,6 +35,7 @@ jobs:
           sudo mkdir /usr/data/
           echo "created directory"
           sudo chmod -R 644 /usr/data/
+          echo "ran chmod"
           wget  -O /usr/data/city_stats.csv $CSV_DATA_SOURCE
           echo "downloaded the file to machine"
 
