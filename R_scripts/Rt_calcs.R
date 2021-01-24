@@ -7,9 +7,9 @@
 
 library(lubridate)
 library(tidyverse)
-library(EpiNow2)
-library(rstan)
-library(EpiEstim)
+# library(EpiNow2)
+# library(rstan)
+# library(EpiEstim)
 library(ggplot2)
 library(gridExtra)
 library(incidence)
