@@ -104,6 +104,18 @@ rt <-
 # get the summary estimates with the credible intervals.
 rt <- summary(rt, type = "parameters", params = "R")
 
+# dummy RT df
+date <- c('2021-01-15', '2021-01-16','2021-01-17','2021-01-18','2021-01-19')
+variable <- c('R','R','R','R','R')
+strat <- c(NA,NA,NA,NA,NA)
+type <- c('forecast','forecast','forecast','forecast','forecast')
+median <- c(.959,.959,.959,.959,.959)
+mean <- c(.968,.968,.968,.968,.968)
+sd <- c(.131,.131,.131,.131,.131 )
+lower_95 <- c(.76,.76,.76,.76,.76)
+upper_95 <- c(1.14,1.14,1.14,1.14,1.14)
+rt <- data.frame(date, variable, strat, type, median, mean, sd, lower_95, upper_95)
+
 # ============================
 # Doubling time
 
