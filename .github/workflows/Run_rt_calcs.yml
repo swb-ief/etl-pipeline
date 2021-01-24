@@ -60,11 +60,12 @@ jobs:
       #     install.packages("rstan")
       #   shell: Rscript {0}
 
+      # drat:::add("epiforecasts")
+      # install.packages("EpiEstim")
       - name: Install deps
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           install.packages("drat")
-      # drat:::add("epiforecasts")
           install.packages("ggplot2")
           install.packages("gridExtra")
           install.packages("magrittr")
@@ -72,7 +73,6 @@ jobs:
           install.packages("knitr")
           install.packages("dplyr")
           install.packages("tidyverse")
-      # install.packages("EpiEstim")
         shell: Rscript {0}
 
       - name: Run R script
