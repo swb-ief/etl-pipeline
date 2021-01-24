@@ -90,19 +90,19 @@ reporting_delay$max <- 30
 # values for generation time and incubation period have been defined now.
 # the code below is for v 1.3.0 package.
 # set credible interval as 0.95
-rt <-
-  EpiNow2::epinow(
-    reported_cases = df3,
-    generation_time = generation_time,
-    delays = delay_opts(incubation_period, reporting_delay),
-    rt = rt_opts(prior = list(mean = 2, sd = 0.2)),
-    stan = stan_opts(cores = 4, samples = 100),
-    verbose = TRUE,
-    CrIs = 0.95
-  )
+# rt <-
+#   EpiNow2::epinow(
+#     reported_cases = df3,
+#     generation_time = generation_time,
+#     delays = delay_opts(incubation_period, reporting_delay),
+#     rt = rt_opts(prior = list(mean = 2, sd = 0.2)),
+#     stan = stan_opts(cores = 4, samples = 100),
+#     verbose = TRUE,
+#     CrIs = 0.95
+#   )
 
 # get the summary estimates with the credible intervals.
-rt <- summary(rt, type = "parameters", params = "R")
+# rt <- summary(rt, type = "parameters", params = "R")
 
 # dummy RT df
 date <- c('2021-01-15', '2021-01-16','2021-01-17','2021-01-18','2021-01-19')
