@@ -75,17 +75,17 @@ df3 <- tibble(date, confirm)
 # need to get the generation_time and then the incubation_period.
 
 # get the generation and incubation time from the new EpiNow2 package.
-generation_time <- get_generation_time(disease = "SARS-CoV-2", source = "ganyani")
+# generation_time <- get_generation_time(disease = "SARS-CoV-2", source = "ganyani")
 
-incubation_period <- get_incubation_period(disease = "SARS-CoV-2", source = "lauer")
+# incubation_period <- get_incubation_period(disease = "SARS-CoV-2", source = "lauer")
 
 # model parameters as default
 # note that parameters about generation_time,
 # incubation_period, and reporting_delay are set as default in the package.
-reporting_delay <- EpiNow2::bootstrapped_dist_fit(rlnorm(100, log(6), 1))
+# reporting_delay <- EpiNow2::bootstrapped_dist_fit(rlnorm(100, log(6), 1))
 
 ## Set max allowed delay to 30 days to truncate computation
-reporting_delay$max <- 30
+# reporting_delay$max <- 30
 
 # values for generation time and incubation period have been defined now.
 # the code below is for v 1.3.0 package.
