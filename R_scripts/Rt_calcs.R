@@ -1,7 +1,6 @@
 ################################################################
 ##                    Multiple City-Rscript                    #
 ################################################################
-
 # first load all the libraries needed.
 options(warn = -1)
 options(message = -1)
