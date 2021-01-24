@@ -3,7 +3,7 @@ import unittest
 from datetime import datetime
 
 from numpy.testing import assert_allclose
-from pandas.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal, assert_series_equal
 from backend.metrics.calculations import *
 import pandas as pd
 import numpy as np
@@ -356,3 +356,154 @@ class TestCalculateMetrics(unittest.TestCase):
         result = raw_result['delta.deceased.ratio_per_million'].values
 
         assert_allclose(expected, result, rtol=1e-04)
+
+    def test_fourteen_day_avg_ratio_42(self):
+        data = {
+            'state': ['MA'] * 112,
+            'date': list(pd.date_range(start='2020-10-1', end='2021-01-20')),
+            'some_number': [42] * 112,
+        }
+
+        df = pd.DataFrame(data).set_index(['state', 'date'])
+        df['expected'] = [np.nan] * 20 + [1.] * 92
+        result = fourteen_day_avg_ratio(df['some_number'])
+
+        assert_series_equal(result, df['expected'], check_names=False)
+
+    def test_fourteen_day_avg_ratio_three_extra_indexes(self):
+        data = {
+            'index_one': ['state_name'] * 112,
+            'index_two': ['city_name'] * 112,
+            'index_three': ['ward_name'] * 112,
+            'date': list(pd.date_range(start='2020-10-1', end='2021-01-20')),
+            'some_number': [42] * 112,
+        }
+
+        df = pd.DataFrame(data).set_index(['index_one', 'index_two', 'index_three', 'date'])
+        df['expected'] = [np.nan] * 20 + [1.] * 92
+        result = fourteen_day_avg_ratio(df['some_number'])
+
+        assert_series_equal(result, df['expected'], check_names=False)
+
+    def test_fourteen_day_avg_ratio_gap(self):
+
+        data = {
+            'state': ['MA'] * 112,
+            'date': list(pd.date_range(start='2020-10-1', end='2021-01-20')),
+            'some_number': [42] * 112,
+        }
+
+        df = pd.DataFrame(data).set_index(['state', 'date'])
+
+        df = df.drop(('MA', datetime(2021, 1, 1)))
+
+        df['expected'] = [np.nan] * 20 + [1.] * 91
+        result = fourteen_day_avg_ratio(df['some_number'])
+
+        assert_series_equal(result, df['expected'], check_names=False)
+
+    def test_fourteen_day_avg_ratio(self):
+        data = {
+            'state': ['MA'] * 112,
+            'date': list(pd.date_range(start='2020-10-1', end='2021-01-20')),
+            'some_number': list(range(112)),
+        }
+
+        df = pd.DataFrame(data).set_index(['state', 'date'])
+        df['expected'] = [np.nan] * 20 + [
+            4.5,
+            4.142857143,
+            3.875,
+            3.666666667,
+            3.5,
+            3.363636364,
+            3.25,
+            3.153846154,
+            2.866666667,
+            2.647058824,
+            2.473684211,
+            2.333333333,
+            2.217391304,
+            2.12,
+            2.037037037,
+            1.965517241,
+            1.903225806,
+            1.848484848,
+            1.8,
+            1.756756757,
+            1.717948718,
+            1.682926829,
+            1.651162791,
+            1.622222222,
+            1.595744681,
+            1.571428571,
+            1.549019608,
+            1.528301887,
+            1.509090909,
+            1.49122807,
+            1.474576271,
+            1.459016393,
+            1.444444444,
+            1.430769231,
+            1.417910448,
+            1.405797101,
+            1.394366197,
+            1.383561644,
+            1.373333333,
+            1.363636364,
+            1.35443038,
+            1.345679012,
+            1.337349398,
+            1.329411765,
+            1.32183908,
+            1.314606742,
+            1.307692308,
+            1.301075269,
+            1.294736842,
+            1.288659794,
+            1.282828283,
+            1.277227723,
+            1.27184466,
+            1.266666667,
+            1.261682243,
+            1.256880734,
+            1.252252252,
+            1.247787611,
+            1.243478261,
+            1.239316239,
+            1.235294118,
+            1.231404959,
+            1.227642276,
+            1.224,
+            1.220472441,
+            1.217054264,
+            1.213740458,
+            1.210526316,
+            1.207407407,
+            1.204379562,
+            1.201438849,
+            1.19858156,
+            1.195804196,
+            1.193103448,
+            1.19047619,
+            1.187919463,
+            1.185430464,
+            1.183006536,
+            1.180645161,
+            1.178343949,
+            1.176100629,
+            1.173913043,
+            1.171779141,
+            1.16969697,
+            1.167664671,
+            1.165680473,
+            1.16374269,
+            1.161849711,
+            1.16,
+            1.15819209,
+            1.156424581,
+            1.154696133
+        ]
+        result = fourteen_day_avg_ratio(df['some_number'])
+
+        assert_series_equal(result, df['expected'], check_names=False)
