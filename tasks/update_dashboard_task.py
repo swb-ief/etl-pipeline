@@ -48,9 +48,11 @@ class UpdateDashboardTask(luigi.Task):
         'total.confirmed',
         'total.deceased',
 
+        'total.confirmed.14_day_ratio',
+
         'delta.confirmed.ratio_per_million',
         'delta.deceased.ratio_per_million',
-        
+
         'total.confirmed.ratio_per_million',
         'total.deceased.ratio_per_million',
 
