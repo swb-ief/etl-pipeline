@@ -2,16 +2,16 @@
 ##                    Multiple City-Rscript                    #
 ################################################################
 # first load all the libraries needed.
-options(warn = -1)
-options(message = -1)
+# options(warn = -1)
+# options(message = -1)
 
-library("lubridate")
-library("tidyverse")
-library("EpiNow2")
-library("rstan")
+library(lubridate)
+library(tidyverse)
+library(EpiNow2)
+library(rstan)
 library(EpiEstim)
 library(ggplot2)
-library("gridExtra")
+library(gridExtra)
 library(incidence)
 library(magrittr)
 library(readr) # for read_csv
@@ -42,6 +42,8 @@ gs4_deauth()
 sheets_url <- "https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k2ZraDb6DzgCOSXI0f0/edit#gid=0"
 
 df <- read_sheet(sheets_url, sheet = "city_stats")
+
+print(df)
 
 city <- "Mumbai"
 df2 <- df %>% filter(district == city)
@@ -176,5 +178,6 @@ cases_dates <- df3$date
 db <- compute_doubling_time(total_cases, cases_dates, time.gap = 7, alpha = 0.95)
 
 # right now using the same code provided by @krishna for saving both rt and doubling_time results.
+print("write to local FS")
 write.csv(rt, "/usr/data/epinow2_out.csv")
 write.csv(db, "/usr/data/doubling_time.csv")
