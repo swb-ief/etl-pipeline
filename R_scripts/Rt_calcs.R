@@ -5,21 +5,19 @@
 options(warn = -1)
 options(message = -1)
 
-suppressMessages(library("lubridate"))
-suppressMessages(library("tidyverse"))
-suppressMessages(library("EpiNow2"))
-suppressMessages(library("rstan"))
-suppressMessages(library(EpiEstim))
-suppressMessages(library(ggplot2))
-suppressMessages(library("gridExtra"))
-suppressMessages(library(incidence))
-suppressMessages(library(magrittr))
-suppressMessages(library(readr)) # for read_csv
-suppressMessages(library(knitr)) # for kable
-suppressMessages(library(readxl))
-suppressMessages(library(googlesheets4))
-
-
+library("lubridate")
+library("tidyverse")
+library("EpiNow2")
+library("rstan")
+library(EpiEstim)
+library(ggplot2)
+library("gridExtra")
+library(incidence)
+library(magrittr)
+library(readr) # for read_csv
+library(knitr) # for kable
+library(readxl)
+library(googlesheets4)
 
 # to make the code acceptable for multiple
 # cites, we need to keep the name of the df constant
