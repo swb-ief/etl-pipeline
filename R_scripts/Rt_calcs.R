@@ -12,7 +12,7 @@ library(tidyverse)
 # library(EpiEstim)
 library(ggplot2)
 library(gridExtra)
-library(incidence)
+# library(incidence)
 library(magrittr)
 library(readr) # for read_csv
 library(knitr) # for kable
