@@ -183,6 +183,7 @@ class TestCalculateMetrics(unittest.TestCase):
                             'MA.21.total.confirmed', 'MA.21.total.deceased', 'MA.21.total.recovered',
                             'MA.21.total.other', 'delta.positivity', 'delta.percent.case.growth',
                             'delta.hospitalized', 'total.hospitalized', 'delta.active',
+                            'total.confirmed.14_day_ratio',
                             'delta.confirmed.ratio_per_million', 'delta.deceased.ratio_per_million',
                             'total.confirmed.ratio_per_million', 'total.deceased.ratio_per_million',
                             'MA.21.delta.positivity', 'MA.21.delta.hospitalized', 'MA.21.delta.active']

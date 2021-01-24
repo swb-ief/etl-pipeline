@@ -76,7 +76,10 @@ def fourteen_day_avg_ratio(values: pd.Series) -> pd.Series:
     other_index_values = values.index.droplevel('date').unique().tolist()
 
     assert len(other_index_values) == 1, "Should be called with a grouping by location (state/district/ward)"
-    other_index_values = other_index_values[0]  # to extract the tuple
+
+    # other_index_values can be ['state'] or [('state', 'district')], etc.. notice the tuple
+    # we just want to iterate over these so in the second case we just pick the tuple
+    other_index_values = other_index_values if isinstance(other_index_values[0], str) else other_index_values[0]
 
     series.index = series.index.droplevel(other_index_names)
 
