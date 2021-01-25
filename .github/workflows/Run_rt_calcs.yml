@@ -34,7 +34,7 @@ jobs:
           echo "trying to create a direcotry"
           sudo mkdir /usr/data/
           echo "created directory"
-          sudo chmod -R 644 /usr/data/
+          sudo chmod -R ugo+rwx /usr/data/
 
       # - name: Download the input CSV
       #   run: |
