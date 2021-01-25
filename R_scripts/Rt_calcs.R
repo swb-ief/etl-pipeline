@@ -7,12 +7,12 @@
 
 library(lubridate)
 library(tidyverse)
-# library(EpiNow2)
-# library(rstan)
-# library(EpiEstim)
+library(EpiNow2)
+library(rstan)
+library(EpiEstim)
 library(ggplot2)
 library(gridExtra)
-# library(incidence)
+library(incidence)
 library(magrittr)
 library(readr) # for read_csv
 library(knitr) # for kable
@@ -75,46 +75,46 @@ df3 <- tibble(date, confirm)
 # need to get the generation_time and then the incubation_period.
 
 # get the generation and incubation time from the new EpiNow2 package.
-# generation_time <- get_generation_time(disease = "SARS-CoV-2", source = "ganyani")
+generation_time <- get_generation_time(disease = "SARS-CoV-2", source = "ganyani")
 
-# incubation_period <- get_incubation_period(disease = "SARS-CoV-2", source = "lauer")
+incubation_period <- get_incubation_period(disease = "SARS-CoV-2", source = "lauer")
 
 # model parameters as default
 # note that parameters about generation_time,
 # incubation_period, and reporting_delay are set as default in the package.
-# reporting_delay <- EpiNow2::bootstrapped_dist_fit(rlnorm(100, log(6), 1))
+reporting_delay <- EpiNow2::bootstrapped_dist_fit(rlnorm(100, log(6), 1))
 
 ## Set max allowed delay to 30 days to truncate computation
-# reporting_delay$max <- 30
+reporting_delay$max <- 30
 
 # values for generation time and incubation period have been defined now.
 # the code below is for v 1.3.0 package.
 # set credible interval as 0.95
-# rt <-
-#   EpiNow2::epinow(
-#     reported_cases = df3,
-#     generation_time = generation_time,
-#     delays = delay_opts(incubation_period, reporting_delay),
-#     rt = rt_opts(prior = list(mean = 2, sd = 0.2)),
-#     stan = stan_opts(cores = 4, samples = 100),
-#     verbose = TRUE,
-#     CrIs = 0.95
-#   )
+rt <-
+  EpiNow2::epinow(
+    reported_cases = df3,
+    generation_time = generation_time,
+    delays = delay_opts(incubation_period, reporting_delay),
+    rt = rt_opts(prior = list(mean = 2, sd = 0.2)),
+    stan = stan_opts(cores = 4, samples = 100),
+    verbose = TRUE,
+    CrIs = 0.95
+  )
 
 # get the summary estimates with the credible intervals.
-# rt <- summary(rt, type = "parameters", params = "R")
+rt <- summary(rt, type = "parameters", params = "R")
 
 # dummy RT df
-date <- c('2021-01-15', '2021-01-16','2021-01-17','2021-01-18','2021-01-19')
-variable <- c('R','R','R','R','R')
-strat <- c(NA,NA,NA,NA,NA)
-type <- c('forecast','forecast','forecast','forecast','forecast')
-median <- c(.959,.959,.959,.959,.959)
-mean <- c(.968,.968,.968,.968,.968)
-sd <- c(.131,.131,.131,.131,.131 )
-lower_95 <- c(.76,.76,.76,.76,.76)
-upper_95 <- c(1.14,1.14,1.14,1.14,1.14)
-rt <- data.frame(date, variable, strat, type, median, mean, sd, lower_95, upper_95)
+# date <- c('2021-01-15', '2021-01-16','2021-01-17','2021-01-18','2021-01-19')
+# variable <- c('R','R','R','R','R')
+# strat <- c(NA,NA,NA,NA,NA)
+# type <- c('forecast','forecast','forecast','forecast','forecast')
+# median <- c(.959,.959,.959,.959,.959)
+# mean <- c(.968,.968,.968,.968,.968)
+# sd <- c(.131,.131,.131,.131,.131 )
+# lower_95 <- c(.76,.76,.76,.76,.76)
+# upper_95 <- c(1.14,1.14,1.14,1.14,1.14)
+# rt <- data.frame(date, variable, strat, type, median, mean, sd, lower_95, upper_95)
 
 # ============================
 # Doubling time

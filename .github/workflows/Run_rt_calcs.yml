@@ -54,27 +54,27 @@ jobs:
           install.packages("httpuv")
         shell: Rscript {0}
 
-      # - name: Install Epinow2
-      #   if: steps.cache.outputs.cache-hit != 'true'
-      #   run: |
-      #     require(devtools)
-      #     install.packages("EpiNow2")
-      #   shell: Rscript {0}
+      - name: Install Epinow2
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          require(devtools)
+          install.packages("EpiNow2")
+        shell: Rscript {0}
 
-      # - name: Install Rstan
-      #   if: steps.cache.outputs.cache-hit != 'true'
-      #   run: |
-      #     install.packages("rstan")
-      #   shell: Rscript {0}
+      - name: Install Rstan
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          install.packages("rstan")
+        shell: Rscript {0}
 
-      # drat:::add("epiforecasts")
-      # install.packages("EpiEstim")
       - name: Install deps
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           install.packages("drat")
           install.packages("ggplot2")
           install.packages("gridExtra")
+          drat:::add("epiforecasts")
+          install.packages("EpiEstim")
           install.packages("magrittr")
           install.packages("readr")
           install.packages("knitr")
