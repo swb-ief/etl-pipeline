@@ -29,6 +29,13 @@ jobs:
       - name: install v8
         run: sudo apt-get install libv8-dev libcurl4-openssl-dev  -y 
 
+      - name: Create Data Directory
+        run: |
+          echo "trying to create a direcotry"
+          sudo mkdir /usr/data/
+          echo "created directory"
+          sudo chmod -R 644 /usr/data/
+
       # - name: Download the input CSV
       #   run: |
       #     echo "trying to create a direcotry"
