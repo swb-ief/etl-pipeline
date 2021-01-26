@@ -1,5 +1,6 @@
 import logging
 from datetime import date
+from backend.data.utility import create_delta_cols
 
 import luigi
 import pandas as pd
@@ -53,12 +54,11 @@ class FetchWardDataTask(luigi.Task):
         repository.store_dataframe(all_wards, ward_storage_location, allow_create=True, store_index=True)
 
         # impute delta's atleast for Mumbai this is needed it only provides totals
-        delta_needed_for = ['total.confirmed', 'total.recovered', 'total.deceased', 'total.active']
+        delta_needed_for = ['confirmed', 'recovered', 'deceased', 'active']
         group_by_cols = ['state', 'district', 'ward']
         all_wards = create_delta_cols(all_wards,group_by_cols, delta_needed_for)
 
         all_wards.to_csv(self.output().path, index=True)
-
 
     def output(self):
         return luigi.LocalTarget(f'wards_{date.today()}.csv')
@@ -67,14 +67,3 @@ class FetchWardDataTask(luigi.Task):
         return self.output().exists()
 
 
-def create_delta_cols( df,group_by_cols, delta_needed_for_cols):
-    index_cols = df.index.names
-    df = df.reset_index()
-    df = df.sort_values(index_cols) # this may not be strictly needed. Does DF already sort by index?
-
-    for column in delta_needed_for_cols:
-        df[f'delta.{column}'] = df.groupby(group_by_cols)[f'{column}'].diff().fillna(
-            0)
-    df = df.set_index(index_cols)
-
-    return df

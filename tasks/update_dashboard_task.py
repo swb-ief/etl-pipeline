@@ -6,13 +6,14 @@ from datetime import datetime
 import pandas as pd
 import logging
 
+from backend.data.utility import create_delta_cols
 from backend.config import get_config
 from backend.data import ExtractCovid19IndiaData
 from backend.data.utility import last_values_by_date
 from backend.repository import GSheetRepository, Repository
 from backend.metrics.calculations import impute_hospitalization_percentages, extend_and_impute_metrics
-from .fetch_covid19_india_data_task import FetchCovid19IndiaDataTask
-from .fetch_ward_data import FetchWardDataTask
+from tasks.fetch_covid19_india_data_task import FetchCovid19IndiaDataTask
+from tasks.fetch_ward_data import FetchWardDataTask
 
 log = logging.getLogger(__name__)
 
@@ -61,10 +62,10 @@ class UpdateDashboardTask(luigi.Task):
         'MA.21.delta.positivity',
         'MA.21.delta.tested',
 
-        'delta.total.confirmed',
-        'delta.total.recovered',
-        'delta.total.active',
-        'delta.total.deceased'
+        'delta.confirmed',
+        'delta.recovered',
+        'delta.active',
+        'delta.deceased'
         # phase 1 name MA.21.daily.tests
     ]
     # Not yet added R generated metrics mean.mean, CI_lower.mean, CI_upper.mean, doubling.time
