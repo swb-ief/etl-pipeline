@@ -1,7 +1,9 @@
-import pandas as pd
-import luigi
-from datetime import date
 import logging
+from datetime import date
+from backend.data.utility import create_delta_cols
+
+import luigi
+import pandas as pd
 
 from backend import GSheetRepository
 from backend.config import get_config
@@ -52,6 +54,10 @@ class FetchWardDataTask(luigi.Task):
         repository.store_dataframe(all_wards, ward_storage_location, allow_create=True, store_index=True)
 
         # impute delta's atleast for Mumbai this is needed it only provides totals
+        delta_needed_for = ['confirmed', 'recovered', 'deceased', 'active']
+        group_by_cols = ['state', 'district', 'ward']
+        all_wards = create_delta_cols(all_wards,group_by_cols, delta_needed_for)
+
         all_wards.to_csv(self.output().path, index=True)
 
     def output(self):
@@ -59,3 +65,5 @@ class FetchWardDataTask(luigi.Task):
 
     def complete(self):
         return self.output().exists()
+
+

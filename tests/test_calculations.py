@@ -2,6 +2,7 @@ import os
 import unittest
 from datetime import datetime
 
+
 from numpy.testing import assert_allclose
 from pandas.testing import assert_frame_equal, assert_series_equal
 from backend.metrics.calculations import *
@@ -186,7 +187,8 @@ class TestCalculateMetrics(unittest.TestCase):
                             'total.confirmed.14_day_ratio',
                             'delta.confirmed.ratio_per_million', 'delta.deceased.ratio_per_million',
                             'total.confirmed.ratio_per_million', 'total.deceased.ratio_per_million',
-                            'MA.21.delta.positivity', 'MA.21.delta.hospitalized', 'MA.21.delta.active']
+                            'MA.21.delta.positivity', 'MA.21.delta.hospitalized', 'MA.21.delta.active'
+                             ]
         expected_shape = (measurements * districts, len(expected_columns))
 
         result = extend_and_impute_metrics(
