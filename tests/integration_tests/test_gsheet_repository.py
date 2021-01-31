@@ -6,8 +6,9 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from backend import GSheetRepository
+from backend.repository import GSheetRepository
 from backend.config import get_config
+
 
 @pytest.mark.skip("gcloud issues")
 @pytest.mark.skipif('CI' not in os.environ, reason="Can only run on github (due to secrets)")

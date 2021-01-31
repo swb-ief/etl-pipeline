@@ -6,7 +6,7 @@ import luigi
 import pandas as pd
 import pytest
 
-from backend import GSheetRepository
+from backend.repository import GSheetRepository
 from tasks.districts.DownloadFileTask import DownloadFileTask
 from tasks.fetch_ward_data import FetchWardDataTask
 
