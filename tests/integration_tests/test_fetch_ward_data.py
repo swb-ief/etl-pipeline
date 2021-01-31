@@ -59,7 +59,7 @@ def test_fetch_ward_data_run(pdf_path):
 def test_fetch_ward_data_run_with_sheet_data():
     # contains data from 01-Jan while the existing data is from 03 Jan so should append
     pdf_path = '../samples/mumbai_dashboard_2020_01_02.pdf'
-    expected = (48, 4)
+    expected = (48, 6)
 
     results = dict()
 
@@ -110,7 +110,7 @@ def test_fetch_ward_data_run_with_sheet_data():
 def test_fetch_ward_data_run_with_old_sheet_data():
     # pdf and the csv both have data for Jan 3 this should not lead to duplicates
     pdf_path = '../samples/mumbai_dashboard_2020_01_04.pdf'
-    expected = (24, 4)
+    expected = (24, 6)
 
     results = dict()
 
