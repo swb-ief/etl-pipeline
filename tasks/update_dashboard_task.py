@@ -73,10 +73,12 @@ class UpdateDashboardTask(luigi.Task):
     # Not yet added R generated metrics mean.mean, CI_lower.mean, CI_upper.mean, doubling.time
 
     state_keys = ['date', 'state']
-    district_keys = ['date', 'state', 'district']
+    district_keys = state_keys + ['district']
+    ward_keys = district_keys + ['ward']
 
     state_columns_needed_by_dashboard = state_keys + metrics_needed_by_dashboard
     district_columns_needed_by_dashboard = district_keys + metrics_needed_by_dashboard
+    ward_columns_needed_by_dashboard = ward_keys + metrics_needed_by_dashboard
 
     def requires(self):
         return {
@@ -128,31 +130,32 @@ class UpdateDashboardTask(luigi.Task):
         )
 
         ward_data = all_ward_data[all_ward_data['date'] >= start_date]
-        # disabled because we are missing some columns like all the delta. columns that extend_and_impute expects
-        # ward_data = extend_and_impute_metrics(
-        #     raw_metrics=ward_data,
-        #     hospitalizations=hospitalizations_updated,
-        #     grouping_columns=['state', 'district', 'ward']
-        # )
+
+        ward_data = extend_and_impute_metrics(
+            raw_metrics=ward_data,
+            hospitalizations=hospitalizations_updated,
+            grouping_columns=['state', 'district', 'ward']
+        )
 
         self.update_population_sheets(state_data, district_data, repository)
 
         # Idea placeholder
-        # Calculate 'todays' top 20ish cities and add that top 20 as a tab in the google sheet so the dashboard can
+        # Calculate today's top 20ish cities and add that top 20 as a tab in the google sheet so the dashboard can
         # get access to it.
 
         # validate and filter
         self.states_is_valid = self._has_all_columns(state_data, self.state_columns_needed_by_dashboard)
         self.districts_is_valid = self._has_all_columns(district_data, self.district_columns_needed_by_dashboard)
-        self.wards_is_valid = True  # TODO
+        self.wards_is_valid = self._has_all_columns(ward_data, self.ward_columns_needed_by_dashboard)
 
         states_filtered = state_data[self.state_columns_needed_by_dashboard]
         districts_filtered = district_data[self.district_columns_needed_by_dashboard]
+        wards_filtered = ward_data[self.ward_columns_needed_by_dashboard]
 
         repository.store_dataframe(hospitalizations_updated, self.storage_hospitalizations, allow_create=True)
         repository.store_dataframe(states_filtered, self.storage_states, allow_create=True)
         repository.store_dataframe(districts_filtered, self.storage_districts, allow_create=True)
-        repository.store_dataframe(ward_data, self.storage_wards, allow_create=True)
+        repository.store_dataframe(wards_filtered, self.storage_wards, allow_create=True)
 
     @staticmethod
     def _has_all_columns(df: pd.DataFrame, columns: List[str]) -> bool:

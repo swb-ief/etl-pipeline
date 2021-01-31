@@ -24,8 +24,8 @@ class TestUpdateGSheetTask(unittest.TestCase):
         expected_results = {
             UpdateDashboardTask.storage_hospitalizations: (307, 2),
             UpdateDashboardTask.storage_states: (9790, metrics_count + 2),  # + 2 date, state
-            UpdateDashboardTask.storage_districts: (156697, metrics_count + 3)  # +3 date, state, district
-            # TODO UpdateDashboardTask.storage_wards: (10, metrics_count + 4)  # +4 date, state, district, wards
+            UpdateDashboardTask.storage_districts: (156697, metrics_count + 3),  # +3 date, state, district
+            UpdateDashboardTask.storage_wards: (24, metrics_count + 4)  # +4 date, state, district, wards
         }
 
         storage_prefix = 'test_update_run_'
@@ -38,8 +38,7 @@ class TestUpdateGSheetTask(unittest.TestCase):
 
             UpdateDashboardTask.storage_states_static,
             UpdateDashboardTask.storage_districts_static,
-        ]
-                                 ]
+        ]]
 
         def mock_exists(self, storage_name):
             if storage_name == 'raw_ward_data':
@@ -108,8 +107,8 @@ class TestUpdateGSheetTask(unittest.TestCase):
             expected_columns, result_columns = expected[1], results[worksheet].shape[1]
 
             # this is an integration test so rows will keep growing, columns should stay the same however
-            self.assertEqual(result_rows, expected_rows, f'Expected more rows for worksheet {worksheet}')
-            self.assertEqual(result_columns, expected_columns,
+            self.assertEqual(expected_rows, result_rows, f'Expected more rows for worksheet {worksheet}')
+            self.assertEqual(expected_columns, result_columns,
                              f'Number of columns does not match expectations for {worksheet}')
 
         for file in expected_output_files:

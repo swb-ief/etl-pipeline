@@ -1,5 +1,7 @@
 import logging
 from datetime import date
+
+from backend.data import get_static_ward_data
 from backend.data.utility import create_delta_cols
 
 import luigi
@@ -54,9 +56,13 @@ class FetchWardDataTask(luigi.Task):
         repository.store_dataframe(all_wards, ward_storage_location, allow_create=True, store_index=True)
 
         # impute delta's atleast for Mumbai this is needed it only provides totals
-        delta_needed_for = ['confirmed', 'recovered', 'deceased', 'active']
+        delta_needed_for = ['tested', 'confirmed', 'recovered', 'deceased', 'active', 'other']
         group_by_cols = ['state', 'district', 'ward']
-        all_wards = create_delta_cols(all_wards,group_by_cols, delta_needed_for)
+        all_wards = create_delta_cols(all_wards, group_by_cols, delta_needed_for)
+
+        # add population
+        static_ward_data = get_static_ward_data()
+        all_wards = all_wards.join(static_ward_data, on=group_by_cols, how='left')
 
         all_wards.to_csv(self.output().path, index=True)
 
@@ -65,5 +71,3 @@ class FetchWardDataTask(luigi.Task):
 
     def complete(self):
         return self.output().exists()
-
-
