@@ -1,10 +1,25 @@
 state,district,ward,population
-"MH","Mumbai","A", 210926
-"MH","Mumbai","B", 140480
-"MH","Mumbai","C", 191670
-"MH","Mumbai","D", 378610
-"MH","Mumbai","E", 439390
-"MH","Mumbai","F", 430406
-"MH","Mumbai","G", 537032
-"MH","Mumbai","H", 478413
-"MH","Mumbai","I", 516552
+"MH","Mumbai","A",210847
+"MH","Mumbai","B",140633
+"MH","Mumbai","C",202922
+"MH","Mumbai","D",382841
+"MH","Mumbai","E",440335
+"MH","Mumbai","FS",396122
+"MH","Mumbai","FN",524393
+"MH","Mumbai","GS",457931
+"MH","Mumbai","GN",582007
+"MH","Mumbai","HE",580835
+"MH","Mumbai","HW",337391
+"MH","Mumbai","KE",810002
+"MH","Mumbai","KW",70068
+"MH","Mumbai","L",778218
+"MH","Mumbai","ME",67485
+"MH","Mumbai","MW",41404
+"MH","Mumbai","N",619556
+"MH","Mumbai","PS",437849
+"MH","Mumbai","PN",796775
+"MH","Mumbai","RS",589886
+"MH","Mumbai","RC",513077
+"MH","Mumbai","RN",363827
+"MH","Mumbai","S",691227
+"MH","Mumbai","T",330195
