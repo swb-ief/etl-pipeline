@@ -12,6 +12,14 @@ class AWSFileRepository(Repository):
     """ csv file based repository
 
     :remarks: Assumes AWS credentials are set in the environment as expected by the boto3 library
+    Use this in GitHub Workflow (update the secrets names and the region)
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-2
+
     """
 
     def __init__(self, bucket):
