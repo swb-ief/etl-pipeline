@@ -2,6 +2,8 @@ name: Code quality validation
 
 on:
   push:
+    branches:
+      - master
   pull_request:
 
 
