@@ -10,7 +10,7 @@ from backend.data.utility import create_delta_cols
 from backend.config import get_config
 from backend.data import ExtractCovid19IndiaData
 from backend.data.utility import last_values_by_date
-from backend.repository import GSheetRepository, Repository
+from backend.repository import GSheetRepository, Repository, AWSFileRepository
 from backend.metrics.calculations import impute_hospitalization_percentages, extend_and_impute_metrics
 from tasks.fetch_covid19_india_data_task import FetchCovid19IndiaDataTask
 from tasks.fetch_ward_data import FetchWardDataTask
@@ -91,7 +91,8 @@ class UpdateDashboardTask(luigi.Task):
 
         # we are skipping older data since we only have low case numbers there.
         start_date = datetime.strptime(config['dashboard']['start date'], '%Y-%m-%d')
-        repository = GSheetRepository(config['google sheets']['url production'])
+        # repository = GSheetRepository(config['google sheets']['url production'])
+        repository = AWSFileRepository(config['aws']['bucket production'])
 
         fetch_covid19_india_task = self.input()['state_district_data']
         fetch_wards_task = self.input()['ward_data']

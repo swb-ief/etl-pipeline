@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pandas as pd
 import luigi
 
-from backend.repository.gsheet_repository import GSheetRepository
+from backend.repository import AWSFileRepository
 from tasks import FetchCovid19IndiaDataTask
 from tasks.districts import DownloadFileTask
 from tasks.update_dashboard_task import UpdateDashboardTask
@@ -12,7 +12,7 @@ from tasks.update_dashboard_task import UpdateDashboardTask
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-class TestUpdateGSheetTask(unittest.TestCase):
+class TestUpdateDashboardTask(unittest.TestCase):
 
     def test_update_dashboard_run(self):
         """ This will run local parts only using files from sample etc...
@@ -91,9 +91,9 @@ class TestUpdateGSheetTask(unittest.TestCase):
         def mock_download_task_output(self):
             return DownloadOutputMock()
 
-        with patch.object(GSheetRepository, 'get_dataframe', new=mock_get_dataframe), \
-                patch.object(GSheetRepository, 'store_dataframe', new=mock_store_dataframe), \
-                patch.object(GSheetRepository, 'exists', new=mock_exists), \
+        with patch.object(AWSFileRepository, 'get_dataframe', new=mock_get_dataframe), \
+                patch.object(AWSFileRepository, 'store_dataframe', new=mock_store_dataframe), \
+                patch.object(AWSFileRepository, 'exists', new=mock_exists), \
                 patch.object(FetchCovid19IndiaDataTask, 'output', new=mock_output), \
                 patch.object(DownloadFileTask, 'output', new=mock_download_task_output):
 
