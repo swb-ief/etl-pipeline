@@ -34,10 +34,7 @@ class AWSFileRepository(Repository):
 
         file_name = self._convert_to_filename(storage_location)
 
-        if not store_index:
-            df = df.reset_index(drop=True)
-
-        df.to_csv(file_name)
+        df.to_csv(file_name, index=store_index)
         self._upload_file(file_name, self.bucket)
 
     def get_dataframe(self, storage_location: str) -> pd.DataFrame:
@@ -45,7 +42,7 @@ class AWSFileRepository(Repository):
         file_name = self._convert_to_filename(storage_location)
 
         self._download_file(file_name, self.bucket)
-        df = pd.read_csv(file_name)
+        df = pd.read_csv(file_name, parse_dates=['date'], header=0)
 
         return df
 
