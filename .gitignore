@@ -140,3 +140,4 @@ cython_debug/
 # for this project
 .idea
 temp/
+.Rproj.user

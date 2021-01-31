@@ -1,9 +1,9 @@
-name: R_proc
+name: phase2_rt_df
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: 
   schedule:
-    - cron: '30 18 * * *'
+    - cron:  '30 18 * * *'
 
 jobs:
   setup_run_r:
@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: checkout this repo
         uses: actions/checkout@v2
-        with:
+        with: 
           ref: ${{ github.head_ref }}
 
       - name:  setup R
@@ -29,15 +29,23 @@ jobs:
       - name: install v8
         run: sudo apt-get install libv8-dev libcurl4-openssl-dev  -y 
 
-      # - name: Download the input CSV
-      #   run: |
-      #     echo "trying to create a direcotry"
-      #     sudo mkdir /usr/data/
-      #     echo "created directory"
-      #     sudo chmod -R 644 /usr/data/
-      #     echo "ran chmod"
-      #     wget  -O /usr/data/city_stats.csv $CSV_DATA_SOURCE
-      #     echo "downloaded the file to machine"
+      - name: Download the input CSV
+        run: |
+          echo "trying to create a direcotry"
+          sudo mkdir /usr/data/
+          echo "created directory"
+          sudo chmod -R 777 /usr/data/
+          wget  -O /usr/data/city_stats.csv $CSV_DATA_SOURCE
+          echo "downloaded the file to machine"
+
+      - name: Dependency Cache
+        id: cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.local/share/renv
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: |
+              ${{ runner.os }}-renv-
 
       - name: Install remotes devtools, googlesheets4, httpuv
         if: steps.cache.outputs.cache-hit != 'true'
@@ -46,19 +54,6 @@ jobs:
           install.packages("devtools")
           install.packages("googlesheets4")
           install.packages("httpuv")
-        shell: Rscript {0}
-
-      - name: Install Epinow2
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          require(devtools)
-          install.packages("EpiNow2")
-        shell: Rscript {0}
-
-      - name: Install Rstan
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          install.packages("rstan")
         shell: Rscript {0}
 
       - name: Install deps
@@ -76,15 +71,31 @@ jobs:
           install.packages("EpiEstim")
         shell: Rscript {0}
 
-      - name: Run R script
-        run: Rscript  R_scripts/Rt_calcs.R
+      - name: Run R DT script
+        run: Rscript  R_scripts/ph2_Dt_calcs.R
+
+      - name: Install Epinow2
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          require(devtools)
+          install.packages("EpiNow2")
+        shell: Rscript {0}
+
+      - name: Install Rstan
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          install.packages("rstan")
+        shell: Rscript {0}
+
+      - name: Run R RT script
+        run: Rscript  R_scripts/ph2_Rt_calcs.R
 
       - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
-          version: '290.0.1'
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          service_account_email: ${{ secrets.GCP_SA_EMAIL }}
-          export_default_credentials: true
+         version: '290.0.1'
+         service_account_key: ${{ secrets.GCP_SA_KEY }}
+         service_account_email: ${{ secrets.GCP_SA_EMAIL }}
+         export_default_credentials: true
       - run: gcloud info
 
       - name: Set up Python
@@ -95,7 +106,7 @@ jobs:
         run: |
 
           pip install pandas gspread  numpy luigi
-
+          
       - name: Run py script
         run: |
           python R_scripts/push_Rt_to_gsheets.py
