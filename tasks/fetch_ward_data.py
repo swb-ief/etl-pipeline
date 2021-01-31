@@ -7,7 +7,7 @@ from backend.data.utility import create_delta_cols
 import luigi
 import pandas as pd
 
-from backend import GSheetRepository
+from backend.repository import GSheetRepository
 from backend.config import get_config
 from tasks.districts import FetchMumbaiWardsTask
 
