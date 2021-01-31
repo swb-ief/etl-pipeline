@@ -1,26 +1,23 @@
 ################################################################
 ##                    Multiple City-Rscript                    #
 ################################################################
-
 # first load all the libraries needed.
-options(warn = -1)
-options(message = -1)
+# options(warn = -1)
+# options(message = -1)
 
-suppressMessages(library("lubridate"))
-suppressMessages(library("tidyverse"))
-suppressMessages(library("EpiNow2"))
-suppressMessages(library("rstan"))
-suppressMessages(library(EpiEstim))
-suppressMessages(library(ggplot2))
-suppressMessages(library("gridExtra"))
-suppressMessages(library(incidence))
-suppressMessages(library(magrittr))
-suppressMessages(library(readr)) # for read_csv
-suppressMessages(library(knitr)) # for kable
-suppressMessages(library(readxl))
-suppressMessages(library(googlesheets4))
-
-
+library(lubridate)
+library(tidyverse)
+library(EpiNow2)
+library(rstan)
+library(EpiEstim)
+library(ggplot2)
+library(gridExtra)
+library(incidence)
+library(magrittr)
+library(readr) # for read_csv
+library(knitr) # for kable
+library(readxl)
+library(googlesheets4)
 
 # to make the code acceptable for multiple
 # cites, we need to keep the name of the df constant
@@ -45,6 +42,8 @@ gs4_deauth()
 sheets_url <- "https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k2ZraDb6DzgCOSXI0f0/edit#gid=0"
 
 df <- read_sheet(sheets_url, sheet = "city_stats")
+
+print(df)
 
 city <- "Mumbai"
 df2 <- df %>% filter(district == city)
@@ -118,6 +117,18 @@ upper_95 <- c(1.14,1.14,1.14,1.14,1.14)
 rt <- data.frame(date, variable, strat, type, median, mean, sd, lower_95, upper_95)
 
 
+# dummy RT df
+# date <- c('2021-01-15', '2021-01-16','2021-01-17','2021-01-18','2021-01-19')
+# variable <- c('R','R','R','R','R')
+# strat <- c(NA,NA,NA,NA,NA)
+# type <- c('forecast','forecast','forecast','forecast','forecast')
+# median <- c(.959,.959,.959,.959,.959)
+# mean <- c(.968,.968,.968,.968,.968)
+# sd <- c(.131,.131,.131,.131,.131 )
+# lower_95 <- c(.76,.76,.76,.76,.76)
+# upper_95 <- c(1.14,1.14,1.14,1.14,1.14)
+# rt <- data.frame(date, variable, strat, type, median, mean, sd, lower_95, upper_95)
+
 # ============================
 # Doubling time
 
@@ -180,5 +191,6 @@ cases_dates <- df3$date
 db <- compute_doubling_time(total_cases, cases_dates, time.gap = 7, alpha = 0.95)
 
 # right now using the same code provided by @krishna for saving both rt and doubling_time results.
+print("write to local FS")
 write.csv(rt, "/usr/data/epinow2_out.csv")
 write.csv(db, "/usr/data/doubling_time.csv")

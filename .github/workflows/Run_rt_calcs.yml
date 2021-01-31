@@ -29,13 +29,26 @@ jobs:
       - name: install v8
         run: sudo apt-get install libv8-dev libcurl4-openssl-dev  -y 
 
+<<<<<<< HEAD
+=======
+      - name: Create Data Directory
+        run: |
+          echo "trying to create a direcotry"
+          sudo mkdir /usr/data/
+          echo "created directory"
+          sudo chmod -R ugo+rwx /usr/data/
+
+>>>>>>> a79f66c3dcdc73e34b68652da12608d795385195
       # - name: Download the input CSV
       #   run: |
       #     echo "trying to create a direcotry"
       #     sudo mkdir /usr/data/
       #     echo "created directory"
       #     sudo chmod -R 644 /usr/data/
+<<<<<<< HEAD
       #     echo "ran chmod"
+=======
+>>>>>>> a79f66c3dcdc73e34b68652da12608d795385195
       #     wget  -O /usr/data/city_stats.csv $CSV_DATA_SOURCE
       #     echo "downloaded the file to machine"
 
@@ -65,15 +78,15 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           install.packages("drat")
-          drat:::add("epiforecasts")
           install.packages("ggplot2")
           install.packages("gridExtra")
+          drat:::add("epiforecasts")
+          install.packages("EpiEstim")
           install.packages("magrittr")
           install.packages("readr")
           install.packages("knitr")
           install.packages("dplyr")
           install.packages("tidyverse")
-          install.packages("EpiEstim")
         shell: Rscript {0}
 
       - name: Run R script
