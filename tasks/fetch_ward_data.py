@@ -7,7 +7,7 @@ from backend.data.utility import create_delta_cols
 import luigi
 import pandas as pd
 
-from backend.repository import GSheetRepository
+from backend.repository import GSheetRepository, AWSFileRepository
 from backend.config import get_config
 from tasks.districts import FetchMumbaiWardsTask
 
@@ -26,7 +26,7 @@ class FetchWardDataTask(luigi.Task):
 
         ward_storage_location = 'raw_ward_data'
         config = get_config()
-        repository = GSheetRepository(config['google sheets']['url production'])
+        repository = AWSFileRepository(config['aws']['bucket production'])
 
         if repository.exists(ward_storage_location):
             all_wards = repository.get_dataframe(ward_storage_location)
