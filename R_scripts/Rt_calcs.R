@@ -7,9 +7,9 @@
 
 library(lubridate)
 library(tidyverse)
-library(EpiNow2)
-library(rstan)
-library(EpiEstim)
+#library(EpiNow2)
+#library(rstan)
+#library(EpiEstim)
 library(ggplot2)
 library(gridExtra)
 library(incidence)
@@ -43,8 +43,6 @@ sheets_url <- "https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k
 
 df <- read_sheet(sheets_url, sheet = "city_stats")
 
-print(df)
-
 city <- "Mumbai"
 df2 <- df %>% filter(district == city)
 # todo v2 --> city <- args[1]
@@ -70,39 +68,46 @@ confirm <- df2$delta_case
 # the colnames need to be exactly this for the epinow function to work.
 df3 <- tibble(date, confirm)
 
+
+# =========================
+
 # now the 2 columns needed for the Rt calculations are decided.
 # to make the Rt calculation for that cityname
 # need to get the generation_time and then the incubation_period.
 
 # get the generation and incubation time from the new EpiNow2 package.
-generation_time <- get_generation_time(disease = "SARS-CoV-2", source = "ganyani")
 
-incubation_period <- get_incubation_period(disease = "SARS-CoV-2", source = "lauer")
+#generation_time <- get_generation_time(disease = "SARS-CoV-2", source = "ganyani")
+
+#incubation_period <- get_incubation_period(disease = "SARS-CoV-2", source = "lauer")
 
 # model parameters as default
 # note that parameters about generation_time,
 # incubation_period, and reporting_delay are set as default in the package.
-reporting_delay <- EpiNow2::bootstrapped_dist_fit(rlnorm(100, log(6), 1))
+
+#reporting_delay <- EpiNow2::bootstrapped_dist_fit(rlnorm(100, log(6), 1))
 
 ## Set max allowed delay to 30 days to truncate computation
-reporting_delay$max <- 30
+
+#reporting_delay$max <- 30
 
 # values for generation time and incubation period have been defined now.
 # the code below is for v 1.3.0 package.
 # set credible interval as 0.95
-rt <-
-  EpiNow2::epinow(
-    reported_cases = df3,
-    generation_time = generation_time,
-    delays = delay_opts(incubation_period, reporting_delay),
-    rt = rt_opts(prior = list(mean = 2, sd = 0.2)),
-    stan = stan_opts(cores = 4, samples = 100),
-    verbose = TRUE,
-    CrIs = 0.95
-  )
+
+# rt <-
+#   EpiNow2::epinow(
+#     reported_cases = df3,
+#     generation_time = generation_time,
+#     delays = delay_opts(incubation_period, reporting_delay),
+#     rt = rt_opts(prior = list(mean = 2, sd = 0.2)),
+#     stan = stan_opts(cores = 4, samples = 100),
+#     verbose = TRUE,
+#     CrIs = 0.95
+#   )
 
 # get the summary estimates with the credible intervals.
-rt <- summary(rt, type = "parameters", params = "R")
+# rt <- summary(rt, type = "parameters", params = "R")
 
 # dummy RT df
 # date <- c('2021-01-15', '2021-01-16','2021-01-17','2021-01-18','2021-01-19')
@@ -170,7 +175,7 @@ compute_doubling_time <- function(total_cases, case_dates, time.gap, alpha = 0.0
     dt = dt, dt_ci_low = dt + qnorm(alpha / 2) * sd_dt, dt_ci_up = dt + qnorm(1 - alpha / 2) * sd_dt
   ))
 }
-
+# ================
 
 total_cases <- df3$confirm
 cases_dates <- df3$date
@@ -179,5 +184,5 @@ db <- compute_doubling_time(total_cases, cases_dates, time.gap = 7, alpha = 0.95
 
 # right now using the same code provided by @krishna for saving both rt and doubling_time results.
 print("write to local FS")
-write.csv(rt, "/usr/data/epinow2_out.csv")
+# write.csv(rt, "/usr/data/epinow2_out.csv")
 write.csv(db, "/usr/data/doubling_time.csv")

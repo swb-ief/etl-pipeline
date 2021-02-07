@@ -29,7 +29,10 @@ rt_worksheet, Rt_df = worksheet_as_df_by_url(WORKSHEET_URL, "Rt")
 dt_worksheet, dt_df = worksheet_as_df_by_url(WORKSHEET_URL, "doubling_time")
 
 # Read the existing Rt out file by the R Script
-new_Rt_df = pd.read_csv("/usr/data/epinow2_out.csv")
+#new_Rt_df = pd.read_csv("/usr/data/epinow2_out.csv")
+new_Rt_df = pd.read_csv("/usr/data/epiestim_out.csv")
+print(new_Rt_df)
+
 # TODO p2 --> input from critical cities tab for RT calcs, all cities/districts for DT
 new_Rt_df["city"] = "Mumbai"
 
