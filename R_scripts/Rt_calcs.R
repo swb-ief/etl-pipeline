@@ -59,7 +59,7 @@ df2$delta_case <- df2$total.confirmed - df2$total.deceased - df2$total.recovered
 date <- as_date(df2$date)
 
 # column names have changed. also active column is not present in the present table. so, using the columns present...
-delta_case <- df2$total.confirmed - df2$total.deceased - df2$total.recovered
+#delta_case <- df2$total.confirmed - df2$total.deceased - df2$total.recovered
 
 date <- as_date(df2$date)
 

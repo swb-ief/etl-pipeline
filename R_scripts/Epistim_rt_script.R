@@ -47,6 +47,8 @@ df2$delta_case <- df2$total.confirmed - df2$total.deceased - df2$total.recovered
 
 df2$date <- as_date(df2$date)
 
+print(df2)
+
 df3 = df2 %>% rename(I = delta_case, dates = date) %>%
   dplyr::select(dates,I)
 
@@ -82,11 +84,11 @@ config = make_config(list(mean_si = 3.96, std_mean_si = 0.215,
                           std_prior=2))
                      
 
-# rt_nonparametric = estimate_R(df3,
-#                    method = "uncertain_si",
-#                    config = config)
-# 
-# 
+rt_nonparametric = estimate_R(df3,
+                   method = "uncertain_si",
+                   config = config)
+
+
 # plot(rt_nonparametric)
 # 
 # 
