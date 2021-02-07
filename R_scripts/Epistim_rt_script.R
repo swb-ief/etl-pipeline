@@ -47,10 +47,8 @@ df2$delta_case <- df2$total.confirmed - df2$total.deceased - df2$total.recovered
 
 df2$date <- as_date(df2$date)
 
-print(df2)
-
-df3 = df2 %>% rename(I = delta_case, dates = date) %>%
-  dplyr::select(dates,I)
+df3 = tibble(dates = df2$date, I = df2$delta_case)
+print(df3)
 
 
 # now to calculate the Rt using the parametric method 

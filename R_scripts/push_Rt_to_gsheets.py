@@ -37,10 +37,11 @@ print(new_Rt_df)
 new_Rt_df["city"] = "Mumbai"
 
 # TODO --> TEMPORARY UNTIL SCHEMA IN OUTPUT GOOGLE SHEET IS CHANGED
-new_Rt_df["lower"] = ""
-new_Rt_df["upper"] = ""
+new_Rt_df["lower_95"] = ""
+new_Rt_df["upper_95"] = ""
+new_Rt_df["type"] = ""
 
-new_Rt_df = new_Rt_df.drop(['variable', 'strat'], 1)
+#new_Rt_df = new_Rt_df.drop(['variable', 'strat'], 1)
 
 cols = ['Unnamed: 0', 'date', 'type', 'median', 'lower', 'upper', 'mean', 'lower_95', 'upper_95', 'city']
 new_Rt_df = new_Rt_df[cols]

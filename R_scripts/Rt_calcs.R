@@ -66,7 +66,7 @@ date <- as_date(df2$date)
 confirm <- df2$delta_case
 
 # the colnames need to be exactly this for the epinow function to work.
-df3 <- tibble(date, confirm)
+df3 <- tibble(date, confirm )
 
 
 # =========================
