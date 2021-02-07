@@ -102,11 +102,12 @@ n <- length(df3$dates)
 
 dates_list <- dates[8:n]
 
-res_df <- tibble(rt = rt_nonparametric$R$`Mean(R)`,
-                 low = rt_nonparametric$R$`Mean(R)` - 1.96*rt_nonparametric$R$`Std(R)`,
-                 high = rt_nonparametric$R$`Mean(R)` + 1.96*rt_nonparametric$R$`Std(R)`,
-                 dates = dates_list,
-                 city = city)
+res_df <- tibble(mean = rt_nonparametric$R$`Mean(R)`,
+                 lower = rt_nonparametric$R$`Mean(R)` - 1.96*rt_nonparametric$R$`Std(R)`,
+                 higher = rt_nonparametric$R$`Mean(R)` + 1.96*rt_nonparametric$R$`Std(R)`,
+                 date = dates_list,
+                 city = city, 
+                 median = rt_nonparametric$R$`Median(R)`)
 
 
 #str(res_df)
