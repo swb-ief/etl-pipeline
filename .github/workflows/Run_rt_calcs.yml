@@ -52,6 +52,7 @@ jobs:
           install.packages("devtools")
           install.packages("googlesheets4")
           install.packages("httpuv")
+          install.packages("easypackages")
         shell: Rscript {0}
 
       # - name: Install Epinow2

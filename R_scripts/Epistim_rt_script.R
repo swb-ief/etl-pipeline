@@ -4,11 +4,22 @@
 
 # rt calculations using EpiEstim package.
 
-library(easypackages)
+# library(easypackages)
+library(lubridate)
+library(tidyverse)
+library(EpiEstim)
+library(ggplot2)
+library(gridExtra)
+library(incidence)
+library(magrittr)
+library(readr)
+library(knitr)
+library(readxl)
+library(googlesheets4)
 
-libraries("lubridate","tidyverse","EpiEstim","ggplot2",
-        "gridExtra","incidence","magrittr",
-        "readr","knitr","readxl","googlesheets4")
+# libraries("lubridate","tidyverse","EpiEstim","ggplot2",
+#         "gridExtra","incidence","magrittr",
+#         "readr","knitr","readxl","googlesheets4")
 
 
 # get the data --
