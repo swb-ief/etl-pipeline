@@ -90,9 +90,8 @@ rt_nonparametric = estimate_R(df3,
 # plot(rt_nonparametric)
 # 
 # 
-# res <- rt_nonparametric$R
-# 
-# dates <- rt_nonparametric$dates
+res <- rt_nonparametric$R
+dates <- rt_nonparametric$dates
 # 
 # glimpse(res)
 # 
