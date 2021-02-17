@@ -63,6 +63,7 @@ class UpdateDashboardTask(luigi.Task):
         'MA.21.delta.recovered',
         'MA.21.delta.positivity',
         'MA.21.delta.tested',
+        'MA.21.delta.confirmed',
 
         'delta.confirmed',
         'delta.recovered',
