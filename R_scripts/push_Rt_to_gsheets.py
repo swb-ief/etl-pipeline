@@ -24,14 +24,14 @@ def worksheet_as_df_by_url(sheet_url: str, worksheet_name: str):
     worksheet = sheet.worksheet(worksheet_name)
     return worksheet, pd.DataFrame(worksheet.get_all_records())
 
+from backend.repository.gsheet_repository import GSheetRepository
+
 
 rt_worksheet, Rt_df = worksheet_as_df_by_url(WORKSHEET_URL, "Rt")
 dt_worksheet, dt_df = worksheet_as_df_by_url(WORKSHEET_URL, "doubling_time")
 
 # Read the existing Rt out file by the R Script
-#new_Rt_df = pd.read_csv("/usr/data/epinow2_out.csv")
-new_Rt_df = pd.read_csv("/usr/data/epiestim_out.csv")
-print(new_Rt_df)
+new_Rt_df = pd.read_csv("/usr/data/epiestim_out.csv", index_col=0)
 
 # TODO p2 --> input from critical cities tab for RT calcs, all cities/districts for DT
 new_Rt_df["city"] = "Mumbai"
@@ -43,14 +43,17 @@ new_Rt_df["type"] = ""
 
 #new_Rt_df = new_Rt_df.drop(['variable', 'strat'], 1)
 
-cols = ['Unnamed: 0', 'date', 'type', 'median', 'lower', 'upper', 'mean', 'lower_95', 'upper_95', 'city']
+#cols = ['Unnamed: 0', 'date', 'type', 'median', 'lower', 'upper', 'mean', 'lower_95', 'upper_95', 'city']
+cols = ['date', 'type', 'median', 'lower', 'upper', 'mean', 'lower_95', 'upper_95', 'city']
 new_Rt_df = new_Rt_df[cols]
-new_Rt_df.columns = ['Unnamed: 0', 'date', 'type', 'median', 'lower', 'upper', 'mean.mean', 'CI_lower.mean', 'CI_upper.mean', 'city']
+#new_Rt_df.columns = ['Unnamed: 0', 'date', 'type', 'median', 'lower', 'upper', 'mean.mean', 'CI_lower.mean', 'CI_upper.mean', 'city']
+new_Rt_df.columns = ['date', 'type', 'median', 'lower', 'upper', 'mean.mean', 'CI_lower.mean', 'CI_upper.mean', 'city']
 
 # Read the existing doubling time numbers in days
-new_dt_df = pd.read_csv("/usr/data/doubling_time.csv")
+new_dt_df = pd.read_csv("/usr/data/doubling_time.csv", index_col=0)
 new_dt_df["city"] = "Mumbai"
-cols = ['Unnamed: 0', 'date', 'dt', 'city']
+#cols = ['Unnamed: 0', 'date', 'dt', 'city']
+cols = ['date', 'dt', 'city']
 new_dt_df = new_dt_df[cols]
 new_dt_df.columns = ['Unnamed: 0', 'date', 'doubling.time', 'city']
 

@@ -2,33 +2,23 @@
 ##  Doubling time script  ##
 ############################
 
-
-
 # script to calculate the doubling time only.
 # 01/18/2021
 # script does not depend upon the city/district name.
 # script contains a dummy var == group.
 
-
 # first load all the libraries needed.
-options(warn = -1)
-options(message = -1)
 
-suppressMessages(library("lubridate"))
-suppressMessages(library("tidyverse"))
-suppressMessages(library("EpiNow2"))
-suppressMessages(library("rstan"))
-suppressMessages(library(EpiEstim))
-suppressMessages(library(ggplot2))
-suppressMessages(library("gridExtra"))
-suppressMessages(library(incidence))
-suppressMessages(library(magrittr))
-suppressMessages(library(readr)) # for read_csv
-suppressMessages(library(knitr)) # for kable
-suppressMessages(library(readxl))
-suppressMessages(library(googlesheets4))
-
-
+library("lubridate"))
+library("tidyverse"))
+library("EpiNow2"))
+library("rstan"))
+library(EpiEstim))
+library("gridExtra")
+library(incidence)
+library(magrittr)
+library(readr) # for read_csv
+library(knitr) # for kable
 
 # to make the code acceptable for multiple
 # cites, we need to keep the name of the df constant
@@ -49,15 +39,8 @@ suppressMessages(library(googlesheets4))
 # import data from the google sheet...
 # no authorisation needed...
 
-gs4_deauth()
-sheets_url <- "https://docs.google.com/spreadsheets/d/1HeTZKEXtSYFDNKmVEcRmF573k2ZraDb6DzgCOSXI0f0/edit#gid=0"
-
-df <- read_sheet(sheets_url, sheet = "city_stats")
-
-city <- "Mumbai"
-df2 <- df %>% filter(district == city)
-# todo v2 --> city <- args[1]
-# todo v2 --> command line args or simply read from results of city criteria filters for RT and all districts for DT
+# TODO --> cmd line arg Rscript name.R --args file_name 
+df <- read.csv(file = '/usr/data/citystats.csv')
 
 # ensure that there is no missing data for the columns here.
 # we need only 5 columns for the calculation -

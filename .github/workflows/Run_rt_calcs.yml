@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-18.04
     env:
       CRAN_REPO: 'https://packagemanager.rstudio.com/all/__linux__/bionic/latest'
-      CSV_DATA_SOURCE: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRlIadXzFkZNn5kijxCWx3IHfwvFIJQEMy9UEwm9uCjvWwVtbu9UdYnhPV9SlijmvlnytfcZjW0sp9B/pub?gid=533672872&single=true&output=csv"
+      #CSV_DATA_SOURCE: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRlIadXzFkZNn5kijxCWx3IHfwvFIJQEMy9UEwm9uCjvWwVtbu9UdYnhPV9SlijmvlnytfcZjW0sp9B/pub?gid=533672872&single=true&output=csv"
 
     steps:
       - name: checkout this repo
@@ -36,41 +36,13 @@ jobs:
           echo "created directory"
           sudo chmod -R ugo+rwx /usr/data/
 
-      # - name: Download the input CSV
-      #   run: |
-      #     echo "trying to create a direcotry"
-      #     sudo mkdir /usr/data/
-      #     echo "created directory"
-      #     sudo chmod -R 644 /usr/data/
-      #     wget  -O /usr/data/city_stats.csv $CSV_DATA_SOURCE
-      #     echo "downloaded the file to machine"
-
-      - name: Install remotes devtools, googlesheets4, httpuv
+      - name: Install deps
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           install.packages("remotes", repos = c("CRAN" = Sys.getenv("CRAN_REPO")))
           install.packages("devtools")
-          install.packages("googlesheets4")
           install.packages("httpuv")
           install.packages("easypackages")
-        shell: Rscript {0}
-
-      # - name: Install Epinow2
-      #   if: steps.cache.outputs.cache-hit != 'true'
-      #   run: |
-      #     require(devtools)
-      #     install.packages("EpiNow2")
-      #   shell: Rscript {0}
-
-      # - name: Install Rstan
-      #   if: steps.cache.outputs.cache-hit != 'true'
-      #   run: |
-      #     install.packages("rstan")
-      #   shell: Rscript {0}
-
-      - name: Install deps
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
           install.packages("drat")
           install.packages("ggplot2")
           install.packages("gridExtra")
@@ -83,29 +55,41 @@ jobs:
           install.packages("tidyverse")
         shell: Rscript {0}
 
-      - name: Run R script, DT
-        run: Rscript  R_scripts/Rt_calcs.R
+      # - name: Run R script, DT
+      #   run: Rscript  R_scripts/Rt_calcs.R
 
-      - name: Run R script, RT
-        run: Rscript  R_scripts/Epistim_rt_script.R
+      # - name: Run R script, RT
+      #   run: Rscript  R_scripts/Epistim_rt_script.R
 
-      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
-        with:
-          version: '290.0.1'
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          service_account_email: ${{ secrets.GCP_SA_EMAIL }}
-          export_default_credentials: true
-      - run: gcloud info
+      # - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      #   with:
+      #     version: '290.0.1'
+      #     service_account_key: ${{ secrets.GCP_SA_KEY }}
+      #     service_account_email: ${{ secrets.GCP_SA_EMAIL }}
+      #     export_default_credentials: true
+      # - run: gcloud info
 
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: 3.7
+
       - name: Install Python dependencies
         run: |
-
           pip install pandas gspread  numpy luigi
 
-      - name: Run py script
+      - name: Configure AWS Credentials for data repository
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      # - name: Run py script
+      #   run: |
+      #     python R_scripts/push_Rt_to_gsheets.py
+
+      - name: Executing UpdateEpiStatsTask a luigi task
         run: |
-          python R_scripts/push_Rt_to_gsheets.py
+          python -m luigi --module tasks UpdateEpiStatsTask --local-scheduler
+
