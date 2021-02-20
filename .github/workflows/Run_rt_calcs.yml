@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-18.04
     env:
       CRAN_REPO: 'https://packagemanager.rstudio.com/all/__linux__/bionic/latest'
-      #CSV_DATA_SOURCE: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRlIadXzFkZNn5kijxCWx3IHfwvFIJQEMy9UEwm9uCjvWwVtbu9UdYnhPV9SlijmvlnytfcZjW0sp9B/pub?gid=533672872&single=true&output=csv"
 
     steps:
       - name: checkout this repo
