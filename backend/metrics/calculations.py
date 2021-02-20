@@ -1,5 +1,6 @@
 import pandas as pd
 from numpy import random
+import numpy as np
 
 
 def impute_hospitalization_percentages(current_hospitalizations: pd.DataFrame, expected_dates: pd.Series):
@@ -59,6 +60,46 @@ def _moving_average_grouped(df: pd.DataFrame, group_columns: list[str], target_c
         .mean()
 
 
+def fourteen_day_avg_ratio(values: pd.Series) -> pd.Series:
+    """ Calculates the ratio of the 14 day average compared to the previous 14 day average
+        When not enough data is available it starts averaging if there are at least 7 days
+        Calculation: on day 28 = (day 1 day - 14 day avg) / (day 15 -  day 28 day avg)
+        nan values are ignored, the avg is calculated over the other values
+        :param values: the values over which to calculate the ratio
+        :return:  (sliding window)
+    """
+
+    series = values.copy()
+
+    dates = values.index.get_level_values('date').values
+    other_index_names = values.index.droplevel('date').names
+    other_index_values = values.index.droplevel('date').unique().tolist()
+
+    assert len(other_index_values) == 1, "Should be called with a grouping by location (state/district/ward)"
+
+    # other_index_values can be ['state'] or [('state', 'district')], etc.. notice the tuple
+    # we just want to iterate over these so in the second case we just pick the tuple
+    other_index_values = other_index_values if isinstance(other_index_values[0], str) else other_index_values[0]
+
+    series.index = series.index.droplevel(other_index_names)
+
+    idx = pd.date_range(min(dates), max(dates), name='date')
+    reindexed = series.reindex(idx)  # This also sorts the dates
+
+    two_week_avg = reindexed.rolling(window='14D', min_periods=7).mean()
+    prev_two_week_avg = reindexed.shift(periods=14, freq='D').rolling(window='14D', min_periods=7).mean()
+    ratio = two_week_avg / prev_two_week_avg
+
+    df = ratio.reset_index()
+    for i, column in enumerate(other_index_names):
+        df[column] = other_index_values[i]
+    df = df.set_index([*other_index_names, 'date'])
+
+    just_for_original_values = df.loc[values.index]
+
+    return just_for_original_values[values.name]
+
+
 def extend_and_impute_metrics(
         raw_metrics: pd.DataFrame,
         hospitalizations: pd.DataFrame,
@@ -106,6 +147,9 @@ def extend_and_impute_metrics(
             - df["total.recovered"]
             - df["delta.other"]
     )
+
+    df['total.confirmed.14_day_ratio'] = df.groupby(grouping_columns)["delta.hospitalized"].apply(
+        fourteen_day_avg_ratio)
 
     # ratios per million
     ratios_needed_for = ['delta.confirmed', 'delta.deceased', 'total.confirmed', 'total.deceased']
