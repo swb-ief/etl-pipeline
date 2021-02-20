@@ -28,6 +28,7 @@ jobs:
       - name: install v8
         run: sudo apt-get install libv8-dev libcurl4-openssl-dev  -y 
 
+        
       - name: Create Data Directory
         run: |
           echo "trying to create a direcotry"
@@ -52,20 +53,6 @@ jobs:
           install.packages("tidyverse")
         shell: Rscript {0}
 
-      # - name: Run R script, DT
-      #   run: Rscript  R_scripts/Rt_calcs.R
-
-      # - name: Run R script, RT
-      #   run: Rscript  R_scripts/Epistim_rt_script.R
-
-      # - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
-      #   with:
-      #     version: '290.0.1'
-      #     service_account_key: ${{ secrets.GCP_SA_KEY }}
-      #     service_account_email: ${{ secrets.GCP_SA_EMAIL }}
-      #     export_default_credentials: true
-      # - run: gcloud info
-
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -82,10 +69,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
-
-      # - name: Run py script
-      #   run: |
-      #     python R_scripts/push_Rt_to_gsheets.py
 
       - name: Executing UpdateEpiStatsTask a luigi task
         run: |
