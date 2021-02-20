@@ -77,21 +77,21 @@ config = make_config(list(mean_si = 3.96, std_mean_si = 0.215,
                           std_prior=2))
                      
 
-# rt_nonparametric = estimate_R(df3,
-#                    method = "uncertain_si",
-#                    config = config)
-# 
-# 
+rt_nonparametric = estimate_R(df3,
+                    method = "uncertain_si",
+                    config = config)
+ 
+
 # plot(rt_nonparametric)
 # 
 # 
-# res <- rt_nonparametric$R
+ res <- rt_nonparametric$R
 # 
-# dates <- rt_nonparametric$dates
+ dates <- rt_nonparametric$dates
 # 
-# glimpse(res)
+#  glimpse(res)
 # 
-# length(dates)
+#  length(dates)
 
 
 n <- length(df3$dates)
@@ -102,10 +102,13 @@ res_df <- tibble(rt = rt_nonparametric$R$`Mean(R)`,
                  low = rt_nonparametric$R$`Mean(R)` - 1.96*rt_nonparametric$R$`Std(R)`,
                  high = rt_nonparametric$R$`Mean(R)` + 1.96*rt_nonparametric$R$`Std(R)`,
                  dates = dates_list,
-                 city = city)
+                 city = city,
+                 median = rt_nonparametric$R$`Median(R)`)
 
 
 str(res_df)
+
+# change columns according to 
 
 
 # plot(res_df$dates, res_df$rt, type = "l", col = "red")
