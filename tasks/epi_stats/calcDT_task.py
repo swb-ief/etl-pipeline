@@ -14,8 +14,7 @@ class CalcDTTask(luigi.Task):
     citystats_path = '/usr/data/citystats.csv'
 
     def requires(self):
-        return DownloadFileTask(
-            file_name = citystats_path)
+        return DownloadFileTask(file_name = citystats_path)
 
     file_name = luigi.Parameter()
     # /usr/data/doubling_time.csv
@@ -26,6 +25,7 @@ class CalcDTTask(luigi.Task):
     def run(self):
         # Run DT Calculation
         subprocess.call("Rscript R_scripts/Rt_calcs.R", shell=False)
+        log.info("Ran DT Calculation")
 
     def complete(self):
         # checks if DT Calc ran successfully

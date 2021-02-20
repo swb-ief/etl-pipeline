@@ -21,10 +21,8 @@ class UpdateEpiStatsTask(luigi.Task):
     s3_dt_path = 'Phase2_DT.csv'
 
     def requires(self):
-        return {
-                'RT': CalcRTTask(file_path = local_rt_path),
-                'DT': CalcDTTask(file_path = local_dt_path),
-                }
+        return CalcRTTask(file_path = local_rt_path), 
+               CalcDTTask(file_path = local_dt_path)
 
     def run(self):
         config = get_config()

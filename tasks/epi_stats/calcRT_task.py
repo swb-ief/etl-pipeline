@@ -26,6 +26,7 @@ class CalcRTTask(luigi.Task):
     def run(self):
         # Run RT Calculation
         subprocess.call("Rscript R_scripts/Epistim_rt_script.R", shell=False)
+        log.info("Ran RT Calculation")
 
     def complete(self):
         # checks if RT Calc ran successfully
