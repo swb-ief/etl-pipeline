@@ -20,7 +20,7 @@ class CalcDTTask(luigi.Task):
     # /usr/data/doubling_time.csv
 
     def output(self):
-        return luigi.LocalTarget(file_name)
+        return luigi.LocalTarget(self.file_name)
 
     def run(self):
         # Run DT Calculation

@@ -21,7 +21,7 @@ class CalcRTTask(luigi.Task):
     # "/usr/data/epiestim_out.csv"
 
     def output(self):
-        return luigi.LocalTarget(file_name)
+        return luigi.LocalTarget(self.file_name)
 
     def run(self):
         # Run RT Calculation
