@@ -15,7 +15,7 @@ class CalcRTTask(luigi.Task):
 
     def requires(self):
         return DownloadCityStatsTask(
-            file_name = citystats_path)
+            file_name = self.citystats_path)
 
     file_name = luigi.Parameter()
     # "/usr/data/epiestim_out.csv"
