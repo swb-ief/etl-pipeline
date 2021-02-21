@@ -24,8 +24,10 @@ class CalcRTTask(luigi.Task):
         return luigi.LocalTarget(self.file_name)
 
     def run(self):
+        # cwd 
+        cwd = os.getcwd()
         # Run RT Calculation
-        subprocess.call("Rscript R_scripts/Epistim_rt_script.R", shell=False)
+        subprocess.call("Rscript {}/R_scripts/Epistim_rt_script.R".format(cwd), shell=False)
         log.info("Ran RT Calculation")
 
     def complete(self):
