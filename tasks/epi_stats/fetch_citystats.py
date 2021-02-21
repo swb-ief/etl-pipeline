@@ -17,7 +17,7 @@ class DownloadCityStatsTask(luigi.Task):
 
     def run(self):
         
-        city_stats_location = 'Phase 2 - Districts.csv'
+        city_stats_location = 'Phase 2 - Districts'
         config = get_config()
         repository = AWSFileRepository(config['aws']['bucket production'])
 
