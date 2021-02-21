@@ -38,10 +38,10 @@ class UpdateEpiStatsTask(luigi.Task):
         repository.store_dataframe(dt_results, self.s3_dt_path, allow_create=True)
 
 
-    def complete(self):
-        # TODO --> palceholder for some kind of validation process,
-        # TODO, similar to https://github.com/swb-ief/etl-pipeline/blob/master/tasks/update_dashboard_task.py
-        return True
+    # def complete(self):
+    #     # TODO --> palceholder for some kind of validation process,
+    #     # TODO, similar to https://github.com/swb-ief/etl-pipeline/blob/master/tasks/update_dashboard_task.py
+    #     return True
 
 
 
