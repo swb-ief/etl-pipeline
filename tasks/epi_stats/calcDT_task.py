@@ -32,7 +32,7 @@ class CalcDTTask(luigi.Task):
         print("==== NEW WD")
         print(os.listdir())
         # Run DT Calculation
-        subprocess.call("Rscript {}/Rt_calcs.R".format(cwd), shell=False)
+        subprocess.call("Rscript {}/Rt_calcs.R".format(cwd), shell=True)
         log.info("Ran DT Calculation")
 
     def complete(self):
