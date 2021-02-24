@@ -2,7 +2,7 @@ import logging
 from datetime import date
 import subprocess
 import pandas as pd
-
+import os
 import luigi
 from tasks.epi_stats.fetch_citystats import DownloadCityStatsTask
 
@@ -26,7 +26,7 @@ class CalcRTTask(luigi.Task):
     def run(self):
         # cwd 
         cwd = os.getcwd()
-        print(os.listdir())
+
         # Run RT Calculation
         subprocess.call("Rscript {}/R_scripts/Epistim_rt_script.R".format(cwd), shell=True)
         log.info("Ran RT Calculation")
