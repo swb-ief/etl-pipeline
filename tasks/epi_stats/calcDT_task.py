@@ -26,6 +26,7 @@ class CalcDTTask(luigi.Task):
     def run(self):
         # cwd 
         cwd = os.getcwd()
+        print(os.listdir())
         # Run DT Calculation
         subprocess.call("Rscript {}/R_scripts/Rt_calcs.R".format(cwd), shell=False)
         log.info("Ran DT Calculation")

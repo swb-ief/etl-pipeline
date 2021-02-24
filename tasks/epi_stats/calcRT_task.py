@@ -26,6 +26,7 @@ class CalcRTTask(luigi.Task):
     def run(self):
         # cwd 
         cwd = os.getcwd()
+        print(os.listdir())
         # Run RT Calculation
         subprocess.call("Rscript {}/R_scripts/Epistim_rt_script.R".format(cwd), shell=False)
         log.info("Ran RT Calculation")
