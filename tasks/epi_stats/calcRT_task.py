@@ -20,8 +20,8 @@ class CalcRTTask(luigi.Task):
     file_name = luigi.Parameter()
     # "/usr/data/epiestim_out.csv"
 
-    def output(self):
-        return luigi.LocalTarget(self.file_name)
+    # def output(self):
+    #     return luigi.LocalTarget(self.file_name)
 
     def run(self):
         # cwd 
@@ -31,9 +31,9 @@ class CalcRTTask(luigi.Task):
         subprocess.call("Rscript {}/R_scripts/Epistim_rt_script.R".format(cwd), shell=True)
         log.info("Ran RT Calculation")
 
-    def complete(self):
-        # checks if RT Calc ran successfully
-        return self.output().exists()
+    # def complete(self):
+    #     # checks if RT Calc ran successfully
+    #     return self.output().exists()
 
 
 
