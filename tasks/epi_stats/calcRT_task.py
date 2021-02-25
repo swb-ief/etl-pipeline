@@ -20,8 +20,8 @@ class CalcRTTask(luigi.Task):
     file_name = luigi.Parameter()
     # "/usr/data/epiestim_out.csv"
 
-    # def output(self):
-    #     return luigi.LocalTarget(self.file_name)
+    def output(self):
+        return luigi.LocalTarget(self.file_name)
 
     def run(self):
         # cwd 
