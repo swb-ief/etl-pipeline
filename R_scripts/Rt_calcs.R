@@ -14,7 +14,7 @@ library(knitr) # for kable
 # TODO --> cmd line arg Rscript name.R --args file_name 
 df <- read.csv(file = '/usr/data/citystats.csv')
 # we need only 5 columns for the calculation -
-df2 <- df2 %>% dplyr::select(date, district, total.confirmed, total.deceased, total.recovered) # keep only col needed.
+df2 <- df %>% dplyr::select(date, district, total.confirmed, total.deceased, total.recovered) # keep only col needed.
 # remove rows with NA to allow for calculation.
 df2 <- df2[complete.cases(df2), ]
 # delta_case
