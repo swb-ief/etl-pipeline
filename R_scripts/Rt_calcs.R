@@ -13,7 +13,6 @@ library(knitr) # for kable
 
 # TODO --> cmd line arg Rscript name.R --args file_name 
 df <- read.csv(file = '/usr/data/citystats.csv')
-print(df)
 # we need only 5 columns for the calculation -
 df2 <- df %>% dplyr::select(date, district, total.confirmed, total.deceased, total.recovered) # keep only col needed.
 # remove rows with NA to allow for calculation.
