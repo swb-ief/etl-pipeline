@@ -6,13 +6,14 @@ from datetime import datetime
 import pandas as pd
 import logging
 
+from backend.data.utility import create_delta_cols
 from backend.config import get_config
 from backend.data import ExtractCovid19IndiaData
 from backend.data.utility import last_values_by_date
-from backend.repository import GSheetRepository, Repository
+from backend.repository import GSheetRepository, Repository, AWSFileRepository
 from backend.metrics.calculations import impute_hospitalization_percentages, extend_and_impute_metrics
-from .fetch_covid19_india_data_task import FetchCovid19IndiaDataTask
-from .fetch_ward_data import FetchWardDataTask
+from tasks.fetch_covid19_india_data_task import FetchCovid19IndiaDataTask
+from tasks.fetch_ward_data import FetchWardDataTask
 
 log = logging.getLogger(__name__)
 
@@ -48,9 +49,11 @@ class UpdateDashboardTask(luigi.Task):
         'total.confirmed',
         'total.deceased',
 
+        'total.confirmed.14_day_ratio',
+
         'delta.confirmed.ratio_per_million',
         'delta.deceased.ratio_per_million',
-        
+
         'total.confirmed.ratio_per_million',
         'total.deceased.ratio_per_million',
 
@@ -59,15 +62,24 @@ class UpdateDashboardTask(luigi.Task):
         'MA.21.delta.hospitalized',
         'MA.21.delta.recovered',
         'MA.21.delta.positivity',
-        'MA.21.delta.tested',  # phase 1 name MA.21.daily.tests
+        'MA.21.delta.tested',
+        'MA.21.delta.confirmed',
+
+        'delta.confirmed',
+        'delta.recovered',
+        'delta.active',
+        'delta.deceased'
+        # phase 1 name MA.21.daily.tests
     ]
     # Not yet added R generated metrics mean.mean, CI_lower.mean, CI_upper.mean, doubling.time
 
     state_keys = ['date', 'state']
-    district_keys = ['date', 'state', 'district']
+    district_keys = state_keys + ['district']
+    ward_keys = district_keys + ['ward']
 
     state_columns_needed_by_dashboard = state_keys + metrics_needed_by_dashboard
     district_columns_needed_by_dashboard = district_keys + metrics_needed_by_dashboard
+    ward_columns_needed_by_dashboard = ward_keys + metrics_needed_by_dashboard
 
     def requires(self):
         return {
@@ -80,7 +92,8 @@ class UpdateDashboardTask(luigi.Task):
 
         # we are skipping older data since we only have low case numbers there.
         start_date = datetime.strptime(config['dashboard']['start date'], '%Y-%m-%d')
-        repository = GSheetRepository(config['google sheets']['url production'])
+        # repository = GSheetRepository(config['google sheets']['url production'])
+        repository = AWSFileRepository(config['aws']['bucket production'])
 
         fetch_covid19_india_task = self.input()['state_district_data']
         fetch_wards_task = self.input()['ward_data']
@@ -119,31 +132,32 @@ class UpdateDashboardTask(luigi.Task):
         )
 
         ward_data = all_ward_data[all_ward_data['date'] >= start_date]
-        # disabled because we are missing some columns like all the delta. columns that extend_and_impute expects
-        # ward_data = extend_and_impute_metrics(
-        #     raw_metrics=ward_data,
-        #     hospitalizations=hospitalizations_updated,
-        #     grouping_columns=['state', 'district', 'ward']
-        # )
+
+        ward_data = extend_and_impute_metrics(
+            raw_metrics=ward_data,
+            hospitalizations=hospitalizations_updated,
+            grouping_columns=['state', 'district', 'ward']
+        )
 
         self.update_population_sheets(state_data, district_data, repository)
 
         # Idea placeholder
-        # Calculate 'todays' top 20ish cities and add that top 20 as a tab in the google sheet so the dashboard can
+        # Calculate today's top 20ish cities and add that top 20 as a tab in the google sheet so the dashboard can
         # get access to it.
 
         # validate and filter
         self.states_is_valid = self._has_all_columns(state_data, self.state_columns_needed_by_dashboard)
         self.districts_is_valid = self._has_all_columns(district_data, self.district_columns_needed_by_dashboard)
-        self.wards_is_valid = True  # TODO
+        self.wards_is_valid = self._has_all_columns(ward_data, self.ward_columns_needed_by_dashboard)
 
         states_filtered = state_data[self.state_columns_needed_by_dashboard]
         districts_filtered = district_data[self.district_columns_needed_by_dashboard]
+        wards_filtered = ward_data[self.ward_columns_needed_by_dashboard]
 
         repository.store_dataframe(hospitalizations_updated, self.storage_hospitalizations, allow_create=True)
         repository.store_dataframe(states_filtered, self.storage_states, allow_create=True)
         repository.store_dataframe(districts_filtered, self.storage_districts, allow_create=True)
-        repository.store_dataframe(ward_data, self.storage_wards, allow_create=True)
+        repository.store_dataframe(wards_filtered, self.storage_wards, allow_create=True)
 
     @staticmethod
     def _has_all_columns(df: pd.DataFrame, columns: List[str]) -> bool:

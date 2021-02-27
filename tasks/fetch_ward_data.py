@@ -1,9 +1,13 @@
-import pandas as pd
-import luigi
-from datetime import date
 import logging
+from datetime import date
 
-from backend import GSheetRepository
+from backend.data import get_static_ward_data
+from backend.data.utility import create_delta_cols
+
+import luigi
+import pandas as pd
+
+from backend.repository import GSheetRepository, AWSFileRepository
 from backend.config import get_config
 from tasks.districts import FetchMumbaiWardsTask
 
@@ -22,7 +26,7 @@ class FetchWardDataTask(luigi.Task):
 
         ward_storage_location = 'raw_ward_data'
         config = get_config()
-        repository = GSheetRepository(config['google sheets']['url production'])
+        repository = AWSFileRepository(config['aws']['bucket production'])
 
         if repository.exists(ward_storage_location):
             all_wards = repository.get_dataframe(ward_storage_location)
@@ -52,6 +56,14 @@ class FetchWardDataTask(luigi.Task):
         repository.store_dataframe(all_wards, ward_storage_location, allow_create=True, store_index=True)
 
         # impute delta's atleast for Mumbai this is needed it only provides totals
+        delta_needed_for = ['tested', 'confirmed', 'recovered', 'deceased', 'active', 'other']
+        group_by_cols = ['state', 'district', 'ward']
+        all_wards = create_delta_cols(all_wards, group_by_cols, delta_needed_for)
+
+        # add population
+        static_ward_data = get_static_ward_data()
+        all_wards = all_wards.join(static_ward_data, on=group_by_cols, how='left')
+
         all_wards.to_csv(self.output().path, index=True)
 
     def output(self):
