@@ -14,8 +14,8 @@ def _extract_wards_data_from_page(positive_cases_pdf_page) -> pd.DataFrame:
 
     # switching to our naming convention
     boxes = {
-        'ward': (240, 79.2, 350, 504),  # ward abbreviation
-        'total.confirmed': (350, 79.2, total_discharged_boundary, 504),  # cases
+        'ward': (240, 79.2, 330, 504),  # ward abbreviation
+        'total.confirmed': (330, 79.2, total_discharged_boundary, 504),  # cases
         'total.recovered': (total_discharged_boundary, 79.2, discharged_deaths_boundary, 504),  # Discharged column
         'total.deceased': (discharged_deaths_boundary, 79.2, deaths_active_boundary, 504),  # deaths column
         'total.active': (deaths_active_boundary, 79.2, 800, 504),  # active column
@@ -45,13 +45,26 @@ def _extract_wards_data_from_page(positive_cases_pdf_page) -> pd.DataFrame:
     return df
 
 
+def find_ward_wise_breakdown_page(pdf):
+    title_box = (0, 0, 800, 70)
+    ward_page_title = 'Ward-wise breakdown of positive cases'
+
+    for page in pdf.pages:
+        title = page.within_bbox(title_box).extract_text()
+        if title is not None and ward_page_title in title:
+            return page
+
+    raise ValueError(f'PDF does not contain a page with {ward_page_title}')
+
+
 def scrape_mumbai_pdf(source_file_path):
     """
     :param source_file_path: 
     :remarks:
     """
     pdf = _read_pdf(source_file_path)
-    positive_cases_page = pdf.pages[20]  # TODO instead of hardcoded page, search for the correct page see notes above
+
+    positive_cases_page = find_ward_wise_breakdown_page(pdf)
     df = _extract_wards_data_from_page(positive_cases_page)
 
     return df

@@ -58,3 +58,20 @@ class TestExtractMumbaiWardsPDF(unittest.TestCase):
 
         self.assertCountEqual(result_first, expected_first)
         self.assertCountEqual(result_last, expected_last)
+
+    def test_extract_sample_2020_02_27(self):
+        # alignment issues in this pdf
+        expected = (24, 8)
+        expected_first = ['RC', '22879', '21544', '648', '649', pd.to_datetime('2021-02-25 00:00:00'), 'Mumbai', 'MH']
+        expected_last = ['B', '2302', '2084', '146', '65', pd.to_datetime('2021-02-25 00:00:00'), 'Mumbai', 'MH']
+        sample = os.path.join(THIS_DIR, 'samples/mumbai_dashboard_2021_02_27.pdf')
+        result = scrape_mumbai_pdf(sample)
+        result_first = result.iloc[0].values
+        result_last = result.iloc[-1].values
+
+        self.assertIsNotNone(result)
+
+        self.assertEqual(expected, result.shape)
+
+        self.assertCountEqual(result_first, expected_first)
+        self.assertCountEqual(result_last, expected_last)
