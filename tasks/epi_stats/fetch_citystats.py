@@ -9,6 +9,26 @@ from backend.repository import AWSFileRepository
 
 log = logging.getLogger(__name__)
 
+def critical_districts(data):
+    """
+    1) Criteria for identifying cities/districts with (a) increasing Covid-19 Incidence:
+    a. Daily new cases  >  100 
+    b. New Cases in the last 14 days  >  New cases in the preceding 14 days
+    AND
+    2) Criteria for identifying cities with high incidence burden:
+    a. Top 20 cities/districts with the highest incidence burden as of date in terms of cumulative cases
+    """
+
+    #? criteria 1 a 
+    c1a = list(map(lambda x: x > 100, data['daily_new_cases']))
+    #? criteria 1 b
+    
+
+
+    #? criteria 2: 
+
+    return 
+
 class DownloadCityStatsTask(luigi.Task):
     file_name = luigi.Parameter()
 
