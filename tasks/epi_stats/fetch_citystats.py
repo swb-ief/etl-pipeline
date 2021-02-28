@@ -43,6 +43,8 @@ class DownloadCityStatsTask(luigi.Task):
 
         if repository.exists(city_stats_location):
             city_stats = repository.get_dataframe(city_stats_location)
+            print("columns")
+            print(city_stats.columns)
             # TODO --> Edit implementations of RT and DT to accomodate all districts
             city_stats = city_stats[list(map(lambda x: x == "Mumbai", city_stats['district']))].reset_index(drop=True)
             # download to local fs
