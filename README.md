@@ -82,6 +82,8 @@ pytest output for that test. So be sure to open the full test run output to find
 
 ## Google Sheets
 
+**TODO Needs to be updated to AWS**
+
 Sheets with pythonic names (underscores as spaces) are only used by the backend. Sheets with more human readable names
 are used by powerBI frontend
 
@@ -93,6 +95,23 @@ are used by powerBI frontend
 |Phase 2 - Districts|Metrics at District level for the dashboard|
 |Phase 2 - Wards|Metrics at Ward level for the dashboard|
 |Phase 2 - Important| **Work in progress** - top x states/districts/wards|
+
+## AWS
+
+TODO rewrite the above google sheets info to AWS info
+
+### AWS added security
+
+AWS S3 buckets can be further protected by blacklisting the entire internet, and whitelisting powerbi either by
+IP-address ranges or by domain names.
+
+## Publish Dashboard
+
+1) Follow [these steps](https://docs.microsoft.com/en-us/power-bi/collaborate-share/service-publish-to-web) to get a
+   iframe html code snippet
+1) Edit [this reports.html](https://github.com/swb-ief/etl-pipeline/blob/gh-pages/docs/report.html) note that this is on
+   a **gh-pages** branch that should **not** be merged with main.
+1) View the page at [https://swb-ief.github.io/etl-pipeline/report](https://swb-ief.github.io/etl-pipeline/report)
 
 # old documentation
 
