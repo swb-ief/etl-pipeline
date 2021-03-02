@@ -25,9 +25,11 @@ def _extract_wards_data_from_page(positive_cases_pdf_page) -> pd.DataFrame:
     data = dict()
     for key, box in boxes.items():
         raw_data = positive_cases_pdf_page.within_bbox(box).extract_text()
-        data[key] = raw_data.split('\n')
+        # due to shifting sizes the totals rows sometimes gets included
+        # because we know there are only 24 wards we can cut it of by limiting our selves to 24
+        data[key] = raw_data.split('\n')[:24]
 
-    # In a similar way we could actually search for the correct page that
+        # In a similar way we could actually search for the correct page that
     # contains 'Ward-wise breakdown of positive cases' instead of hard coded page numbers
     date_box = (50, 70, 200, 120)
     raw_date = positive_cases_pdf_page.within_bbox(date_box).extract_text().strip()

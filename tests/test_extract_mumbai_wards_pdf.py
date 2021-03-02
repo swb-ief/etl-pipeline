@@ -84,3 +84,22 @@ class TestExtractMumbaiWardsPDF(unittest.TestCase):
 
         np.array_equal(result_first, expected_first)
         np.array_equal(result_last, expected_last)
+
+    def test_extract_sample_2020_03_02(self):
+        # alignment issues in this pdf
+        expected = (24, 10)
+        expected_first = ['RC', '23059', '21672', '648', '700', 0, np.nan, pd.to_datetime('2021-02-28 00:00:00'),
+                          'Mumbai', 'MH']
+        expected_last = ['B', '2321', '2097', '146', '71', 0, np.nan, pd.to_datetime('2021-02-28 00:00:00'), 'Mumbai',
+                         'MH']
+        sample = os.path.join(THIS_DIR, 'samples/mumbai_dashboard_2021_03_02.pdf')
+        result = scrape_mumbai_pdf(sample)
+        result_first = result.iloc[0].values
+        result_last = result.iloc[-1].values
+
+        self.assertIsNotNone(result)
+
+        self.assertEqual(expected, result.shape)
+
+        np.array_equal(result_first, expected_first)
+        np.array_equal(result_last, expected_last)
