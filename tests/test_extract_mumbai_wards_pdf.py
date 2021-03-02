@@ -92,7 +92,7 @@ class TestExtractMumbaiWardsPDF(unittest.TestCase):
                           'Mumbai', 'MH']
         expected_last = ['B', '2321', '2097', '146', '71', 0, np.nan, pd.to_datetime('2021-02-28 00:00:00'), 'Mumbai',
                          'MH']
-        sample = os.path.join(THIS_DIR, 'samples/mumbai_dashboard_2021_03_02.pdf')
+        sample = os.path.join(THIS_DIR, 'samples/mumbai_dashboard_2021_02_28.pdf')
         result = scrape_mumbai_pdf(sample)
         result_first = result.iloc[0].values
         result_last = result.iloc[-1].values
