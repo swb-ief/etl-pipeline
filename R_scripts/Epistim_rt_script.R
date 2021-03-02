@@ -15,7 +15,7 @@ library(knitr)
 # # TODO --> cmd line arg Rscript name.R --args file_name 
 df <- read.csv(file = '/usr/data/citystats.csv')
 # TODO --> temporary, mumbai filter
-city < - "Mumbai"
+city <- "Mumbai"
 # filter
 df2 <- df %>% dplyr::select(date, district, total.confirmed, total.deceased, total.recovered)
 # remove rows with NA to allow for calculation.
