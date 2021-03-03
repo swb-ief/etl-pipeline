@@ -10,6 +10,7 @@ from backend.repository import AWSFileRepository
 log = logging.getLogger(__name__)
 
 def critical_districts(data):
+    # TODO!
     """
     1) Criteria for identifying cities/districts with (a) increasing Covid-19 Incidence:
     a. Daily new cases  >  100 
@@ -23,8 +24,6 @@ def critical_districts(data):
     c1a = list(map(lambda x: x > 100, data['daily_new_cases']))
     #? criteria 1 b
     
-
-
     #? criteria 2: 
 
     return 
@@ -43,8 +42,6 @@ class DownloadCityStatsTask(luigi.Task):
 
         if repository.exists(city_stats_location):
             city_stats = repository.get_dataframe(city_stats_location)
-            print("columns")
-            print(city_stats.columns)
             # TODO --> Edit implementations of RT and DT to accomodate all districts
             city_stats = city_stats[list(map(lambda x: x == "Mumbai", city_stats['district']))].reset_index(drop=True)
             # download to local fs

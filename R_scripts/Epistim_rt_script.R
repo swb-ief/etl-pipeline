@@ -14,7 +14,7 @@ library(knitr)
 
 # # TODO --> cmd line arg Rscript name.R --args file_name 
 df <- read.csv(file = '/usr/data/citystats.csv')
-# TODO --> temporary, mumbai filter
+# TODO --> temporary, mumbai identifier --> replaced by critical cities 
 city <- "Mumbai"
 # filter
 df2 <- df %>% dplyr::select(date, district, total.confirmed, total.deceased, total.recovered)
@@ -43,17 +43,13 @@ dates <- rt_nonparametric$dates
 n <- length(df3$dates)
 
 dates_list <- dates[8:n]
-print("============")
-print(city)
+
 res_df <- tibble(mean = rt_nonparametric$R$`Mean(R)`,
                  upper = rt_nonparametric$R$`Mean(R)` - 1.96*rt_nonparametric$R$`Std(R)`,
                  lower = rt_nonparametric$R$`Mean(R)` + 1.96*rt_nonparametric$R$`Std(R)`,
                  date = dates_list,
                  city = city, 
                  median = rt_nonparametric$R$`Median(R)`)
-
-print("============")
-print(res_df)
 
 # now res_df contains the rt, low and high ci and dates.
 # TODO --> add this path as cmd line arg
