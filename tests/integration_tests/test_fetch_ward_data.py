@@ -14,7 +14,8 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 @pytest.mark.parametrize('pdf_path', ['../samples/mumbai_dashboard_2020_01_02.pdf',
-                                      '../samples/mumbai_dashboard_2020_01_04.pdf'])
+                                      '../samples/mumbai_dashboard_2020_01_04.pdf',
+                                      '../samples/mumbai_dashboard_2021_02_28.pdf'])
 def test_fetch_ward_data_run(pdf_path):
     results = dict()
 
