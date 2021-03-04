@@ -17,8 +17,8 @@ class UpdateEpiStatsTask(luigi.Task):
     local_rt_path = "/usr/data/epiestim_out.csv"
     local_dt_path = "/usr/data/doubling_time.csv"
     # aws s3 paths
-    s3_rt_path = 'Phase2_RT.csv'
-    s3_dt_path = 'Phase2_DT.csv'
+    s3_rt_path = 'Phase2_RT'
+    s3_dt_path = 'Phase2_DT'
 
     def requires(self):
         return CalcRTTask(file_name = self.local_rt_path), CalcDTTask(file_name = self.local_dt_path)
