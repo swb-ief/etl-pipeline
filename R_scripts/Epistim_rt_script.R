@@ -53,5 +53,5 @@ res_df <- tibble(mean = rt_nonparametric$R$`Mean(R)`,
 
 # now res_df contains the rt, low and high ci and dates.
 # TODO --> add this path as cmd line arg
-write.csv(res_df, "/usr/data/epiestim_out.csv")
+write.csv(res_df, "/usr/data/epiestim_out.csv", row.names=FALSE)
 

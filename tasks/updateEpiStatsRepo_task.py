@@ -29,12 +29,16 @@ class UpdateEpiStatsTask(luigi.Task):
 
         # read RT results
         rt_results = pd.read_csv(self.local_rt_path)
+        print("RT RESULTS")
+        print(rt_results.columns)
         print(rt_results.head())
         # push RT to Repo
         repository.store_dataframe(rt_results, self.s3_rt_path, allow_create=True)
 
         # read DT results
         dt_results = pd.read_csv(self.local_dt_path)
+        print("DT RESULTS")
+        print(dt_results.columns)
         print(dt_results.head())
         # push DT to Repo
         repository.store_dataframe(dt_results, self.s3_dt_path, allow_create=True)

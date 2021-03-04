@@ -72,16 +72,21 @@ compute_doubling_time <- function(total_cases, case_dates, time.gap, alpha = 0.0
   sd_dt <- c(sd_dt, sd_dt[(length(t.start) - 1)])
 
 
-  return(data.frame(
-    date = as.Date(end.time, origin = "1970-01-01"), r = r, r_ci_low = r + qnorm(alpha / 2) * sd_r, r_ci_up = r + qnorm(1 - alpha / 2) * sd_r,
-    dt = dt, dt_ci_low = dt + qnorm(alpha / 2) * sd_dt, dt_ci_up = dt + qnorm(1 - alpha / 2) * sd_dt
-  ))
-}
-# ================
+  return(data.frame(date = as.Date(end.time, origin = "1970-01-01"), 
+                    r = r, 
+                    r_ci_low = r + qnorm(alpha / 2) * sd_r, 
+                    r_ci_up = r + qnorm(1 - alpha / 2) * sd_r,
+                    dt = dt, 
+                    dt_ci_low = dt + qnorm(alpha / 2) * sd_dt, 
+                    dt_ci_up = dt + qnorm(1 - alpha / 2) * sd_dt))
+  }
 
 total_cases <- df3$confirm
 cases_dates <- df3$date
+
 # compute db time
 db <- compute_doubling_time(total_cases, cases_dates, time.gap = 7, alpha = 0.95)
-# TODO --> add this path as cmd line arg
-write.csv(db, "/usr/data/doubling_time.csv")
+# TODO Default data for Mumbai, will replace with all districts
+df["city"] = "Mumbai"
+
+write.csv(db, "/usr/data/doubling_time.csv", row.names=FALSE)
