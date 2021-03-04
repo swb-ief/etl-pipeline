@@ -87,6 +87,6 @@ cases_dates <- df3$date
 # compute db time
 db <- compute_doubling_time(total_cases, cases_dates, time.gap = 7, alpha = 0.95)
 # TODO Default data for Mumbai, will replace with all districts
-df["city"] = "Mumbai"
+db["city"] = "Mumbai"
 
 write.csv(db, "/usr/data/doubling_time.csv", row.names=FALSE)
