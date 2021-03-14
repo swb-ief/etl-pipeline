@@ -1,4 +1,4 @@
-name: R_proc
+name: phase 2, Reproduction Rate and Doubling Time
 
 on:
   workflow_dispatch:

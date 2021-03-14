@@ -6,6 +6,7 @@ import pandas as pd
 import luigi
 from backend.config import get_config
 from backend.repository import AWSFileRepository
+from backend.metrics.calculations import fourteen_day_avg_ratio
 
 log = logging.getLogger(__name__)
 
@@ -22,11 +23,18 @@ def critical_districts(data):
 
     #? criteria 1 a 
     c1a = list(map(lambda x: x > 100, data['daily_new_cases']))
-    #? criteria 1 b
     
-    #? criteria 2: 
+    #? criteria 1 b
+    daily_new_cases_14dratio = fourteen_day_avg_ratio(data['daily_new_cases'])
+    c1b = list(map(lambda x: x >1, daily_new_cases_14dratio))
 
-    return 
+    # apply criteria
+    criteria = list(map(lambda coll: all(coll), zip(c1a, c1b)))
+
+    # critical cities 
+    data = data[criteria].reset_index(drop=True)
+
+    return data
 
 class DownloadCityStatsTask(luigi.Task):
     file_name = luigi.Parameter()
@@ -48,6 +56,17 @@ class DownloadCityStatsTask(luigi.Task):
             city_stats.to_csv(self.output().path, index=False)     
         else:
             log.error("Missing City Stats Data")
+        
+        # test 
+        print(city_stats.head())
+        print(city_stats.colums)
+
+        new_data = critical_districts(data=data)
+        print(new_data.head())
+        print(new_data.colums)
+
+        raise ValueError
+        return None
 
     def complete(self):
         return self.output().exists()

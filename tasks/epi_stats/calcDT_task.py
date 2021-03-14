@@ -31,9 +31,5 @@ class CalcDTTask(luigi.Task):
         subprocess.call("Rscript {}/R_scripts/dt_script.R".format(cwd), shell=True)
         log.info("Ran DT Calculation")
 
-    # def complete(self):
-    #     # checks if DT Calc ran successfully
-    #     return self.output().exists()
-
 
 
