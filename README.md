@@ -4,8 +4,6 @@
 
 ![Update Covid 19 dashboard](https://github.com/swb-ief/etl-pipeline/workflows/Update%20Covid%2019%20dashboard/badge.svg)
 
-![Phase 1 - Luigi Pipeline Scheduled](https://github.com/swb-ief/etl-pipeline/workflows/LuigiPipelineSchedule/badge.svg)
-
 # Flow [ Phase 2 ]
 
 ![Task Flow](readme/Task_diagram.svg "Overview")
@@ -80,32 +78,25 @@ calls the needed methods to do the work, retaining its orchestration nature
 When an integration test involving luigi fails it is almost alwasy hidden because luigi hides the exceptions in the
 pytest output for that test. So be sure to open the full test run output to find the actual problem.
 
-## Google Sheets
-
-**TODO Needs to be updated to AWS**
-
-Sheets with pythonic names (underscores as spaces) are only used by the backend. Sheets with more human readable names
-are used by powerBI frontend
-
-|Sheet|Description|
-|---|---|
-|raw_ward_data|storage of raw historic data. For some wards we need to do this ourselves and is not done by the source|
-|for_unit_tests|a sheet used during integration tests|
-|Phase 2 - States|Metrics at State level for the dashboard|
-|Phase 2 - Districts|Metrics at District level for the dashboard|
-|Phase 2 - Wards|Metrics at Ward level for the dashboard|
-|Phase 2 - Important| **Work in progress** - top x states/districts/wards|
-
 ## AWS
 
-TODO rewrite the above google sheets info to AWS info
+We use AWS S3 buckets as our storage, there we store computed values as .csv files that are ingested by the PowerBi
+Dashboard
 
 ### AWS added security
 
 AWS S3 buckets can be further protected by blacklisting the entire internet, and whitelisting powerbi either by
 IP-address ranges or by domain names.
 
-## Publish Dashboard
+## Update dashboard data
+
+Is fully automated trough
+a [github workflow action 'Update Covid 19 dashboard'](https://github.com/swb-ief/etl-pipeline/actions/workflows/update_dashboard.yml)
+
+In case of a failure this can be manually triggered with the 'Run workflow' button on that page. <br />
+There is no harm in running it twice a day.
+
+## Publish dashboard
 
 1) Follow [these steps](https://docs.microsoft.com/en-us/power-bi/collaborate-share/service-publish-to-web) to get a
    iframe html code snippet
