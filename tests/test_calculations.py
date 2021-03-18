@@ -187,7 +187,9 @@ class TestCalculateMetrics(unittest.TestCase):
                             'total.confirmed.14_day_ratio',
                             'delta.confirmed.ratio_per_million', 'delta.deceased.ratio_per_million',
                             'total.confirmed.ratio_per_million', 'total.deceased.ratio_per_million',
-                            'MA.21.delta.positivity', 'MA.21.delta.hospitalized', 'MA.21.delta.active'
+                            'MA.21.delta.positivity', 'MA.21.delta.hospitalized', 'MA.21.delta.active',
+                            'MA.21.delta.confirmed.ratio_per_million', 'MA.21.delta.deceased.ratio_per_million',
+                            'MA.21.total.confirmed.ratio_per_million', 'MA.21.total.deceased.ratio_per_million'
                              ]
         expected_shape = (measurements * districts, len(expected_columns))
 

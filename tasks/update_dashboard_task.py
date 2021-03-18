@@ -65,6 +65,12 @@ class UpdateDashboardTask(luigi.Task):
         'MA.21.delta.tested',
         'MA.21.delta.confirmed',
 
+        'MA.21.delta.confirmed.ratio_per_million',
+        'MA.21.delta.deceased.ratio_per_million',
+
+        'MA.21.total.confirmed.ratio_per_million',
+        'MA.21.total.deceased.ratio_per_million',
+
         'delta.confirmed',
         'delta.recovered',
         'delta.active',
