@@ -49,7 +49,7 @@ class TestUpdateDashboardTask(unittest.TestCase):
             if storage_name == UpdateDashboardTask.storage_hospitalizations:
                 return pd.read_csv(
                     os.path.join(THIS_DIR, '../samples/Dashboard PDF Development - hospitalization.csv'))
-            raise ValueError(f'Did not expect {storage_name}')
+            raise ValueError(f'Did not expect {storage_name=}')
 
         def mock_store_dataframe(self, df: pd.DataFrame, storage_name, allow_create, store_index=True):
             results[storage_name] = df
