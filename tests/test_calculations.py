@@ -187,7 +187,9 @@ class TestCalculateMetrics(unittest.TestCase):
                             'total.confirmed.14_day_ratio',
                             'delta.confirmed.ratio_per_million', 'delta.deceased.ratio_per_million',
                             'total.confirmed.ratio_per_million', 'total.deceased.ratio_per_million',
-                            'MA.21.delta.positivity', 'MA.21.delta.hospitalized', 'MA.21.delta.active'
+                            'MA.21.delta.positivity', 'MA.21.delta.hospitalized', 'MA.21.delta.active',
+                            'MA.21.delta.confirmed.ratio_per_million', 'MA.21.delta.deceased.ratio_per_million',
+                            'MA.21.total.confirmed.ratio_per_million', 'MA.21.total.deceased.ratio_per_million'
                              ]
         expected_shape = (measurements * districts, len(expected_columns))
 
@@ -231,6 +233,10 @@ class TestCalculateMetrics(unittest.TestCase):
             [np.nan] * 20 + [0.3] * 5 +
             [np.nan] * 20 + [0.7] * 5)
 
+        expected_means_per_million = np.array(
+            [np.nan] * 20 + [0.3] * 5 +
+            [np.nan] * 20 + [0.35] * 5)
+
         raw_result = extend_and_impute_metrics(
             raw_metrics=input_df,
             hospitalizations=hospitalizations,
@@ -245,10 +251,20 @@ class TestCalculateMetrics(unittest.TestCase):
                 continue  # we got a separate test for these
 
             result = raw_result[column].to_numpy()
-            assert_allclose(
-                expected_means,
-                result,
-                err_msg=f'Column {column} does not have the expected values')
+
+            per_million_column= [column for column in raw_result if 'million' in column]
+            if column in per_million_column:
+                assert_allclose(
+                    expected_means_per_million,
+                    result,
+                    err_msg=f'Column {column} does not have the expected values')
+            else:
+                assert_allclose(
+                    expected_means,
+                    result,
+                    err_msg=f'Column {column} does not have the expected values')
+
+
 
     def test_positivity(self):
         input_df = self._build_district_input(measurements=25, districts=2, district_values=[0.3, 0.7])
