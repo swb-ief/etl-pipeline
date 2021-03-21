@@ -1,6 +1,8 @@
 import pandas as pd
 from numpy import random
-import numpy as np
+import logging
+
+log = logging.getLogger(__name__)
 
 
 def impute_hospitalization_percentages(current_hospitalizations: pd.DataFrame, expected_dates: pd.Series):
@@ -116,12 +118,17 @@ def extend_and_impute_metrics(
         .set_index([*grouping_columns, 'date']) \
         .sort_index()
 
-    measurements = ['tested', 'confirmed', 'deceased', 'recovered', 'other']
+    measurements = ['tested', 'confirmed', 'deceased', 'recovered', 'other', 'vaccinated']
     rolling_window = 21
 
     for group in ['delta', 'total']:
         for measurement in measurements:
-            df[f'{group}.{measurement}'] = df[f'{group}.{measurement}'].fillna(value=0)
+            column_name = f'{group}.{measurement}'
+            if column_name not in df:
+                df[column_name] = 0
+                log.warning(f'{column_name} not present in input data, creating an zero filled column')
+                
+            df[column_name] = df[column_name].fillna(value=0)
 
             df.loc[:, f'MA.21.{group}.{measurement}'] = _moving_average_grouped(df, grouping_columns,
                                                                                 f'{group}.{measurement}',
@@ -158,10 +165,8 @@ def extend_and_impute_metrics(
 
     # moving averages of some of our calculated columns
     for column in ['delta.positivity', 'delta.hospitalized', 'delta.active'
-                   , 'delta.confirmed.ratio_per_million', 'delta.deceased.ratio_per_million',
+        , 'delta.confirmed.ratio_per_million', 'delta.deceased.ratio_per_million',
                    'total.confirmed.ratio_per_million', 'total.deceased.ratio_per_million']:
         df.loc[:, f'MA.21.{column}'] = _moving_average_grouped(df, grouping_columns, column, rolling_window)
-
-
 
     return df.reset_index()

@@ -49,6 +49,7 @@ class UpdateDashboardTask(luigi.Task):
         'total.confirmed',
         'total.deceased',
         'total.recovered',
+        'total.vaccinated',
 
         'total.confirmed.14_day_ratio',
 

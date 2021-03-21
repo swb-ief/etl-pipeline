@@ -13,14 +13,10 @@ class FetchMumbaiWardsTask(luigi.Task):
 
     def run(self):
         # We can also create a backup of the just downloaded PDF here
-        
-        df = scrape_mumbai_pdf(self.input().path)
-        
-        
-        df.to_csv(self.output().path, index=False)
 
-        # cleanup
-        self.input().remove()
+        df = scrape_mumbai_pdf(self.input().path)
+
+        df.to_csv(self.output().path, index=False)
 
     def output(self):
         return luigi.LocalTarget(f'mumbai_{date.today()}.csv')  # TODO this can fail if the run is very close 23:59
