@@ -70,5 +70,3 @@ def interpolate_values(df, group_by_cols, delta_needed_for_cols):
     del complete_df['combo']
     
     return complete_df
-
-    return complete_df
