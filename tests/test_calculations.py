@@ -2,7 +2,6 @@ import os
 import unittest
 from datetime import datetime
 
-
 from numpy.testing import assert_allclose
 from pandas.testing import assert_frame_equal, assert_series_equal
 from backend.metrics.calculations import *
@@ -176,21 +175,25 @@ class TestCalculateMetrics(unittest.TestCase):
         hospitalizations = impute_hospitalization_percentages(
             pd.DataFrame({'date': [datetime(2020, 10, 3)], 'percentages': [0.13]}), input_df['date'])
 
-        expected_columns = ['state', 'district', 'date', 'population', 'delta.tested', 'delta.confirmed',
-                            'delta.deceased', 'delta.recovered', 'delta.other', 'total.tested',
-                            'total.confirmed', 'total.deceased', 'total.recovered', 'total.other',
-                            'MA.21.delta.tested', 'MA.21.delta.confirmed', 'MA.21.delta.deceased',
-                            'MA.21.delta.recovered', 'MA.21.delta.other', 'MA.21.total.tested',
-                            'MA.21.total.confirmed', 'MA.21.total.deceased', 'MA.21.total.recovered',
-                            'MA.21.total.other', 'delta.positivity', 'delta.percent.case.growth',
-                            'delta.hospitalized', 'total.hospitalized', 'delta.active',
-                            'total.confirmed.14_day_ratio',
+        expected_columns = ['state', 'district', 'date', 'population', 'delta.tested',
+                            'delta.confirmed', 'delta.deceased', 'delta.recovered', 'delta.other',
+                            'total.tested', 'total.confirmed', 'total.deceased', 'total.recovered',
+                            'total.other', 'MA.21.delta.tested', 'MA.21.delta.confirmed',
+                            'MA.21.delta.deceased', 'MA.21.delta.recovered', 'MA.21.delta.other',
+                            'delta.vaccinated', 'MA.21.delta.vaccinated', 'MA.21.total.tested',
+                            'MA.21.total.confirmed', 'MA.21.total.deceased',
+                            'MA.21.total.recovered', 'MA.21.total.other', 'total.vaccinated',
+                            'MA.21.total.vaccinated', 'delta.positivity',
+                            'delta.percent.case.growth', 'delta.hospitalized', 'total.hospitalized',
+                            'delta.active', 'total.confirmed.14_day_ratio',
                             'delta.confirmed.ratio_per_million', 'delta.deceased.ratio_per_million',
                             'total.confirmed.ratio_per_million', 'total.deceased.ratio_per_million',
-                            'MA.21.delta.positivity', 'MA.21.delta.hospitalized', 'MA.21.delta.active',
-                            'MA.21.delta.confirmed.ratio_per_million', 'MA.21.delta.deceased.ratio_per_million',
-                            'MA.21.total.confirmed.ratio_per_million', 'MA.21.total.deceased.ratio_per_million'
-                             ]
+                            'MA.21.delta.positivity', 'MA.21.delta.hospitalized',
+                            'MA.21.delta.active', 'MA.21.delta.confirmed.ratio_per_million',
+                            'MA.21.delta.deceased.ratio_per_million',
+                            'MA.21.total.confirmed.ratio_per_million',
+                            'MA.21.total.deceased.ratio_per_million',
+                            ]
         expected_shape = (measurements * districts, len(expected_columns))
 
         result = extend_and_impute_metrics(
@@ -247,12 +250,16 @@ class TestCalculateMetrics(unittest.TestCase):
         self.assertGreater(len(ma_columns), 0)
 
         for column in ma_columns:
-            if 'positivity' in column or 'hospitalized' in column or 'active' in column:
+            # the words checked are part of various column names hence no column in [...]
+            if 'positivity' in column or \
+                    'hospitalized' in column or \
+                    'active' in column or \
+                    'vaccinated' in column:
                 continue  # we got a separate test for these
 
             result = raw_result[column].to_numpy()
 
-            per_million_column= [column for column in raw_result if 'million' in column]
+            per_million_column = [column for column in raw_result if 'million' in column]
             if column in per_million_column:
                 assert_allclose(
                     expected_means_per_million,
@@ -263,8 +270,6 @@ class TestCalculateMetrics(unittest.TestCase):
                     expected_means,
                     result,
                     err_msg=f'Column {column} does not have the expected values')
-
-
 
     def test_positivity(self):
         input_df = self._build_district_input(measurements=25, districts=2, district_values=[0.3, 0.7])

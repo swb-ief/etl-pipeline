@@ -5,15 +5,15 @@ import pandas as pd
 
 import luigi
 
-from backend.repository.gsheet_repository import GSheetRepository
+from backend.repository import AWSFileRepository
 from tasks.update_dashboard_task import UpdateDashboardTask
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-class TestUpdateGSheetTask(unittest.TestCase):
+class TestUpdateDashboardTask(unittest.TestCase):
 
-    def test_update_gsheet_full_run(self):
+    def test_update_dashboard_full_run(self):
         """ This test will run as much of the pipeline locally this includes getting the data from the API
         Once you identify the problem write a unit test that only executes that part and mock everything else
         We don't want to overburden the covid19india.org api to much :-)
@@ -21,8 +21,9 @@ class TestUpdateGSheetTask(unittest.TestCase):
         results = dict()
         expected_results = {
             UpdateDashboardTask.storage_hospitalizations: (308, 2),
-            UpdateDashboardTask.storage_states: (9826, 16),
-            UpdateDashboardTask.storage_districts: (157350, 17)  # +1 column for district
+            UpdateDashboardTask.storage_states: (9826, 33),
+            UpdateDashboardTask.storage_districts: (157350, 34),  # +1 column for district
+            UpdateDashboardTask.storage_wards: (24, 35)  # +1 column for ward
         }
 
         def my_get_dataframe(self, storage_name):
@@ -31,12 +32,17 @@ class TestUpdateGSheetTask(unittest.TestCase):
                     os.path.join(THIS_DIR, '../tests/samples/Dashboard PDF Development - hospitalization.csv'))
             raise ValueError(f'Did not expect {storage_name=}')
 
-        def my_store_dataframe(self, df: pd.DataFrame, storage_name, allow_create):
+        def my_store_dataframe(self, df: pd.DataFrame, storage_name, allow_create=True, store_index=False):
             results[storage_name] = df
             df.to_csv(os.path.join(THIS_DIR, f'../tests/test output/test_update_full_run_{storage_name}.csv'))
 
-        with patch.object(GSheetRepository, 'get_dataframe', new=my_get_dataframe), \
-                patch.object(GSheetRepository, 'store_dataframe', new=my_store_dataframe):
+        def my_store_exists(self, url: str):
+            return url == UpdateDashboardTask.storage_hospitalizations
+
+        with patch.object(AWSFileRepository, 'get_dataframe', new=my_get_dataframe), \
+                patch.object(AWSFileRepository, 'store_dataframe', new=my_store_dataframe), \
+                patch.object(AWSFileRepository, 'exists', new=my_store_exists):
+
             sut = UpdateDashboardTask()
             worker = luigi.worker.Worker()
             worker.add(sut)
