@@ -24,14 +24,21 @@ def create_delta_cols( df,group_by_cols, delta_needed_for_cols):
 
 
 def interpolate_values(df, group_by_cols, delta_needed_for_cols):
+    """
+    Function to interpolate values for columns specified in 'delta_needed_for_cols' list, when data for wards are missing on certain days
+    
+    df - Dataframe containing day-wise count of total confirmed/recovered/fatalities etc for each ward
+    group_by_cols - columns used to identify wards with
+    delta_needed_for_cols - columns whose values need to be interpolated
+    
+    Contributor: aswinjayan94
+    """
+    
     # create copy of original dataframe
     df_cp = df.copy()
 
-    # concatenate join columns
-    df_cp["combo"] = df_cp[group_by_cols].apply(lambda x: "|".join(x.tolist()), axis=1)
-    
     # obtain list of wards
-    list_of_wards = list(df_cp["combo"].unique())
+    list_of_wards = df_cp[group_by_cols].drop_duplicates().reset_index(drop=True)
 
     ### create dataframe such that every ward has a row for every date in the original dataframe ###
     # replicate dates as many times as there are wards
@@ -42,31 +49,27 @@ def interpolate_values(df, group_by_cols, delta_needed_for_cols):
     r = r * num_wards
     r = sorted(r)
     # replicate wards as many times as there are unique dates
-    wardrep = list_of_wards*num_dates
+    wardrep = pd.concat([list_of_wards]*num_dates)
 
     # create new dataframe with the complete series of dates for each ward
-    complete_df = pd.DataFrame({"date": r, "combo": wardrep})
-    # obtain state/district/ward from the concatenated join-column
-    complete_df["state"] = complete_df["combo"].apply(lambda x: x.split("|")[0])
-    complete_df["district"] = complete_df["combo"].apply(lambda x: x.split("|")[1])
-    complete_df["ward"] = complete_df["combo"].apply(lambda x: x.split("|")[2])
+    complete_df = pd.DataFrame({"date": r})
+    complete_df = pd.concat([complete_df, wardrep.reset_index(drop=True)], axis=1)
     # obtain all columns in the original dataframe (except join columns and state/district/ward columns)
-    original_cols = [x for x in df.columns if x not in ["combo", "date", "state", "district", "ward"]]
+    original_cols = [x for x in df.columns if x not in ["date"]+group_by_cols]
+    original_cols_order = list(df)
     # join new dataframe with original dataframe to obtain available values against each date
-    complete_df = complete_df.merge(df_cp[["combo", "date"]+original_cols], on=["combo", "date"], how="left")
-
+    complete_df = complete_df.merge(df_cp[["date"]+group_by_cols+original_cols], on=["date"]+group_by_cols, how="left")
+    complete_df = complete_df[original_cols_order]
+    
     # sort dataframe by date/ward
-    complete_df.sort_values(by=["combo", "date"], inplace=True)
+    complete_df.sort_values(by=group_by_cols+["date"], inplace=True)
 
     # fill missing values with linearly interpolated values, and round interpolated values to the nearest integer
     for item in delta_needed_for:
-        complete_df[item] = complete_df.groupby("combo")[item].transform(lambda x: x.fillna(x.interpolate()))
+        complete_df[item] = complete_df.groupby(group_by_cols)[item].transform(lambda x: x.fillna(x.interpolate()))
         complete_df[item] = complete_df[item].apply(lambda x: round(x, 0))
 
     # sort again on ward/date
-    complete_df.sort_values(by=["combo", "date"], inplace=True)
+    complete_df.sort_values(by=group_by_cols+["date"], inplace=True)
 
-    # delete concatenated join column
-    del complete_df['combo']
-    
     return complete_df
