@@ -33,8 +33,10 @@ def interpolate_values(df, group_by_cols, delta_needed_for_cols):
     
     Contributor: aswinjayan94
     """
-    
-    # create copy of original dataframe
+   
+    # create copy of original dataframe after resetting index, and saving index names
+    index_cols = df.index.names
+    df = df.reset_index()
     df_cp = df.copy()
 
     # obtain list of wards
@@ -71,5 +73,6 @@ def interpolate_values(df, group_by_cols, delta_needed_for_cols):
 
     # sort again on ward/date
     complete_df.sort_values(by=group_by_cols+["date"], inplace=True)
+    complete_df = complete_df.set_index(index_cols)
 
     return complete_df
