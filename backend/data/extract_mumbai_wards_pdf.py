@@ -3,23 +3,82 @@ from datetime import datetime
 import pandas as pd
 import numpy as np
 
-
 def _read_pdf(source_file_path):
     return pdfplumber.open(source_file_path)
 
 
+def identify_wardnames_top_left(positive_cases_pdf_page, initial_bbox=(240, 80, 330, 150)):
+    """
+    Function to identify the top left corner of the wardnames box, to allow dynamic box definitions
+    positive_cases_pdf_page - page containing data of active/recovered/discharged/deaths etc
+    initial_bbox - initial box with which the search for top-left corner will start
+    
+    Contributor: aswinjayan94
+    """
+    
+    x0 = initial_bbox[0]
+    top = initial_bbox[1]
+    
+    checkbox = initial_bbox
+    # extract all wards in initial_bbox
+    checkdata = positive_cases_pdf_page.within_bbox(checkbox).extract_text()
+    checklist = set(checkdata.split('\n')[:24])
+    # check which wards extracted above belong to the list below (it's very likely that you'll find at least one of the wards specified below)
+    checkagainstlist = set(['RC', 'KW', 'PN', 'RS', 'KE'])
+    # Number of wards common to checklist and checkagainstlist
+    initiallen = len(checklist.intersection(checkagainstlist))
+    
+    # keep adjusting the x coordinate of the initial_bbox until the list of extracted wards is different to initially extracted list
+    while initiallen>0 and len(checklist.intersection(checkagainstlist))==initiallen:
+        #print("All in initiallist Still present")
+        previous_x0 = x0
+        x0+=5
+        checkbox = (x0, top, initial_bbox[2], initial_bbox[3])
+        checkdata = positive_cases_pdf_page.within_bbox(checkbox).extract_text()
+        checklist = set(checkdata.split('\n')[:24])
+    
+    # since number of wards has changed (as the while loop has broken), the new box has crossed data. reset it to previous coordinate
+    x0 = previous_x0-5
+    checkbox = (x0, top, initial_bbox[2], initial_bbox[3])
+    checkdata = positive_cases_pdf_page.within_bbox(checkbox).extract_text()
+    checklist = set(checkdata.split('\n')[:24])
+
+    # keep adjusting the y coordinate of the initial_bbox until the list of extracted wards is different to initially extracted list
+    while initiallen>0 and len(checklist.intersection(checkagainstlist))==initiallen:
+        #print("All in initiallist Still present")
+        previous_top = top
+        top+=5
+        checkbox = (x0, top, initial_bbox[2], initial_bbox[3])
+        checkdata = positive_cases_pdf_page.within_bbox(checkbox).extract_text()
+        checklist = set(checkdata.split('\n')[:24])
+        
+    # since number of wards has changed, the new box has crossed data. reset it to previous coordinate
+    top = previous_top-5
+    
+    return (x0, top)
+    
+
 def _extract_wards_data_from_page(positive_cases_pdf_page) -> pd.DataFrame:
     total_discharged_boundary = 618
-    discharged_deaths_boundary = 650
-    deaths_active_boundary = 700
+    discharged_deaths_boundary = 660
+    deaths_active_boundary = 710
+    
+    # identify top left corner of district names
+    x0, top = identify_wardnames_top_left(positive_cases_pdf_page)
+    
+    wardbox = (x0, top, x0+30, top+420)
+    confirmedbox = (x0+30, top, total_discharged_boundary, top+420)
+    recoveredbox = (total_discharged_boundary, top, discharged_deaths_boundary, top+420)
+    deceasedbox = (discharged_deaths_boundary, top, deaths_active_boundary, top+420)
+    activebox = (deaths_active_boundary, top, 800, top+420)
 
     # switching to our naming convention
     boxes = {
-        'ward': (240, 79.2, 310, 504),  # ward abbreviation
-        'total.confirmed': (310, 79.2, total_discharged_boundary, 504),  # cases
-        'total.recovered': (total_discharged_boundary, 79.2, discharged_deaths_boundary, 504),  # Discharged column
-        'total.deceased': (discharged_deaths_boundary, 79.2, deaths_active_boundary, 504),  # deaths column
-        'total.active': (deaths_active_boundary, 79.2, 800, 504),  # active column
+        'ward': wardbox,  # ward abbreviation
+        'total.confirmed': confirmedbox,  # cases
+        'total.recovered': recoveredbox,  # Discharged column
+        'total.deceased': deceasedbox,  # deaths column
+        'total.active': activebox,  # active column
     }
 
     data = dict()
@@ -58,7 +117,19 @@ def find_ward_wise_breakdown_page(pdf):
 
     for page in pdf.pages:
         title = page.within_bbox(title_box).extract_text()
-        if title is not None and ward_page_title in title:
+        if title is not None and ward_page_title.lower() in title.lower():
+            return page
+
+    raise ValueError(f'PDF does not contain a page with {ward_page_title}')
+
+
+def find_ward_wise_new_cases_page(pdf):
+    title_box = (0, 0, 800, 70)
+    ward_page_title = 'Ward-wise new cases'
+
+    for page in pdf.pages:
+        title = page.within_bbox(title_box).extract_text()
+        if title is not None and ward_page_title.lower() in title.lower():
             return page
 
     raise ValueError(f'PDF does not contain a page with {ward_page_title}')
@@ -71,7 +142,8 @@ def scrape_mumbai_pdf(source_file_path):
     """
     pdf = _read_pdf(source_file_path)
 
-    positive_cases_page = find_ward_wise_breakdown_page(pdf)
-    df = _extract_wards_data_from_page(positive_cases_page)
+    positive_cases_pdf_page = find_ward_wise_breakdown_page(pdf)
+    # new_cases_page = find_ward_wise_new_cases_page(pdf)
+    df = _extract_wards_data_from_page(positive_cases_pdf_page)
 
     return df
