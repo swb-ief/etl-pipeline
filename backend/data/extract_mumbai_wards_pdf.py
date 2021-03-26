@@ -15,8 +15,8 @@ def _extract_wards_data_from_page(positive_cases_pdf_page) -> pd.DataFrame:
 
     # switching to our naming convention
     boxes = {
-        'ward': (240, 79.2, 330, 504),  # ward abbreviation
-        'total.confirmed': (330, 79.2, total_discharged_boundary, 504),  # cases
+        'ward': (240, 79.2, 310, 504),  # ward abbreviation
+        'total.confirmed': (310, 79.2, total_discharged_boundary, 504),  # cases
         'total.recovered': (total_discharged_boundary, 79.2, discharged_deaths_boundary, 504),  # Discharged column
         'total.deceased': (discharged_deaths_boundary, 79.2, deaths_active_boundary, 504),  # deaths column
         'total.active': (deaths_active_boundary, 79.2, 800, 504),  # active column
