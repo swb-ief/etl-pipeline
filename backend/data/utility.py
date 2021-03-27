@@ -67,7 +67,7 @@ def interpolate_values(df, group_by_cols, delta_needed_for_cols):
     complete_df.sort_values(by=group_by_cols+["date"], inplace=True)
 
     # fill missing values with linearly interpolated values, and round interpolated values to the nearest integer
-    for item in delta_needed_for:
+    for item in delta_needed_for_cols:
         complete_df[f'total.{item}'] = complete_df.groupby(group_by_cols)[f'total.{item}'].transform(lambda x: x.fillna(x.interpolate()))
         complete_df[f'total.{item}'] = complete_df[f'total.{item}'].apply(lambda x: round(x, 0))
 
