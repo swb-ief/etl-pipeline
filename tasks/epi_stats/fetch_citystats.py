@@ -59,11 +59,11 @@ class DownloadCityStatsTask(luigi.Task):
         
         # test 
         print(city_stats.head())
-        print(city_stats.colums)
+        print(city_stats.columns)
 
         new_data = critical_districts(data=data)
         print(new_data.head())
-        print(new_data.colums)
+        print(new_data.columns)
 
         raise ValueError
         return None
