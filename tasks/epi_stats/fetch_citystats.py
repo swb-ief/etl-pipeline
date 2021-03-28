@@ -2,7 +2,8 @@ import logging
 from datetime import date
 
 import pandas as pd
-
+import numpy as np 
+import functools
 import luigi
 from backend.config import get_config
 from backend.repository import AWSFileRepository
@@ -11,7 +12,6 @@ from backend.metrics.calculations import fourteen_day_avg_ratio
 log = logging.getLogger(__name__)
 
 def critical_districts(data):
-    # TODO!
     """
     1) Criteria for identifying cities/districts with (a) increasing Covid-19 Incidence:
     a. Daily new cases  >  100 
@@ -20,18 +20,14 @@ def critical_districts(data):
     2) Criteria for identifying cities with high incidence burden:
     a. Top 20 cities/districts with the highest incidence burden as of date in terms of cumulative cases
     """
-
     #? criteria 1 a 
-    c1a = list(map(lambda x: x > 100, data['daily_new_cases']))
-    
+    c1a = data['delta.confirmed'] > 100
     #? criteria 1 b
-    daily_new_cases_14dratio = fourteen_day_avg_ratio(data['daily_new_cases'])
-    c1b = list(map(lambda x: x >1, daily_new_cases_14dratio))
-
+    daily_new_cases_14dratio = fourteen_day_avg_ratio(data['delta.confirmed'])
+    c1b = daily_new_cases_14dratio > 1
     # apply criteria
     criteria = list(map(lambda coll: all(coll), zip(c1a, c1b)))
-
-    # critical cities 
+    # data for critical cities 
     data = data[criteria].reset_index(drop=True)
 
     return data
@@ -61,9 +57,9 @@ class DownloadCityStatsTask(luigi.Task):
         print(city_stats.head())
         print(city_stats.columns)
 
-        new_data = critical_districts(data=city_stats)
-        print(new_data.head())
-        print(new_data.columns)
+        # new_data = critical_districts(data=city_stats)
+        # print(new_data.head())
+        # print(new_data.columns)
 
         raise ValueError
         return None

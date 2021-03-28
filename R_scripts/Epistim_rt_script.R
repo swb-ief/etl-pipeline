@@ -18,6 +18,11 @@ df <- read.csv(file = '/usr/data/citystats.csv')
 city <- "Mumbai"
 # filter
 df2 <- df %>% dplyr::select(date, district, total.confirmed, total.deceased, total.recovered)
+# for each city: 
+# city_list = 
+# city_num = 
+# city_output = vector("list", N = city_num)
+
 # remove rows with NA to allow for calculation.
 df2 <- df2[complete.cases(df2), ]
 # delta_case
@@ -50,6 +55,9 @@ res_df <- tibble(mean = rt_nonparametric$R$`Mean(R)`,
                  date = dates_list,
                  city = city, 
                  median = rt_nonparametric$R$`Median(R)`)
+
+# concatenate result list of dataframes
+
 
 # now res_df contains the rt, low and high ci and dates.
 # TODO --> add this path as cmd line arg
