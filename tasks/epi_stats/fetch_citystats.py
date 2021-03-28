@@ -15,6 +15,8 @@ def rolling_avgratio(data):
     window = 14
     shift = 14
     series = data['delta.confirmed']
+    # re index 
+    series = series.reindex(data['date'])
     week_avg = series.rolling(window=window, min_periods=7).mean()
     prev_avg = series.shift(periods=shift, freq='D').rolling(window=window, min_periods=7).mean()
     ratio = week_avg / prev_avg
