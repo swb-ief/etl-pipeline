@@ -21,7 +21,7 @@ class UpdateEpiStatsTask(luigi.Task):
     s3_dt_path = 'Phase2_DT'
 
     def requires(self):
-        return CalcRTTask(file_name = self.local_rt_path), CalcDTTask(file_name = self.local_dt_path)
+        return CalcRTTask(file_name = self.local_rt_path)#, CalcDTTask(file_name = self.local_dt_path)
 
     def run(self):
         config = get_config()
@@ -33,11 +33,11 @@ class UpdateEpiStatsTask(luigi.Task):
         # push RT to Repo
         repository.store_dataframe(rt_results, self.s3_rt_path, allow_create=True)
 
-        # read DT results
-        dt_results = pd.read_csv(self.local_dt_path)
+        # # read DT results
+        # dt_results = pd.read_csv(self.local_dt_path)
         
-        # push DT to Repo
-        repository.store_dataframe(dt_results, self.s3_dt_path, allow_create=True)
+        # # push DT to Repo
+        # repository.store_dataframe(dt_results, self.s3_dt_path, allow_create=True)
 
 
     # def complete(self):
