@@ -11,7 +11,7 @@ from backend.metrics.calculations import fourteen_day_avg_ratio
 
 log = logging.getLogger(__name__)
 
-rolling_avgratio(series, window, shift):
+def rolling_avgratio(series, window, shift):
     week_avg = series.rolling(window='{}D'.format(str(window)), min_periods=7).mean()
     prev_avg = series.shift(periods=shift, freq='D').rolling(window='{}D'.format(str(window)), min_periods=7).mean()
     ratio = week_avg / prev_avg
