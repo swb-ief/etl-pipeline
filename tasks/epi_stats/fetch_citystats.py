@@ -12,8 +12,10 @@ from backend.metrics.calculations import fourteen_day_avg_ratio
 log = logging.getLogger(__name__)
 
 def rolling_avgratio(series, window, shift):
-    week_avg = series.rolling(window='{}D'.format(str(window)), min_periods=7).mean()
-    prev_avg = series.shift(periods=shift, freq='D').rolling(window='{}D'.format(str(window)), min_periods=7).mean()
+    window = 14
+    shift = 14
+    week_avg = series.rolling(window=window, min_periods=7).mean()
+    prev_avg = series.shift(periods=shift, freq='D').rolling(window=window, min_periods=7).mean()
     ratio = week_avg / prev_avg
     return ratio
 
@@ -26,18 +28,23 @@ def critical_districts(data):
     2) Criteria for identifying cities with high incidence burden:
     a. Top 20 cities/districts with the highest incidence burden as of date in terms of cumulative cases
     """
+    # -- sort by date
+    data = data.sort_values(by = ['date'])
     #? criteria 1 a 
     c1a = data['delta.confirmed'] > 100
     #? criteria 1 b
-    daily_new_cases_14dratio = rolling_avgratio(data['delta.confirmed'], window=14, shift=14)
+    daily_new_cases_14dratio = data.groupby(['districts']).apply(rolling_avgratio)
     c1b = daily_new_cases_14dratio > 1
     # latest date
     latest_crit = data['date'] == data['date'].max()
     # apply criteria
     criteria = list(map(lambda coll: all(coll), zip(c1a, c1b, latest_crit)))
-    # critical cities
+    # critical cities, re criteria set 1
     critical_cities = data[criteria]
     # criteria 2a: highest 20 cumulative cases
+    critical_cities = critical_cities.sort_values(by = ['total.confirmed']).reset_index(drop=True)
+    critical_cities = critical_cities.head(20)
+
     print(critical_cities)
     critical_cities = critical_cities['districts'].drop_duplicates().to_list()
     #? critical city data
