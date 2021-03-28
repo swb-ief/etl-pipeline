@@ -61,7 +61,7 @@ class DownloadCityStatsTask(luigi.Task):
         print(city_stats.head())
         print(city_stats.columns)
 
-        new_data = critical_districts(data=data)
+        new_data = critical_districts(data=city_stats)
         print(new_data.head())
         print(new_data.columns)
 
