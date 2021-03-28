@@ -33,7 +33,7 @@ def critical_districts(data):
     #? criteria 1 a 
     c1a = data['delta.confirmed'] > 100
     #? criteria 1 b
-    daily_new_cases_14dratio = data.groupby(['districts']).apply(rolling_avgratio)
+    daily_new_cases_14dratio = data.groupby(['district']).apply(rolling_avgratio)
     c1b = daily_new_cases_14dratio > 1
     # latest date
     latest_crit = data['date'] == data['date'].max()
@@ -46,9 +46,9 @@ def critical_districts(data):
     critical_cities = critical_cities.head(20)
 
     print(critical_cities)
-    critical_cities = critical_cities['districts'].drop_duplicates().to_list()
+    critical_cities = critical_cities['district'].drop_duplicates().to_list()
     #? critical city data
-    data_critical = data[data['districts'].isin(critical_cities)].reset_index(drop=True)
+    data_critical = data[data['district'].isin(critical_cities)].reset_index(drop=True)
 
     return data_critical
 
