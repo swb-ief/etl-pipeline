@@ -26,11 +26,18 @@ def critical_districts(data):
     daily_new_cases_14dratio = fourteen_day_avg_ratio(data['delta.confirmed'])
     c1b = daily_new_cases_14dratio > 1
     # apply criteria
-    criteria = list(map(lambda coll: all(coll), zip(c1a, c1b)))
+    latest_crit = data['date'] == data['date'].max()
+    criteria = list(map(lambda coll: all(coll), zip(c1a, c1b, latest_crit)))
+    # critical cities
+    critical_cities = data[criteria]
+    print(critical_cities)
+    critical_cities = critical_cities['districts'].drop_duplicates().to_list()
+    #? critical city data
+    data_critical = data[data['districts'].isin(critical_cities)].reset_index(drop=True)
     # data for critical cities 
-    data = data[criteria].reset_index(drop=True)
+    #data = data[criteria].reset_index(drop=True)
 
-    return data
+    return data_critical
 
 class DownloadCityStatsTask(luigi.Task):
     file_name = luigi.Parameter()
@@ -48,6 +55,7 @@ class DownloadCityStatsTask(luigi.Task):
             city_stats = repository.get_dataframe(city_stats_location)
             # TODO --> Edit implementations of RT and DT to accomodate all districts
             city_stats = city_stats[list(map(lambda x: x == "Mumbai", city_stats['district']))].reset_index(drop=True)
+            critical_city_stats = critical_districts(data=city_stats)
             # download to local fs
             city_stats.to_csv(self.output().path, index=False)     
         else:
@@ -57,11 +65,10 @@ class DownloadCityStatsTask(luigi.Task):
         print(city_stats.head())
         print(city_stats.columns)
 
-        # new_data = critical_districts(data=city_stats)
-        # print(new_data.head())
-        # print(new_data.columns)
+        new_data = critical_districts(data=city_stats)
+        print(new_data.head())
+        print(new_data.columns)
 
-        raise ValueError
         return None
 
     def complete(self):

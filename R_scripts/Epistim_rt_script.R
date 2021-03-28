@@ -15,13 +15,13 @@ library(knitr)
 # # TODO --> cmd line arg Rscript name.R --args file_name 
 df <- read.csv(file = '/usr/data/citystats.csv')
 # TODO --> temporary, mumbai identifier --> replaced by critical cities 
-city <- "Mumbai"
+#city <- "Mumbai"
 # filter
 df2 <- df %>% dplyr::select(date, district, total.confirmed, total.deceased, total.recovered)
 # for each city: 
-# city_list = 
-# city_num = 
-# city_output = vector("list", N = city_num)
+city_list = unique(df[["some_col"]])
+city_num = 
+city_output = vector("list", N = city_num)
 
 # remove rows with NA to allow for calculation.
 df2 <- df2[complete.cases(df2), ]
