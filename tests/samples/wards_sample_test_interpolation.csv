@@ -1,0 +1,9 @@
+state,district,ward,date,total.confirmed,total.recovered,total.deceased,total.active
+MH,Mumbai,A,2021-01-01 0:00:00,7023,6700,121,194
+MH,Mumbai,A,2021-01-03 0:00:00,7072,6754,121,189
+MH,Mumbai,A,2021-01-04 0:00:00,7091,6793,121,169
+MH,Mumbai,A,2021-01-06 0:00:00,7127,6816,121,182
+MH,Mumbai,A,2021-01-07 0:00:00,7140,6822,121,189
+MH,Mumbai,B,2021-01-02 0:00:00,2208,2010,144,47
+MH,Mumbai,B,2021-01-03 0:00:00,2211,2013,144,47
+MH,Mumbai,B,2021-01-07 0:00:00,2218,2026,144,41

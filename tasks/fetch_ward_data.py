@@ -2,7 +2,7 @@ import logging
 from datetime import date
 
 from backend.data import get_static_ward_data
-from backend.data.utility import create_delta_cols
+from backend.data.utility import create_delta_cols, interpolate_values
 
 import luigi
 import pandas as pd
@@ -58,6 +58,7 @@ class FetchWardDataTask(luigi.Task):
         # impute delta's atleast for Mumbai this is needed it only provides totals
         delta_needed_for = ['tested', 'confirmed', 'recovered', 'deceased', 'active', 'other']
         group_by_cols = ['state', 'district', 'ward']
+        all_wards = interpolate_values(all_wards, group_by_cols, delta_needed_for)
         all_wards = create_delta_cols(all_wards, group_by_cols, delta_needed_for)
 
         # add population
