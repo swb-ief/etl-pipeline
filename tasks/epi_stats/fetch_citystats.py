@@ -31,15 +31,17 @@ def critical_districts(data):
     2) Criteria for identifying cities with high incidence burden:
     a. Top 20 cities/districts with the highest incidence burden as of date in terms of cumulative cases
     """
-    # -- sort by date
-    data = data.sort_values(by = ['date'])
+    # latest date
+    data = data['date'] == data['date'].max()
+    print("latest data")
+    print(data)
+    print("========================")
     #? criteria 1 a 
     c1a = data['delta.confirmed'] > 100
     #? criteria 1 b
-    daily_new_cases_14dratio = data.groupby(['district']).apply(rolling_avgratio)
-    c1b = daily_new_cases_14dratio > 1
-    # latest date
-    latest_crit = data['date'] == data['date'].max()
+    #daily_new_cases_14dratio = data.groupby(['district']).apply(rolling_avgratio)
+    c1b = data['newcase_ratio'] > 1
+    
     # apply criteria
     criteria = list(map(lambda coll: all(coll), zip(c1a, c1b, latest_crit)))
     # critical cities, re criteria set 1
@@ -48,7 +50,6 @@ def critical_districts(data):
     critical_cities = critical_cities.sort_values(by = ['total.confirmed']).reset_index(drop=True)
     critical_cities = critical_cities.head(20)
 
-    print(critical_cities)
     critical_cities = critical_cities['district'].drop_duplicates().to_list()
     #? critical city data
     data_critical = data[data['district'].isin(critical_cities)].reset_index(drop=True)
@@ -70,6 +71,10 @@ class DownloadCityStatsTask(luigi.Task):
         if repository.exists(city_stats_location):
             city_stats = repository.get_dataframe(city_stats_location)
             # TODO --> Edit implementations of RT and DT to accomodate all districts
+            # -- sort by date
+            city_stats = city_stats.sort_values(by = ['date'])
+            city_stats['newcase_ratio'] = city_stats.groupby(['district']).apply(rolling_avgratio)
+            # critical cities
             critical_city_stats = critical_districts(data=city_stats)
             city_stats = city_stats[list(map(lambda x: x == "Mumbai", city_stats['district']))].reset_index(drop=True)
             # download to local fs
@@ -78,10 +83,9 @@ class DownloadCityStatsTask(luigi.Task):
             log.error("Missing City Stats Data")
         
         # test 
-        print(city_stats.head())
-        print(city_stats.columns)
 
         new_data = critical_districts(data=city_stats)
+        print("critical cities")
         print(new_data.head())
         print(new_data.columns)
 
