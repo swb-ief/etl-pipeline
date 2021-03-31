@@ -20,7 +20,9 @@ def rolling_avgratio(data):
     week_avg = series.rolling(window=window, min_periods=7).mean()
     prev_avg = series.shift(periods=shift, freq='D').rolling(window=window, min_periods=7).mean()
     ratio = week_avg / prev_avg
-    return ratio
+    data['newcase_ratio'] = ratio
+
+    return data
 
 def critical_districts(data):
     """
@@ -70,10 +72,13 @@ class DownloadCityStatsTask(luigi.Task):
 
         if repository.exists(city_stats_location):
             city_stats = repository.get_dataframe(city_stats_location)
-            # TODO --> Edit implementations of RT and DT to accomodate all districts
             # -- sort by date
             city_stats = city_stats.sort_values(by = ['date'])
-            city_stats['newcase_ratio'] = city_stats.groupby(['district']).apply(rolling_avgratio)
+            city_stats = city_stats.groupby(['district']).apply(rolling_avgratio)
+
+            print("mumbai data")
+            print(city_stats[city_stats['district'] == "Mumbai"]])
+
             # critical cities
             critical_city_stats = critical_districts(data=city_stats)
             city_stats = city_stats[list(map(lambda x: x == "Mumbai", city_stats['district']))].reset_index(drop=True)
