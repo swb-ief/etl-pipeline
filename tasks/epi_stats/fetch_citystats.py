@@ -77,7 +77,7 @@ class DownloadCityStatsTask(luigi.Task):
             city_stats = city_stats.groupby(['district']).apply(rolling_avgratio)
 
             print("mumbai data")
-            print(city_stats[city_stats['district'] == "Mumbai"]])
+            print(city_stats[city_stats['district'] == "Mumbai"])
 
             # critical cities
             critical_city_stats = critical_districts(data=city_stats)
