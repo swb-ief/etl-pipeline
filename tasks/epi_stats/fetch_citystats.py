@@ -35,19 +35,18 @@ def critical_districts(data):
     """
     # latest date
     data = data[data['date'] == data['date'].max()]
-    print("latest data")
-    print(data)
-    print("========================")
+
     #? criteria 1 a 
     c1a = data['delta.confirmed'] > 100
     #? criteria 1 b
     #daily_new_cases_14dratio = data.groupby(['district']).apply(rolling_avgratio)
-    c1b = data['newcase_ratio'] > 1
+    c1b = data['total.confirmed.14_day_ratio'] > 1
     
     # apply criteria
     criteria = list(map(lambda coll: all(coll), zip(c1a, c1b, latest_crit)))
     # critical cities, re criteria set 1
     critical_cities = data[criteria]
+    
     # criteria 2a: highest 20 cumulative cases
     critical_cities = critical_cities.sort_values(by = ['total.confirmed']).reset_index(drop=True)
     critical_cities = critical_cities.head(20)
