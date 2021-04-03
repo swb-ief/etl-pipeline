@@ -81,9 +81,10 @@ compute_doubling_time <- function(total_cases, case_dates, time.gap, alpha = 0.0
                     dt_ci_up = dt + qnorm(1 - alpha / 2) * sd_dt))
   }
 
+# ================================
+
 total_cases <- df3$confirm
 cases_dates <- df3$date
-
 # compute db time
 db <- compute_doubling_time(total_cases, cases_dates, time.gap = 7, alpha = 0.95)
 # TODO Default data for Mumbai, will replace with all districts

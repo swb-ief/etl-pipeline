@@ -74,21 +74,19 @@ class DownloadCityStatsTask(luigi.Task):
             city_stats = repository.get_dataframe(city_stats_location)
             # -- sort by date
             city_stats = city_stats.sort_values(by = ['date'])
-            city_stats = city_stats.groupby(['district']).apply(rolling_avgratio)
+            #city_stats = city_stats.groupby(['district']).apply(rolling_avgratio)
 
             print("mumbai data")
             print(city_stats[city_stats['district'] == "Mumbai"])
 
             # critical cities
             critical_city_stats = critical_districts(data=city_stats)
-            city_stats = city_stats[list(map(lambda x: x == "Mumbai", city_stats['district']))].reset_index(drop=True)
             # download to local fs
-            city_stats.to_csv(self.output().path, index=False)     
+            critical_city_stats.to_csv(self.output().path, index=False)     
         else:
             log.error("Missing City Stats Data")
         
         # test 
-
         new_data = critical_districts(data=city_stats)
         print("critical cities")
         print(new_data.head())
