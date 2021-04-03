@@ -64,12 +64,16 @@ for (city in city_list) {
         
     # append df
     city_output[[index]] <- res_df
+    print("res_df")
+    print(res_df)
     index <- index + 1
 
         }
 
 # concatenate result list of dataframes
 out_df <- bind_rows(city_output, .id = "column_label")
+print("out_df")
+print(out_df)
 
 # now res_df contains the rt, low and high ci and dates.
 write.csv(out_df, "/usr/data/epiestim_out.csv", row.names=FALSE)

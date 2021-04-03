@@ -74,7 +74,6 @@ class DownloadCityStatsTask(luigi.Task):
             city_stats = repository.get_dataframe(city_stats_location)
             # -- sort by date
             city_stats = city_stats.sort_values(by = ['date'])
-            #city_stats = city_stats.groupby(['district']).apply(rolling_avgratio)
 
             print("mumbai data")
             print(city_stats[city_stats['district'] == "Mumbai"])
