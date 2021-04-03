@@ -34,7 +34,7 @@ def critical_districts(data):
     a. Top 20 cities/districts with the highest incidence burden as of date in terms of cumulative cases
     """
     # latest date
-    data = data['date'] == data['date'].max()
+    data = data[data['date'] == data['date'].max()]
     print("latest data")
     print(data)
     print("========================")
