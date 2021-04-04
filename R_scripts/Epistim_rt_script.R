@@ -20,7 +20,9 @@ df <- read.csv(file = '/usr/data/citystats.csv')
 
 df2 <- df %>% dplyr::select(date, district, total.confirmed, total.deceased, total.recovered)
 # for each city: 
-city_list = unique(df[["some_col"]])
+city_list = unique(df$district)
+print("city list")
+print(city_list)
 city_num = length(city_list)
 city_output = vector("list", city_num)
 
