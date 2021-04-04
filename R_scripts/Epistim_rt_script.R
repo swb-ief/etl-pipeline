@@ -16,7 +16,7 @@ library(dplyr)
 # # TODO --> cmd line arg Rscript name.R --args file_name 
 df <- read.csv(file = '/usr/data/citystats.csv')
 print("--- df")
-print(df)
+print(head(df))
 # TODO --> temporary, mumbai identifier --> replaced by critical cities 
 #city <- "Mumbai"
 
@@ -35,7 +35,7 @@ for (city in city_list) {
     df_city <- df2 %>% filter(district == city)
     print("--- df city")
     print(city)
-    print(df_city
+    print(head(df_city))
     # remove rows with NA to allow for calculation.
     df_city <- df_city[complete.cases(df_city), ]
     # delta_case
@@ -45,7 +45,7 @@ for (city in city_list) {
     # tibble; Dates and delta case
     df_city <- tibble(dates = df_city$date, I = df_city$delta_case)
     print(city)
-    print(df_city)
+    print(head(df_city))
     # default RT arguments --> non-parametric 
     config <- make_config(list(mean_si = 3.96, std_mean_si = 0.215,
                             min_mean_si = 3.53, max_mean_si = 4.39,
