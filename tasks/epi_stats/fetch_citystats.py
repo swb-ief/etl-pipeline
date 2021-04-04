@@ -36,7 +36,7 @@ def critical_districts(data):
 
     # criteria 2a: highest 20 cumulative cases
     critical_cities = critical_cities.sort_values(by = ['total.confirmed']).reset_index(drop=True)
-    critical_cities = critical_cities.head(20)
+    critical_cities = critical_cities.head(2) # 20
 
     critical_cities = critical_cities['district'].drop_duplicates().to_list()
     #? critical city data
