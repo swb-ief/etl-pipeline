@@ -37,12 +37,13 @@ class UpdateEpiStatsTask(luigi.Task):
         
         # rename columns so as to allow join with master districts data
         rt_results.columns = ['district' if x=='city' else x for x in rt_results.columns]
+        rt_results.columns = ['rt' if x==rt_colname else x for x in rt_results.columns]
         
         # import master districts data
         all_districts = repository.get_dataframe(self.s3_districts_path)
         
         # join rt data with all districts data
-        all_districts = all_districts.merge(rt_results[['district', 'date', rt_colname]], on=['district', 'date'], how='left')
+        all_districts = all_districts.merge(rt_results[['district', 'date', 'rt']], on=['district', 'date'], how='left')
     
         # push RT to Repo
         repository.store_dataframe(all_districts, self.s3_districts_rt_path, allow_create=True)
