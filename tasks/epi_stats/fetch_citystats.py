@@ -11,19 +11,6 @@ from backend.metrics.calculations import fourteen_day_avg_ratio
 
 log = logging.getLogger(__name__)
 
-# def rolling_avgratio(data):
-#     window = 14
-#     shift = 14
-#     series = data['delta.confirmed']
-#     # re index 
-#     series = series.reindex(data['date'])
-#     week_avg = series.rolling(window=window, min_periods=7).mean()
-#     prev_avg = series.shift(periods=shift, freq='D').rolling(window=window, min_periods=7).mean()
-#     ratio = week_avg / prev_avg
-#     data['newcase_ratio'] = ratio
-
-#     return data
-
 def critical_districts(data):
     """
     1) Criteria for identifying cities/districts with (a) increasing Covid-19 Incidence:
@@ -34,19 +21,18 @@ def critical_districts(data):
     a. Top 20 cities/districts with the highest incidence burden as of date in terms of cumulative cases
     """
     # latest date
-    data = data[data['date'] == data['date'].max()]
+    data_latest = data[data['date'] == data['date'].max()]
 
     #? criteria 1 a 
-    c1a = data['delta.confirmed'] > 100
+    c1a = data_latest['delta.confirmed'] > 100
     #? criteria 1 b
-    #daily_new_cases_14dratio = data.groupby(['district']).apply(rolling_avgratio)
-    data['total.confirmed.14_day_ratio'] = np.where(abs(data['total.confirmed.14_day_ratio'].values) == np.inf, np.nan, data['total.confirmed.14_day_ratio'].values)
-    c1b = data['total.confirmed.14_day_ratio'] > 1
+    data_latest['total.confirmed.14_day_ratio'] = np.where(abs(data_latest['total.confirmed.14_day_ratio'].values) == np.inf, np.nan, data_latest['total.confirmed.14_day_ratio'].values)
+    c1b = data_latest['total.confirmed.14_day_ratio'] > 1
     
     # apply criteria
     criteria = list(map(lambda coll: all(coll), zip(c1a, c1b)))
     # critical cities, re criteria set 1
-    critical_cities = data[criteria]
+    critical_cities = data_latest[criteria]
 
     # criteria 2a: highest 20 cumulative cases
     critical_cities = critical_cities.sort_values(by = ['total.confirmed']).reset_index(drop=True)
@@ -88,7 +74,7 @@ class DownloadCityStatsTask(luigi.Task):
         # test 
         new_data = critical_districts(data=city_stats)
         print("critical cities")
-        print(new_data.head())
+        print(new_data)
         print(new_data.columns)
 
         return None

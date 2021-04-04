@@ -15,6 +15,8 @@ library(dplyr)
 
 # # TODO --> cmd line arg Rscript name.R --args file_name 
 df <- read.csv(file = '/usr/data/citystats.csv')
+print("--- df")
+print(df)
 # TODO --> temporary, mumbai identifier --> replaced by critical cities 
 #city <- "Mumbai"
 
@@ -30,7 +32,10 @@ index = 1
 for (city in city_list) {
 
     # filter for city
-    df_city = df2 %>% filter(district == city)
+    df_city <- df2 %>% filter(district == city)
+    print("--- df city")
+    print(city)
+    print(df_city
     # remove rows with NA to allow for calculation.
     df_city <- df_city[complete.cases(df_city), ]
     # delta_case
