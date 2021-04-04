@@ -30,7 +30,7 @@ class UpdateEpiStatsTask(luigi.Task):
         repository = AWSFileRepository(config['aws']['bucket production'])
 
         # read RT results
-        rt_results = pd.read_csv(self.local_rt_path)
+        rt_results = pd.read_csv(self.local_rt_path, parse_dates=["date"])
         
         # specify column name containing Rt values
         rt_colname = 'median'
