@@ -39,6 +39,8 @@ for (city in city_list) {
     df_city$date <- as_date(df_city$date)
     # tibble; Dates and delta case
     df_city <- tibble(dates = df_city$date, I = df_city$delta_case)
+    print(city)
+    print(df_city)
     # default RT arguments --> non-parametric 
     config <- make_config(list(mean_si = 3.96, std_mean_si = 0.215,
                             min_mean_si = 3.53, max_mean_si = 4.39,
