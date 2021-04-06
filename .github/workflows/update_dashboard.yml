@@ -3,7 +3,7 @@ name: Update Covid 19 dashboard
 on:
   schedule:
     - cron: '0 22 * * *' # 22:00 Utc with the aim to be finished at 24:00 utc in 2 hours (5:30am India [IST])
-    - cron: '0 10 * * *' # 10:00 Utc 15:30 India [IST] a second run to catch updated wards
+    - cron: '0 13 * * *' # 10:00 Utc 15:30 India [IST] a second run to catch updated wards
   workflow_dispatch:
 
 
