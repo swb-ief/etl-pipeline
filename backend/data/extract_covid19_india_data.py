@@ -17,6 +17,43 @@ class ExtractCovid19IndiaData:
         """ Extract the metrics from the API Jason"""
         state_list = []
         district_list = []
+        
+        unknown_dict = {'AN' : 'Andaman and Nicobar Islands - Other',
+                        'AP' : 'Andhra Pradesh - Other',
+                        'AR' : 'Arunachal Pradesh - Other',
+                        'AS' : 'Assam - Other',
+                        'BR' : 'Bihar - Other',
+                        'CH' : 'Chandigarh - Other',
+                        'CT' : 'Chhattisgarh - Other',
+                        'DL' : 'Delhi - Other',
+                        'DN' : 'Dadra and Nagar Haveli and Daman and Diu - Other',
+                        'GA' : 'Goa - Other',
+                        'GJ' : 'Gujarat - Other',
+                        'HP' : 'Himachal Pradesh - Other',
+                        'HR' : 'Haryana - Other',
+                        'JH' : 'Jharkhand - Other',
+                        'JK' : 'Jammu and Kashmir - Other',
+                        'KA' : 'Karnataka - Other',
+                        'KL' : 'Kerala - Other',
+                        'LA' : 'Ladakh - Other',
+                        'LD' : 'Lakshadweep - Other',
+                        'MH' : 'Maharashtra - Other',
+                        'ML' : 'Meghalaya - Other',
+                        'MN' : 'Manipur - Other',
+                        'MP' : 'Madhya Pradesh - Other',
+                        'MZ' : 'Mizoram - Other',
+                        'NL' : 'Nagaland - Other',
+                        'OR' : 'Orissa - Other',
+                        'PB' : 'Punjab - Other',
+                        'PY' : 'Pondicherry - Other',
+                        'RJ' : 'Rajasthan - Other',
+                        'SK' : 'Sikkim - Other',
+                        'TG' : 'Telangana - Other',
+                        'TN' : 'Tamil Nadu - Other',
+                        'TR' : 'Tripura - Other',
+                        'UP' : 'Uttar Pradesh - Other',
+                        'UT' : 'Uttarakhand - Other',
+                        'WB' : 'West Bengal - Other'}
 
         for date, states in json_dict.items():
             measurement_date = pd.to_datetime(date)
@@ -35,12 +72,16 @@ class ExtractCovid19IndiaData:
                     self._add_metrics(state_dict, state_data['meta'], self.meta_columns, '')
 
                 state_list.append(state_dict)
+
                 if 'districts' in state_data:
                     for district, district_data in state_data['districts'].items():
                         district_dict = dict()
                         district_dict['date'] = measurement_date
                         district_dict['state'] = state
-                        district_dict['district'] = district
+                        if district.strip().lower()=='unknown':
+                            district_dict['district'] = unknown_dict[state]
+                        else:
+                            district_dict['district'] = district
 
                         if 'delta' in district_data:
                             self._add_metrics(district_dict, district_data['delta'], self.metric_columns, 'delta.')
