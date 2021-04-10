@@ -20,7 +20,7 @@ class UpdateEpiStatsTask(luigi.Task):
     s3_rt_path = 'Phase2_RT'
     s3_dt_path = 'Phase2_DT'
     s3_districts_path = 'Phase 2 - Districts'
-    s3_districts_rt_path = 'Phase 2 - DistrictsRt'
+    s3_districts_rt_path = 'Phase 2 - Districts - With RT'
 
     def requires(self):
         return CalcRTTask(file_name = self.local_rt_path)#, CalcDTTask(file_name = self.local_dt_path)
@@ -30,23 +30,21 @@ class UpdateEpiStatsTask(luigi.Task):
         repository = AWSFileRepository(config['aws']['bucket production'])
 
         # read RT results
-        rt_results = pd.read_csv(self.local_rt_path, parse_dates=["date"])
+        rt_results0 = pd.read_csv(self.local_rt_path, parse_dates=["date"])
         
         # specify column name containing Rt values
-        rt_colname = 'median'
-        
-        # rename columns so as to allow join with master districts data
-        rt_results.columns = ['district' if x=='city' else x for x in rt_results.columns]
-        rt_results.columns = ['rt' if x==rt_colname else x for x in rt_results.columns]
+        rt_colname = ['mean', 'upper', 'lower']
+        rt_results = rt_results0[['city', 'date']+rt_colname]
+        rt_results.columns = ['district', 'date', 'mean.RT', 'upper.RT', 'lower.RT']
         
         # import master districts data
         all_districts = repository.get_dataframe(self.s3_districts_path)
         
         # join rt data with all districts data
-        all_districts = all_districts.merge(rt_results[['district', 'date', 'rt']], on=['district', 'date'], how='left')
+        all_districts = all_districts.merge(rt_results, on=['district', 'date'], how='left')
     
         # push RT to Repo
-        repository.store_dataframe(all_districts, self.s3_districts_rt_path, allow_create=True)
+        repository.store_dataframe(all_districts, self.s3_rt_path, allow_create=True)
 
         # # read DT results
         # dt_results = pd.read_csv(self.local_dt_path)
