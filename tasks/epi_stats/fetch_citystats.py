@@ -35,8 +35,8 @@ def critical_districts(data):
     critical_cities = data_latest[criteria]
 
     # criteria 2a: highest 20 cumulative cases
-    critical_cities = critical_cities.sort_values(by = ['total.confirmed']).reset_index(drop=True)
-    critical_cities = critical_cities.head(2) # 20
+    critical_cities = critical_cities.sort_values(by = ['total.confirmed'], ascending=False).reset_index(drop=True)
+    critical_cities = critical_cities.head(2) # 20 --> TEMPORARYS
 
     critical_cities = critical_cities['district'].drop_duplicates().to_list()
     #? critical city data
@@ -48,7 +48,7 @@ class DownloadCityStatsTask(luigi.Task):
     file_name = luigi.Parameter()
 
     def output(self):
-        return luigi.LocalTarget(self.file_name)
+        return luigi.LocalTarget(self.fSile_name)
 
     def run(self):
         
