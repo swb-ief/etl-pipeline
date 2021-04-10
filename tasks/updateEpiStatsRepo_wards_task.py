@@ -30,22 +30,21 @@ class UpdateEpiStatsWardsTask(luigi.Task):
         repository = AWSFileRepository(config['aws']['bucket production'])
 
         # read RT results
-        rt_results = pd.read_csv(self.local_rt_path, parse_dates=["date"])
+        rt_results0 = pd.read_csv(self.local_rt_path, parse_dates=["date"])
         
         # specify column name containing Rt values
-        rt_colname = 'median'
-        
-        # rename columns so as to allow join with master districts data
-        rt_results.columns = ['rt' if x==rt_colname else x for x in rt_results.columns]
+        rt_colname = ['mean', 'upper', 'lower']
+        rt_results = rt_results0[['ward', 'date']+rt_colname]
+        rt_results.columns = ['ward', 'date', 'mean.RT', 'upper.RT', 'lower.RT']
         
         # import master districts data
         all_wards = repository.get_dataframe(self.s3_wards_path)
         
         # join rt data with all districts data
-        all_wards = all_wards.merge(rt_results[['ward', 'date', 'rt']], on=['ward', 'date'], how='left')
+        all_wards = all_wards.merge(rt_results, on=['ward', 'date'], how='left')
     
         # push RT to Repo
-        repository.store_dataframe(all_districts, self.s3_districts_rt_path, allow_create=True)
+        repository.store_dataframe(all_wards, self.s3_wards_rt_path, allow_create=True)
 
         # # read DT results
         # dt_results = pd.read_csv(self.local_dt_path)
@@ -58,6 +57,3 @@ class UpdateEpiStatsWardsTask(luigi.Task):
     #     # TODO --> palceholder for some kind of validation process,
     #     # TODO, similar to https://github.com/swb-ief/etl-pipeline/blob/master/tasks/update_dashboard_task.py
     #     return True
-
-
-
