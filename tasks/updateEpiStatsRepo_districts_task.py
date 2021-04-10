@@ -6,12 +6,12 @@ import pandas as pd
 import luigi
 from backend.config import get_config
 from backend.repository import AWSFileRepository
-from tasks.epi_stats.calcRT_task import CalcRTTask
+from tasks.epi_stats.calcRT_task import CalcDistrictsRTTask
 from tasks.epi_stats.calcDT_task import CalcDTTask
 
 log = logging.getLogger(__name__)
 
-class UpdateEpiStatsTask(luigi.Task):
+class UpdateEpiStatsDistrictsTask(luigi.Task):
 
     # local file paths
     local_rt_path = "/usr/data/epiestim_out_districts.csv"

@@ -70,7 +70,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
 
-      - name: Executing UpdateEpiStatsTask a luigi task
+      - name: Executing Districts UpdateEpiStatsTask luigi task
         run: |
-          python -m luigi --module tasks UpdateEpiStatsTask --local-scheduler
+          python -m luigi --module tasks UpdateEpiStatsDistrictsTask --local-scheduler
 
