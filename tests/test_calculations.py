@@ -2,7 +2,7 @@ import os
 import unittest
 from datetime import datetime
 
-from numpy.testing import assert_allclose
+from numpy.testing import assert_allclose, assert_equal
 from pandas.testing import assert_frame_equal, assert_series_equal
 from backend.metrics.calculations import *
 import pandas as pd
@@ -531,3 +531,26 @@ class TestCalculateMetrics(unittest.TestCase):
         result = fourteen_day_avg_ratio(df['some_number'])
 
         assert_series_equal(result, df['expected'], check_names=False)
+
+    def test_inf_values(self):
+        measurements = 25
+        districts = 4
+        district_values = [.3, .7, 10, 25]
+        input_df = self._build_district_input(measurements=measurements, districts=districts,
+                                              district_values=district_values)
+
+        hospitalizations = impute_hospitalization_percentages(
+            pd.DataFrame({'date': [datetime(2020, 10, 3)], 'percentages': [0.13]}), input_df['date'])
+        input_df["delta.tested"].replace({10:0}, inplace=True)
+
+        result = extend_and_impute_metrics(
+            raw_metrics=input_df,
+            hospitalizations=hospitalizations,
+            grouping_columns=['state', 'district']
+        )
+        ds = result.isin([np.inf, -np.inf])
+        count= (ds.values == True).sum()
+
+        assert_equal(count,0)
+
+

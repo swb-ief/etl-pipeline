@@ -1,6 +1,7 @@
 import pandas as pd
 from numpy import random
 import logging
+import numpy as np
 
 log = logging.getLogger(__name__)
 
@@ -168,5 +169,7 @@ def extend_and_impute_metrics(
         , 'delta.confirmed.ratio_per_million', 'delta.deceased.ratio_per_million',
                    'total.confirmed.ratio_per_million', 'total.deceased.ratio_per_million']:
         df.loc[:, f'MA.21.{column}'] = _moving_average_grouped(df, grouping_columns, column, rolling_window)
+
+    df = df.replace([np.inf,-np.inf],np.NAN)
 
     return df.reset_index()
