@@ -11,7 +11,7 @@ from tasks.epi_stats.calcDT_ward_task import CalcDTWardTask
 
 log = logging.getLogger(__name__)
 
-class UpdateEpiStatsTask(luigi.Task):
+class UpdateEpiStatsWardsTask(luigi.Task):
 
     # local file paths
     local_rt_path = "/usr/data/epiestim_out_wards.csv"
