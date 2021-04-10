@@ -13,12 +13,9 @@ library(readr)
 library(knitr)
 library(dplyr)
 
-# # TODO --> cmd line arg Rscript name.R --args file_name 
 df <- read.csv(file = '/usr/data/citystats.csv')
 print("--- df")
 print(head(df))
-# TODO --> temporary, mumbai identifier --> replaced by critical cities 
-#city <- "Mumbai"
 
 df2 <- df %>% dplyr::select(date, district, total.confirmed, total.deceased, total.recovered)
 # for each city: 
@@ -85,5 +82,5 @@ print("out_df")
 print(out_df)
 
 # now res_df contains the rt, low and high ci and dates.
-write.csv(out_df, "/usr/data/epiestim_out.csv", row.names=FALSE)
+write.csv(out_df, "/usr/data/epiestim_out_districts.csv", row.names=FALSE)
 
