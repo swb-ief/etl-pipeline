@@ -20,10 +20,10 @@ class UpdateEpiStatsTask(luigi.Task):
     s3_rt_path = 'Phase2_RT_Wards'
     s3_dt_path = 'Phase2_DT_Wards'
     s3_wards_path = 'Phase 2 - Wards'
-    s3_wards_rt_path = 'Phase 2 - Districts - With RT'
+    s3_wards_rt_path = 'Phase 2 - Wards - With RT'
 
     def requires(self):
-        return CalcRTTask(file_name = self.local_rt_path)#, CalcDTTask(file_name = self.local_dt_path)
+        return CalcRTWardTask(file_name = self.local_rt_path)#, CalcDTTask(file_name = self.local_dt_path)
 
     def run(self):
         config = get_config()
@@ -36,14 +36,13 @@ class UpdateEpiStatsTask(luigi.Task):
         rt_colname = 'median'
         
         # rename columns so as to allow join with master districts data
-        rt_results.columns = ['district' if x=='city' else x for x in rt_results.columns]
         rt_results.columns = ['rt' if x==rt_colname else x for x in rt_results.columns]
         
         # import master districts data
-        all_districts = repository.get_dataframe(self.s3_districts_path)
+        all_wards = repository.get_dataframe(self.s3_wards_path)
         
         # join rt data with all districts data
-        all_districts = all_districts.merge(rt_results[['district', 'date', 'rt']], on=['district', 'date'], how='left')
+        all_wards = all_wards.merge(rt_results[['ward', 'date', 'rt']], on=['ward', 'date'], how='left')
     
         # push RT to Repo
         repository.store_dataframe(all_districts, self.s3_districts_rt_path, allow_create=True)
