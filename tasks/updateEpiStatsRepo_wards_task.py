@@ -7,7 +7,7 @@ import luigi
 from backend.config import get_config
 from backend.repository import AWSFileRepository
 from tasks.epi_stats.calcRT_ward_task import CalcRTWardTask
-from tasks.epi_stats.calcDT_ward_task import CalcDTWardTask
+# from tasks.epi_stats.calcDT_ward_task import CalcDTWardTask
 
 log = logging.getLogger(__name__)
 
