@@ -7,9 +7,24 @@ import functools
 
 
 def read_CriticalLoc(loc_type):
-    return 
+    if loc_type == "district":
+        df = pd.read_csv()
+        df = df[['date', 'district','total.confirmed', 'total.deceased', 'total.recovered']].dropna()
+        df['delta_case'] = df['total.confirmed'] - df['total.deceased'] - df['total.recovered']
+        df = df[['date', 'district', 'delta_case']]
+    elif loc_type == "ward":
+        df = pd.read_csv()
+        df = df[['date', 'district']]
+    else:
+        raise ValueError
 
-def calc_CalcDT():
+    return df 
+
+
+
+def compute_DT(df):
+
+
 
     return 
 
