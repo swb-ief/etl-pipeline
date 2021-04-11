@@ -47,7 +47,7 @@ class DownloadCityStatsTask(luigi.Task):
     file_name = luigi.Parameter()
 
     def output(self):
-        return luigi.LocalTarget(self.fSile_name)
+        return luigi.LocalTarget(self.file_name)
 
     def run(self):
         
