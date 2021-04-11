@@ -26,7 +26,7 @@ class UpdateEpiStatsDistrictsTask(luigi.Task):
     s3_districts_update_path = 'Phase 2 - Districts_RT-DT'
 
     def requires(self):
-        return CalcDTTask(file_name = self.local_dt_path) #, CalcDistrictsRTTask(file_name = self.local_rt_path)
+        return CalcDTTask(file_name = self.local_dt_path), CalcDistrictsRTTask(file_name = self.local_rt_path)
 
     def run(self):
         config = get_config()
@@ -35,20 +35,19 @@ class UpdateEpiStatsDistrictsTask(luigi.Task):
         # import master districts data
         all_districts = repository.get_dataframe(self.s3_districts_path)
 
-        # # read RT results
-        # rt_results0 = pd.read_csv(self.local_rt_path, parse_dates=["date"])
-        # # specify column name containing Rt values
-        # rt_colname = ['mean', 'upper', 'lower']
-        # rt_results = rt_results0[['city', 'date']+rt_colname]
-        # rt_results.columns = ['district', 'date', 'mean.RT', 'upper.RT', 'lower.RT']
-        # # join rt data with all districts data
-        # all_districts = all_districts.merge(rt_results, on=['district', 'date'], how='left')
+        # read RT results
+        rt_results0 = pd.read_csv(self.local_rt_path, parse_dates=["date"])
+        # specify column name containing Rt values
+        rt_colname = ['mean', 'upper', 'lower']
+        rt_results = rt_results0[['city', 'date']+rt_colname]
+        rt_results.columns = ['district', 'date', 'mean.RT', 'upper.RT', 'lower.RT']
+        # join rt data with all districts data
+        all_districts = all_districts.merge(rt_results, on=['district', 'date'], how='left')
     
         # read DT results
         dt_results = pd.read_csv(self.local_dt_path)
         # join dt data with all districts data
         dt_results['date'] = dt_results['date'].astype('datetime64[ns]')
-        all_districts['date'] = all_districts['date'].astype('datetime64[ns]')
         all_districts = all_districts.merge(dt_results, on=['district', 'date'], how='left')
 
         # push RT/DT Critical Cities Updates to Repo
