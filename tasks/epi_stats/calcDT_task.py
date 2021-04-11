@@ -29,6 +29,4 @@ class CalcDTTask(luigi.Task):
         cwd = os.getcwd()
         # Run DT Calculation
         run_DT(loc_type='district')
-        # subprocess.call("Rscript {}/R_scripts/dt_script.R".format(cwd), shell=True)
-        # log.info("Ran DT Calculation")
 

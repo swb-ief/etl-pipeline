@@ -47,6 +47,10 @@ class UpdateEpiStatsDistrictsTask(luigi.Task):
         # read DT results
         dt_results = pd.read_csv(self.local_dt_path)
         # join dt data with all districts data
+        print(all_districts['date'][0])
+        print(dt_results['date'][0])
+        print(dt_results['date'].astype('datetime64[ns]'))
+        print(all_districts['date'].astype('datetime64[ns]'))
         all_districts = all_districts.merge(dt_results, on=['district', 'date'], how='left')
 
         # push RT/DT Critical Cities Updates to Repo
