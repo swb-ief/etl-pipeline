@@ -26,7 +26,7 @@ class CalcDistrictsRTTask(luigi.Task):
         cwd = os.getcwd()
 
         # Run RT Calculation
-        subprocess.call("Rscript {}/R_scripts/Epistim_rt_script.R".format(cwd), shell=True)
+        subprocess.call("Rscript {}/R_scripts/Epistim_rt_districts_script.R".format(cwd), shell=True)
         log.info("Ran RT Calculation")
 
 
