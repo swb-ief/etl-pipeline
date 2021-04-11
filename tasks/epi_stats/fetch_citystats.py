@@ -60,9 +60,6 @@ class DownloadCityStatsTask(luigi.Task):
             # -- sort by date
             city_stats = city_stats.sort_values(by = ['date'])
 
-            print("mumbai data")
-            print(city_stats[city_stats['district'] == "Mumbai"])
-
             # critical cities
             critical_city_stats = critical_districts(data=city_stats)
             # download to local fs

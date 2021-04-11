@@ -6,6 +6,7 @@ import os
 
 import luigi
 from tasks.epi_stats.fetch_citystats import DownloadCityStatsTask
+from R_scripts.dt_script import run_DT
 
 log = logging.getLogger(__name__)
 
@@ -27,6 +28,7 @@ class CalcDTTask(luigi.Task):
         # cwd 
         cwd = os.getcwd()
         # Run DT Calculation
-        subprocess.call("Rscript {}/R_scripts/dt_script.R".format(cwd), shell=True)
-        log.info("Ran DT Calculation")
+        run_DT(loc_type='district')
+        # subprocess.call("Rscript {}/R_scripts/dt_script.R".format(cwd), shell=True)
+        # log.info("Ran DT Calculation")
 
