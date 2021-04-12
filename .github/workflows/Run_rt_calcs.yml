@@ -10,77 +10,78 @@ jobs:
     runs-on: ubuntu-18.04
     env:
       CRAN_REPO: 'https://packagemanager.rstudio.com/all/__linux__/bionic/latest'
-      CSV_DATA_SOURCE: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRlIadXzFkZNn5kijxCWx3IHfwvFIJQEMy9UEwm9uCjvWwVtbu9UdYnhPV9SlijmvlnytfcZjW0sp9B/pub?gid=533672872&single=true&output=csv"
 
     steps:
       - name: checkout this repo
         uses: actions/checkout@v2
         with:
           ref: ${{ github.head_ref }}
-      - name: setup R
+
+      - name:  setup R
         uses: r-lib/actions/setup-r@master
         with:
           r-version: '3.6.3'
+      
       - name: update apt-get
         run: sudo apt-get update -y
+
       - name: install v8
-        run: sudo apt-get install libv8-dev libcurl4-openssl-dev  -y
-      - name: Download the input CSV
+        run: sudo apt-get install libv8-dev libcurl4-openssl-dev  -y 
+
+        
+      - name: Create Data Directory
         run: |
           echo "trying to create a direcotry"
           sudo mkdir /usr/data/
           echo "created directory"
-          sudo chmod -R 644 /usr/data/
-          wget  -O /usr/data/city_stats.csv $CSV_DATA_SOURCE
-          echo "downloaded the file to machine"
-      - name: Install remotes devtools, googlesheets4, httpuv
+          sudo chmod -R ugo+rwx /usr/data/
+          
+      - name: Restore R package cache
+        if: runner.os != 'Windows'
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: r-${{ hashFiles('DESCRIPTION') }}
+
+      - name: Install deps
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           install.packages("remotes", repos = c("CRAN" = Sys.getenv("CRAN_REPO")))
           install.packages("devtools")
-          install.packages("googlesheets4")
           install.packages("httpuv")
-        shell: Rscript {0}
-      - name: Install Epinow2
-        run: |
-          require(devtools)
-          install_version("EpiNow2", version = "1.3.2", repos = "http://cran.us.r-project.org")
-        shell: Rscript {0}
-      - name: Install Rstan
-        run: |
-          install.packages("rstan")
-        shell: Rscript {0}
-
-      - name: Install deps
-        run: |
           install.packages("drat")
-          drat:::add("epiforecasts")
-          install.packages("ggplot2")
           install.packages("gridExtra")
+          drat:::add("epiforecasts")
+          install.packages("EpiEstim")
           install.packages("magrittr")
           install.packages("readr")
           install.packages("knitr")
           install.packages("dplyr")
+          install.packages("tidyverse")
         shell: Rscript {0}
-      - name: Run R script
-        run: Rscript  R_scripts/Rt_calcs.R
-
-      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
-        with:
-          version: '290.0.1'
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          service_account_email: ${{ secrets.GCP_SA_EMAIL }}
-          export_default_credentials: true
-      - run: gcloud info
+        
+        
 
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: 3.7
+
       - name: Install Python dependencies
         run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+      - name: Configure AWS Credentials for data repository
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
 
-          pip install pandas gspread  numpy luigi
-
-      - name: Run py script
+      - name: Executing Districts UpdateEpiStatsTask luigi task
         run: |
-          python R_scripts/push_Rt_to_gsheets.py
+          python -m luigi --module tasks UpdateEpiStatsDistrictsTask --local-scheduler
+          
+      - name: Executing Wards UpdateEpiStatsTask luigi task
+        run: |
+          python -m luigi --module tasks UpdateEpiStatsWardsTask --local-scheduler
