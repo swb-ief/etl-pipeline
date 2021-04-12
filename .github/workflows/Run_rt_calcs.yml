@@ -48,8 +48,6 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           install.packages("remotes", repos = c("CRAN" = Sys.getenv("CRAN_REPO")))
-          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2) 
-          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
           install.packages("devtools")
           install.packages("httpuv")
           install.packages("drat")
