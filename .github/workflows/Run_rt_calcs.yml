@@ -41,12 +41,15 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: r-${{ hashFiles('DESCRIPTION') }}
+          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }} 
+          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1- 
 
       - name: Install deps
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           install.packages("remotes", repos = c("CRAN" = Sys.getenv("CRAN_REPO")))
+          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2) 
+          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
           install.packages("devtools")
           install.packages("httpuv")
           install.packages("drat")
