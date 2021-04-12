@@ -34,6 +34,12 @@ class UpdateEpiStatsDistrictsTask(luigi.Task):
 
         # import master districts data
         all_districts = repository.get_dataframe(self.s3_districts_path)
+        
+        # delete existing RT/DT columns
+        del all_districts['mean.RT']
+        del all_districts['upper.RT']
+        del all_districts['lower.RT']
+        del all_districts['dt']
 
         # read RT results
         rt_results0 = pd.read_csv(self.local_rt_path, parse_dates=["date"])
@@ -45,9 +51,9 @@ class UpdateEpiStatsDistrictsTask(luigi.Task):
         all_districts = all_districts.merge(rt_results, on=['district', 'date'], how='left')
     
         # read DT results
-        dt_results = pd.read_csv(self.local_dt_path)
-        # join dt data with all districts data
-        dt_results['date'] = dt_results['date'].astype('datetime64[ns]')
+        dt_results0 = pd.read_csv(self.local_dt_path, parse_dates=["date"])
+        # pick only the relevant columns
+        dt_results = dt_results0[["district", "date", "dt"]]
         all_districts = all_districts.merge(dt_results, on=['district', 'date'], how='left')
 
         # push RT/DT Critical Cities Updates to Repo
