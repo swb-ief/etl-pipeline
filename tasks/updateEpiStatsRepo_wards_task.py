@@ -31,10 +31,9 @@ class UpdateEpiStatsWardsTask(luigi.Task):
 
         # import master districts data
         all_wards = repository.get_dataframe(self.s3_wards_path)
-        del all_wards['mean.RT']
-        del all_wards['upper.RT']
-        del all_wards['lower.RT']
-        del all_wards['dt']
+        avl_cols = [x for x in all_wards.columns if x in ['mean.RT', 'upper.RT', 'lower.RT', 'dt']]
+        for avl_col in avl_cols:
+            del all_wards[avl_col]
         
         # read RT results
         rt_results0 = pd.read_csv(self.local_rt_path, parse_dates=["date"])
