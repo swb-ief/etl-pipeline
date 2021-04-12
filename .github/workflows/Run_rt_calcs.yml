@@ -41,26 +41,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: r-${{ hashFiles('DESCRIPTION') }}
-
-      - name: Install deps
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          install.packages("remotes", repos = c("CRAN" = Sys.getenv("CRAN_REPO")))
-          install.packages("devtools")
-          install.packages("httpuv")
-          install.packages("drat")
-          install.packages("gridExtra")
-          drat:::add("epiforecasts")
-          install.packages("EpiEstim")
-          install.packages("magrittr")
-          install.packages("readr")
-          install.packages("knitr")
-          install.packages("dplyr")
-          install.packages("tidyverse")
-        shell: Rscript {0}
-        
-        
+          key: r-${{ hashFiles('DESCRIPTION') }} 
 
       - name: Set up Python
         uses: actions/setup-python@v2
