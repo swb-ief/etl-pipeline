@@ -28,16 +28,15 @@ def critical_districts(data):
     data_latest['total.confirmed.14_day_ratio'] = np.where(abs(data_latest['total.confirmed.14_day_ratio'].values) == np.inf, np.nan, data_latest['total.confirmed.14_day_ratio'].values)
     c1b = data_latest['total.confirmed.14_day_ratio'] > 1
     
+    # criteria 2
+    top20_cutoff = data_latest["total.confirmed"].sort_values(ascending=False).iloc[20]
+    c2 = data_latest['total.confirmed'] > top20_cutoff
+
     # apply criteria
-    criteria = list(map(lambda coll: all(coll), zip(c1a, c1b)))
+    c1 = (c1a & c1b)
+    criteria = (c1 | c2)
     # critical cities, re criteria set 1
-    critical_cities = data_latest[criteria]
-
-    # criteria 2a: highest 20 cumulative cases
-    critical_cities = critical_cities.sort_values(by = ['total.confirmed'], ascending=False).reset_index(drop=True)
-    critical_cities = critical_cities.head(2) # 20 --> TEMPORARY
-
-    critical_cities = critical_cities['district'].drop_duplicates().to_list()
+    critical_cities = data_latest[criteria]['district'].drop_duplicates().to_list()
     #? critical city data
     data_critical = data[data['district'].isin(critical_cities)].reset_index(drop=True)
 
