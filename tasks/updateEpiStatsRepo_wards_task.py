@@ -7,7 +7,7 @@ import luigi
 from backend.config import get_config
 from backend.repository import AWSFileRepository
 from tasks.epi_stats.calcRT_ward_task import CalcRTWardTask
-# from tasks.epi_stats.calcDT_ward_task import CalcDTWardTask
+from tasks.epi_stats.calcDT_ward_task import CalcDTWardTask
 
 log = logging.getLogger(__name__)
 
@@ -20,10 +20,10 @@ class UpdateEpiStatsWardsTask(luigi.Task):
     s3_rt_path = 'Phase2_RT_Wards'
     s3_dt_path = 'Phase2_DT_Wards'
     s3_wards_path = 'Phase 2 - Wards'
-    s3_wards_rt_path = 'Phase 2 - Wards_RT-DT'
+    s3_wards_update_path = 'Phase 2 - Wards_RT-DT'
 
     def requires(self):
-        return CalcRTWardTask(file_name = self.local_rt_path)#, CalcDTTask(file_name = self.local_dt_path)
+        return  CalcDTWardTask(file_name = self.local_dt_path), CalcRTWardTask(file_name = self.local_rt_path)
 
     def run(self):
         config = get_config()
