@@ -43,7 +43,7 @@ def critical_districts(data):
     critical_cities_list = list(set(critical_cities_c1_capped.district.drop_duplicates().to_list()) | set(critical_cities_c2.district.drop_duplicates().to_list()))
 
     #? critical city data (pick 2 for test phase)
-    data_critical = data[data['district'].isin(critical_cities_list[0:2])].reset_index(drop=True)
+    data_critical = data[data['district'].isin(critical_cities_list)].reset_index(drop=True)
 
     return data_critical
 
