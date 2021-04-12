@@ -20,7 +20,7 @@ class UpdateEpiStatsWardsTask(luigi.Task):
     s3_rt_path = 'Phase2_RT_Wards'
     s3_dt_path = 'Phase2_DT_Wards'
     s3_wards_path = 'Phase 2 - Wards'
-    s3_wards_rt_path = 'Phase 2 - Wards_RT_DT'
+    s3_wards_rt_path = 'Phase 2 - Wards_RT-DT'
 
     def requires(self):
         return CalcRTWardTask(file_name = self.local_rt_path)#, CalcDTTask(file_name = self.local_dt_path)
