@@ -30,9 +30,7 @@ for (city in city_list) {
 
     # filter for city
     df_city <- df2 %>% filter(district == city)
-    print("--- df city")
     print(city)
-    print(head(df_city))
     # remove rows with NA to allow for calculation.
     df_city <- df_city[complete.cases(df_city), ]
     # delta_case
@@ -41,8 +39,6 @@ for (city in city_list) {
     df_city$date <- as_date(df_city$date)
     # tibble; Dates and delta case
     df_city <- tibble(dates = df_city$date, I = df_city$delta_case)
-    print(city)
-    print(head(df_city))
     # default RT arguments --> non-parametric 
     config <- make_config(list(mean_si = 3.96, std_mean_si = 0.215,
                             min_mean_si = 3.53, max_mean_si = 4.39,
