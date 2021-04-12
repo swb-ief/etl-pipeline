@@ -81,5 +81,9 @@ jobs:
 
       - name: Executing Districts UpdateEpiStatsTask luigi task
         run: |
+          python -m luigi --module tasks UpdateEpiStatsDistrictsTask --local-scheduler
+          
+      - name: Executing Wards UpdateEpiStatsTask luigi task
+        run: |
           python -m luigi --module tasks UpdateEpiStatsWardsTask --local-scheduler
 
