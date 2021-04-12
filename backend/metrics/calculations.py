@@ -107,7 +107,7 @@ def fourteen_day_avg_ratio(values: pd.Series) -> pd.Series:
 def extend_and_impute_metrics(
         raw_metrics: pd.DataFrame,
         hospitalizations: pd.DataFrame,
-        grouping_columns: list[str]
+        grouping_columns: List[str]
 ) -> pd.DataFrame:
     """
     :returns: extended and imputed metrics
