@@ -35,6 +35,13 @@ jobs:
           sudo mkdir /usr/data/
           echo "created directory"
           sudo chmod -R ugo+rwx /usr/data/
+          
+      - name: Restore R package cache
+        if: runner.os != 'Windows'
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: r-${{ hashFiles('DESCRIPTION') }}
 
       - name: Install deps
         if: steps.cache.outputs.cache-hit != 'true'
@@ -52,6 +59,8 @@ jobs:
           install.packages("dplyr")
           install.packages("tidyverse")
         shell: Rscript {0}
+        
+        
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -72,5 +81,5 @@ jobs:
 
       - name: Executing Districts UpdateEpiStatsTask luigi task
         run: |
-          python -m luigi --module tasks UpdateEpiStatsDistrictsTask --local-scheduler
+          python -m luigi --module tasks UpdateEpiStatsWardsTask --local-scheduler
 
