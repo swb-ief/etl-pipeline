@@ -28,22 +28,22 @@ def critical_districts(data):
     data_latest['total.confirmed.14_day_ratio'] = np.where(abs(data_latest['total.confirmed.14_day_ratio'].values) == np.inf, np.nan, data_latest['total.confirmed.14_day_ratio'].values)
     c1b = data_latest['total.confirmed.14_day_ratio'] > 1
     
+    
+    n = 20  #################### TO n, ASSIGN NUMBER OF CITIES SATISFYING CRITERIA 1 TO BE PICKED #########
+    criteria1 = (c1a & c1b)
+    critical_cities_c1 = data_latest[criteria1][['district', 'delta.confirmed']]
+    critical_cities_c1.sort_values(by=['delta.confirmed'], ascending=False, inplace=True)
+    critical_cities_c1_capped = critical_cities_c1.head(n)    
+    
     # criteria 2
     top20_cutoff = data_latest["total.confirmed"].sort_values(ascending=False).iloc[20]
     c2 = data_latest['total.confirmed'] > top20_cutoff
-
-    # apply criteria
-    c1 = (c1a & c1b)
-    criteria = (c1 | c2)
-    # critical cities, re criteria set 1
-    critical_cities = data_latest[criteria][['district', 'delta.confirmed']]
-    critical_cities.sort_values(by=['delta.confirmed'], ascending=False, inplace=True)
-    critical_cities_capped = critical_cities.head(20)
-    #? critical city data
-    data_critical = data[data['district'].isin(critical_cities_capped.district.drop_duplicates().to_list())].reset_index(drop=True)
+    critical_cities_c2 = data_latest[c2][['district', 'delta.confirmed']]
     
-    # for testing purposes
-    data_critical = data_critical.head(2)
+    critical_cities_list = list(set(critical_cities_c1_capped.district.drop_duplicates().to_list()) | set(critical_cities_c2.district.drop_duplicates().to_list()))
+
+    #? critical city data (pick 2 for test phase)
+    data_critical = data[data['district'].isin(critical_cities_list[0:2])].reset_index(drop=True)
 
     return data_critical
 
