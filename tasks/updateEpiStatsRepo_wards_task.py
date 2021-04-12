@@ -20,7 +20,7 @@ class UpdateEpiStatsWardsTask(luigi.Task):
     s3_rt_path = 'Phase2_RT_Wards'
     s3_dt_path = 'Phase2_DT_Wards'
     s3_wards_path = 'Phase 2 - Wards'
-    s3_wards_update_path = 'Phase 2 - Wards_RT-DT'
+    s3_wards_update_path = 'Phase 2 - Wards'
 
     def requires(self):
         return  CalcDTWardTask(file_name = self.local_dt_path), CalcRTWardTask(file_name = self.local_rt_path)
@@ -53,6 +53,6 @@ class UpdateEpiStatsWardsTask(luigi.Task):
         all_wards = all_wards.merge(dt_results, on=['ward', 'date'], how='left')
     
         # push RT to Repo
-        repository.store_dataframe(all_wards, self.s3_wards_rt_path, allow_create=True)
+        repository.store_dataframe(all_wards, self.s3_wards_update_path, allow_create=True)
 
        
