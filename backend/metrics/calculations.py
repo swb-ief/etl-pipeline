@@ -49,7 +49,7 @@ def calculate_hospitalizations(
     return df
 
 
-def _moving_average_grouped(df: pd.DataFrame, group_columns: list[str], target_column: str, window_size) -> pd.Series:
+def _moving_average_grouped(df: pd.DataFrame, group_columns: List[str], target_column: str, window_size) -> pd.Series:
     """
     :remarks: requires pandas 1.2 (there is a breaking api change in 1.x and 1.2)
     """
