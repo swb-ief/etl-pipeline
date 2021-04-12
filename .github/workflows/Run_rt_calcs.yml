@@ -3,7 +3,7 @@ name: R_proc
 on:
   workflow_dispatch:
   schedule:
-    - cron: '30 18 * * *'
+    - cron: '00 23 * * *'
 
 jobs:
   setup_run_r:
