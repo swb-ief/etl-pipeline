@@ -36,9 +36,11 @@ def critical_districts(data):
     c1 = (c1a & c1b)
     criteria = (c1 | c2)
     # critical cities, re criteria set 1
-    critical_cities = data_latest[criteria]['district'].drop_duplicates().to_list()
+    critical_cities = data_latest[criteria][['district', 'delta.confirmed']]
+    critical_cities.sort_values(by=['delta.confirmed'], ascending=False, inplace=True)
+    critical_cities_capped = critical_cities.head(20)
     #? critical city data
-    data_critical = data[data['district'].isin(critical_cities)].reset_index(drop=True)
+    data_critical = data[data['district'].isin(critical_cities_capped.district.drop_duplicates().to_list())].reset_index(drop=True)
     
     # for testing purposes
     data_critical = data_critical.head(2)
