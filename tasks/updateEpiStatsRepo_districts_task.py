@@ -23,7 +23,7 @@ class UpdateEpiStatsDistrictsTask(luigi.Task):
     s3_rt_path = 'Phase2_RT'
     s3_dt_path = 'Phase2_DT'
     s3_districts_path = 'Phase 2 - Districts'
-    s3_districts_update_path = 'Phase 2 - Districts_RT-DT'
+    s3_districts_update_path = 'Phase 2 - Districts'
 
     def requires(self):
         return CalcDTTask(file_name = self.local_dt_path), CalcDistrictsRTTask(file_name = self.local_rt_path)
@@ -34,6 +34,12 @@ class UpdateEpiStatsDistrictsTask(luigi.Task):
 
         # import master districts data
         all_districts = repository.get_dataframe(self.s3_districts_path)
+        
+        # delete existing RT/DT columns
+        
+        avl_cols = [x for x in all_districts.columns if x in ['mean.RT', 'upper.RT', 'lower.RT', 'dt']]
+        for avl_col in avl_cols:
+            del all_districts[avl_col]
 
         # read RT results
         rt_results0 = pd.read_csv(self.local_rt_path, parse_dates=["date"])
@@ -45,9 +51,9 @@ class UpdateEpiStatsDistrictsTask(luigi.Task):
         all_districts = all_districts.merge(rt_results, on=['district', 'date'], how='left')
     
         # read DT results
-        dt_results = pd.read_csv(self.local_dt_path)
-        # join dt data with all districts data
-        dt_results['date'] = dt_results['date'].astype('datetime64[ns]')
+        dt_results0 = pd.read_csv(self.local_dt_path, parse_dates=["date"])
+        # pick only the relevant columns
+        dt_results = dt_results0[["district", "date", "dt"]]
         all_districts = all_districts.merge(dt_results, on=['district', 'date'], how='left')
 
         # push RT/DT Critical Cities Updates to Repo

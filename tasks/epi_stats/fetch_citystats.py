@@ -28,18 +28,22 @@ def critical_districts(data):
     data_latest['total.confirmed.14_day_ratio'] = np.where(abs(data_latest['total.confirmed.14_day_ratio'].values) == np.inf, np.nan, data_latest['total.confirmed.14_day_ratio'].values)
     c1b = data_latest['total.confirmed.14_day_ratio'] > 1
     
-    # apply criteria
-    criteria = list(map(lambda coll: all(coll), zip(c1a, c1b)))
-    # critical cities, re criteria set 1
-    critical_cities = data_latest[criteria]
+    
+    n = 20  #################### TO n, ASSIGN NUMBER OF CITIES SATISFYING CRITERIA 1 TO BE PICKED #########
+    criteria1 = (c1a & c1b)
+    critical_cities_c1 = data_latest[criteria1][['district', 'delta.confirmed']]
+    critical_cities_c1.sort_values(by=['delta.confirmed'], ascending=False, inplace=True)
+    critical_cities_c1_capped = critical_cities_c1.head(n)    
+    
+    # criteria 2
+    top20_cutoff = data_latest["total.confirmed"].sort_values(ascending=False).iloc[20]
+    c2 = data_latest['total.confirmed'] > top20_cutoff
+    critical_cities_c2 = data_latest[c2][['district', 'delta.confirmed']]
+    
+    critical_cities_list = list(set(critical_cities_c1_capped.district.drop_duplicates().to_list()) | set(critical_cities_c2.district.drop_duplicates().to_list()))
 
-    # criteria 2a: highest 20 cumulative cases
-    critical_cities = critical_cities.sort_values(by = ['total.confirmed'], ascending=False).reset_index(drop=True)
-    critical_cities = critical_cities.head(2) # 20 --> TEMPORARY
-
-    critical_cities = critical_cities['district'].drop_duplicates().to_list()
-    #? critical city data
-    data_critical = data[data['district'].isin(critical_cities)].reset_index(drop=True)
+    #? critical city data (pick 2 for test phase)
+    data_critical = data[data['district'].isin(critical_cities_list)].reset_index(drop=True)
 
     return data_critical
 
