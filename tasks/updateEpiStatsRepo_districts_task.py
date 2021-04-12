@@ -23,7 +23,7 @@ class UpdateEpiStatsDistrictsTask(luigi.Task):
     s3_rt_path = 'Phase2_RT'
     s3_dt_path = 'Phase2_DT'
     s3_districts_path = 'Phase 2 - Districts'
-    s3_districts_update_path = 'Phase 2 - Districts_RT-DT'
+    s3_districts_update_path = 'Phase 2 - Districts'
 
     def requires(self):
         return CalcDTTask(file_name = self.local_dt_path), CalcDistrictsRTTask(file_name = self.local_rt_path)
