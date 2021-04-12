@@ -36,10 +36,10 @@ class UpdateEpiStatsDistrictsTask(luigi.Task):
         all_districts = repository.get_dataframe(self.s3_districts_path)
         
         # delete existing RT/DT columns
-        del all_districts['mean.RT']
-        del all_districts['upper.RT']
-        del all_districts['lower.RT']
-        del all_districts['dt']
+        
+        avl_cols = [x for x in all_districts.columns if x in ['mean.RT', 'upper.RT', 'lower.RT', 'dt']]
+        for avl_col in avl_cols:
+            del all_districts[avl_col]
 
         # read RT results
         rt_results0 = pd.read_csv(self.local_rt_path, parse_dates=["date"])
