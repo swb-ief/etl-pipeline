@@ -1,3 +1,5 @@
 from .update_dashboard_task import UpdateDashboardTask
 from .fetch_covid19_india_data_task import FetchCovid19IndiaDataTask
 from .fetch_ward_data import FetchWardDataTask
+from .updateEpiStatsRepo_districts_task import UpdateEpiStatsDistrictsTask
+from .updateEpiStatsRepo_wards_task import UpdateEpiStatsWardsTask

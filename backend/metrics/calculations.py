@@ -2,6 +2,7 @@ import pandas as pd
 from numpy import random
 import logging
 import numpy as np
+from typing import List
 
 log = logging.getLogger(__name__)
 
@@ -49,7 +50,7 @@ def calculate_hospitalizations(
     return df
 
 
-def _moving_average_grouped(df: pd.DataFrame, group_columns: list[str], target_column: str, window_size) -> pd.Series:
+def _moving_average_grouped(df: pd.DataFrame, group_columns: List[str], target_column: str, window_size) -> pd.Series:
     """
     :remarks: requires pandas 1.2 (there is a breaking api change in 1.x and 1.2)
     """
@@ -106,7 +107,7 @@ def fourteen_day_avg_ratio(values: pd.Series) -> pd.Series:
 def extend_and_impute_metrics(
         raw_metrics: pd.DataFrame,
         hospitalizations: pd.DataFrame,
-        grouping_columns: list[str]
+        grouping_columns: List[str]
 ) -> pd.DataFrame:
     """
     :returns: extended and imputed metrics
