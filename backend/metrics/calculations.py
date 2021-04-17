@@ -132,7 +132,7 @@ def extend_and_impute_metrics(
                 
             df[column_name] = df[column_name].fillna(value=0)
 
-            df.loc[:, f'MA.21.{group}.{measurement}'] = _moving_average_grouped(df, grouping_columns,
+            df.loc[:, f'MA.21.{group}.{measurement}'] = _moving_average_grouped(df.fillna(0), grouping_columns,
                                                                                 f'{group}.{measurement}',
                                                                                 rolling_window)
 

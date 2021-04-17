@@ -212,14 +212,17 @@ class TestCalculateMetrics(unittest.TestCase):
         group_columns = ['state', 'district']
 
         input_df = self._build_district_input(measurements=5, districts=2, district_values=[0.3, 0.7])
+        # inserting Nan value to test MA calculation when NAN is present
+        input_df.loc[input_df['date'].dt.year ==1903,'delta.tested']=np.NaN
         df = input_df.set_index(['date', *group_columns])
         df = df.sort_index()
 
         # the sort is a side effect, however it preserves the indexes so we don't care except when
         # accessing raw values like this.
-        expected = np.array([np.nan, np.nan, np.nan, .3, .3, np.nan, np.nan, np.nan, .7, .7])
-
-        result = _moving_average_grouped(df, group_columns, 'delta.tested', mean_window).to_numpy()
+        expected = np.array([np.nan, np.nan, np.nan, .3, .3, np.nan, np.nan, np.nan, .525, .525])
+        #df.fillna to replicate the same way the function is called in calculation.py
+        #This is to replace all NA values with 0 so that MA calculations are not affected
+        result = _moving_average_grouped(df.fillna(0), group_columns, 'delta.tested', mean_window).to_numpy()
 
         assert_allclose(expected, result)
 
