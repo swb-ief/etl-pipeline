@@ -169,7 +169,7 @@ def extend_and_impute_metrics(
     for column in ['delta.positivity', 'delta.hospitalized', 'delta.active'
         , 'delta.confirmed.ratio_per_million', 'delta.deceased.ratio_per_million',
                    'total.confirmed.ratio_per_million', 'total.deceased.ratio_per_million']:
-        df.loc[:, f'MA.21.{column}'] = _moving_average_grouped(df, grouping_columns, column, rolling_window)
+        df.loc[:, f'MA.21.{column}'] = _moving_average_grouped(df.fillna(0), grouping_columns, column, rolling_window)
 
     df = df.replace([np.inf,-np.inf],np.NAN)
 
