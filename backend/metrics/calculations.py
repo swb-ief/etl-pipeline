@@ -132,7 +132,7 @@ def extend_and_impute_metrics(
                 
             df[column_name] = df[column_name].fillna(value=0)
 
-            df.loc[:, f'MA.21.{group}.{measurement}'] = _moving_average_grouped(df, grouping_columns,
+            df.loc[:, f'MA.21.{group}.{measurement}'] = _moving_average_grouped(df.fillna(0), grouping_columns,
                                                                                 f'{group}.{measurement}',
                                                                                 rolling_window)
 
@@ -169,8 +169,13 @@ def extend_and_impute_metrics(
     for column in ['delta.positivity', 'delta.hospitalized', 'delta.active'
         , 'delta.confirmed.ratio_per_million', 'delta.deceased.ratio_per_million',
                    'total.confirmed.ratio_per_million', 'total.deceased.ratio_per_million']:
-        df.loc[:, f'MA.21.{column}'] = _moving_average_grouped(df, grouping_columns, column, rolling_window)
+        df.loc[:, f'MA.21.{column}'] = _moving_average_grouped(df.fillna(0), grouping_columns, column, rolling_window)
 
     df = df.replace([np.inf,-np.inf],np.NAN)
+    #hard stop on MA values for delta tested and delta positivity
+
+    df.loc[df.index.get_level_values('date')>'2021-01-29', 'MA.21.delta.tested'] = 0
+    df.loc[df.index.get_level_values('date') > '2021-01-29', 'MA.21.delta.positivity'] = 0
+
 
     return df.reset_index()
