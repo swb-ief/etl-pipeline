@@ -556,4 +556,25 @@ class TestCalculateMetrics(unittest.TestCase):
 
         assert_equal(count,0)
 
+    def test_hard_stop(self):
+        measurements = 25
+        districts = 4
+        district_values = [.3, .7, 10, 25]
+        input_df = self._build_district_input(measurements=measurements, districts=districts,
+                                              district_values=district_values)
+
+        hospitalizations = impute_hospitalization_percentages(
+            pd.DataFrame({'date': [datetime(2020, 10, 3)], 'percentages': [0.13]}), input_df['date'])
+        # input_df["date"].replace({'1901-01-01 00:00:00':'2021-01-30 00:00:00'}, inplace=True)
+        input_df['date'] = input_df['date'] + pd.offsets.DateOffset(years=100)
+
+        result = extend_and_impute_metrics(
+            raw_metrics=input_df,
+            hospitalizations=hospitalizations,
+            grouping_columns=['state', 'district']
+        )
+
+        ds= result.loc[result['date']>'2021-01-29','MA.21.delta.tested'].sum()
+        assert_equal(ds,0)
+
 

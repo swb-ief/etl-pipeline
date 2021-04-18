@@ -172,5 +172,10 @@ def extend_and_impute_metrics(
         df.loc[:, f'MA.21.{column}'] = _moving_average_grouped(df.fillna(0), grouping_columns, column, rolling_window)
 
     df = df.replace([np.inf,-np.inf],np.NAN)
+    #hard stop on MA values for delta tested and delta positivity
+
+    df.loc[df.index.get_level_values(2)>'2021-01-29', 'MA.21.delta.tested'] = 0
+    df.loc[df.index.get_level_values(2) > '2021-01-29', 'MA.21.delta.positivity'] = 0
+
 
     return df.reset_index()
