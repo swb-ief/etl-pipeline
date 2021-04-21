@@ -41,7 +41,8 @@ def critical_districts(data):
                        ["delta.active"].sort_values(ascending=False).iloc[n_c2]
 
     c2 = data_latest['delta.active'] > topn_cutoff
-    critical_cities_c2 = data_latest[c2][['district', 'delta.confirmed']]
+    critical_cities_c2_0 = data_latest[c2][['district', 'delta.confirmed']]
+    critical_cities_c2 = critical_cities_c2_0.loc[~critical_cities_c2_0["district"].isin(critical_cities_c1_capped.district.drop_duplicates().to_list())]
     
     critical_cities_list = list(set(critical_cities_c1_capped.district.drop_duplicates().to_list()) | set(critical_cities_c2.district.drop_duplicates().to_list()))
 
