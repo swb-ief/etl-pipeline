@@ -37,8 +37,8 @@ def critical_districts(data):
     
     # criteria 2
     n_c2 = 20    ###### ENTER number of cities as per criteria 2 HERE
-    topn_cutoff = data_latest["delta.active"].sort_values(ascending=False)\
-                         .loc[~data_latest["district"].isin(critical_cities_c1_capped.district.drop_duplicates().to_list())].iloc[n_c2]
+    topn_cutoff = data_latest.loc[~data_latest["district"].isin(critical_cities_c1_capped.district.drop_duplicates().to_list())]\
+                       ["delta.active"].sort_values(ascending=False).iloc[n_c2]
 
     c2 = data_latest['delta.active'] > topn_cutoff
     critical_cities_c2 = data_latest[c2][['district', 'delta.confirmed']]
