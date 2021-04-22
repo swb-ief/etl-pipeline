@@ -80,6 +80,8 @@ class ExtractCovid19IndiaData:
                         district_dict['state'] = state
                         if district.strip().lower()=='unknown':
                             district_dict['district'] = unknown_dict[state]
+                        elif district.strip().lower() in ["other state", "pratapgarh", "hamirpur", "balrampur", "aurangabad", "bilaspur"]:
+                            district_dict['district'] = district + " - " + state
                         else:
                             district_dict['district'] = district
 
