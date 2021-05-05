@@ -38,6 +38,8 @@ for (ward1 in ward_list) {
     df_ward <- df_ward[complete.cases(df_ward), ]
     # delta_case
     df_ward$delta_case <- df_ward$total.confirmed - df_ward$total.deceased - df_ward$total.recovered
+    # replace negative values with 0
+    df_ward$delta_case[df_ward$delta_case < 0] <- 0
     # ensure date format
     df_ward$date <- as_date(df_ward$date)
     # tibble; Dates and delta case

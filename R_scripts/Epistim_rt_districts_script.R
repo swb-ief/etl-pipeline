@@ -35,6 +35,8 @@ for (city in city_list) {
     df_city <- df_city[complete.cases(df_city), ]
     # delta_case
     df_city$delta_case <- df_city$total.confirmed - df_city$total.deceased - df_city$total.recovered
+    # replace negative values with 0
+    df_city$delta_case[df_city$delta_case < 0] <- 0
     # ensure date format
     df_city$date <- as_date(df_city$date)
     # tibble; Dates and delta case
