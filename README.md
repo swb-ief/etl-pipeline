@@ -102,6 +102,7 @@ These actions update the dashboard<br />
 
 There progress can be checked on the [Github actions page](https://github.com/swb-ief/etl-pipeline/actions), thats also the location to inspect the log files.
 
+For instance [here](https://github.com/swb-ief/etl-pipeline/runs/2560518985?check_suite_focus=true#step:6:67) you can see that the 5 luigi tasks ran succesfully
 
 
 ## AWS
