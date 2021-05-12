@@ -3,6 +3,7 @@
 ## status
 
 ![Update Covid 19 dashboard](https://github.com/swb-ief/etl-pipeline/workflows/Update%20Covid%2019%20dashboard/badge.svg)
+![R_proc](https://github.com/swb-ief/etl-pipeline/actions/workflows/Run_rt_calcs.yml/badge.svg)](https://github.com/swb-ief/etl-pipeline/actions/workflows/Run_rt_calcs.yml)
 
 # Flow
 
@@ -23,6 +24,7 @@ moved to phase 1 archive
 │   └───workflows
 │           code_quality.yml                    [ Code quality validation on push and pull requests ]
 │           create_infrastructure.yml           [ Creates the infrastructure needed for the dashboard ]
+|           Run_rt_calcs.yml                    [ Calculates rt using R language and R packages ]
 │           update_dashboard.yml                [ Main action to update the dashboard ]
 ├───backend                                     [ Main package with all the code ]
 │   │   config.py                               [ handles loading the configuration data ]
@@ -76,6 +78,31 @@ calls the needed methods to do the work, retaining its orchestration nature
 
 When an integration test involving luigi fails it is almost alwasy hidden because luigi hides the exceptions in the
 pytest output for that test. So be sure to open the full test run output to find the actual problem.
+
+## Github Actions
+```
+├───.github
+│   └───workflows
+│           code_quality.yml                    [ Code quality validation on push and pull requests ]
+│           create_infrastructure.yml           [ Creates the infrastructure needed for the dashboard ]
+|           Run_rt_calcs.yml                    [ Calculates rt using R language and R packages ]
+│           update_dashboard.yml                [ Main action to update the dashboard ]
+```
+
+The dashboard uses various github actions that are stored in the .github/workflows folder in yaml files (.yml)
+
+For more information on Github actions in general read [this](https://docs.github.com/en/actions).
+
+### Daily run actions
+These actions update the dashboard<br />
+|Workflow|Action name|Status|Description|
+|--|--|--|--|
+|Run_rt_calcs.yml|R proc|[![R_proc](https://github.com/swb-ief/etl-pipeline/actions/workflows/Run_rt_calcs.yml/badge.svg)](https://github.com/swb-ief/etl-pipeline/actions/workflows/Run_rt_calcs.yml)|Rt calculations in R|
+|update_dashboard.yml|Update Covid 19 dashboard|![Update Covid 19 dashboard](https://github.com/swb-ief/etl-pipeline/workflows/Update%20Covid%2019%20dashboard/badge.svg)|Main dashboard update|
+
+There progress can be checked on the [Github actions page](https://github.com/swb-ief/etl-pipeline/actions), thats also the location to inspect the log files.
+
+
 
 ## AWS
 
