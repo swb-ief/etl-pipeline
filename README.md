@@ -105,4 +105,4 @@ There is no harm in running it twice a day.
 
 ## Additional Links
 
-Find additional info and tips about the workflow in the /documentation folder
+Find additional info about the workflow, tips for troubleshooting, in the /documentation folder
