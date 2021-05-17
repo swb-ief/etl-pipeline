@@ -102,3 +102,7 @@ There is no harm in running it twice a day.
 1) Edit [this reports.html](https://github.com/swb-ief/etl-pipeline/blob/gh-pages/docs/report.html) note that this is on
    a **gh-pages** branch that should **not** be merged with main.
 1) View the page at [https://swb-ief.github.io/etl-pipeline/report](https://swb-ief.github.io/etl-pipeline/report)
+
+## Additional Links
+
+Find additional info and tips about the workflow in the /documentation folder
