@@ -105,6 +105,8 @@ There progress can be checked on the [Github actions page](https://github.com/sw
 For instance [here](https://github.com/swb-ief/etl-pipeline/runs/2560518985?check_suite_focus=true#step:6:67) you can see that the 5 luigi tasks ran succesfully
 
 
+Note: It is recommended to run the "Update Covid 19 dashboard" and "R_proc" github actions after editing any code, to ensure that the dashboard reflects the changes made
+
 ## AWS
 
 We use AWS S3 buckets as our storage, there we store computed values as .csv files that are ingested by the PowerBi
@@ -130,3 +132,7 @@ There is no harm in running it twice a day.
 1) Edit [this reports.html](https://github.com/swb-ief/etl-pipeline/blob/gh-pages/docs/report.html) note that this is on
    a **gh-pages** branch that should **not** be merged with main.
 1) View the page at [https://swb-ief.github.io/etl-pipeline/report](https://swb-ief.github.io/etl-pipeline/report)
+
+## Additional Links
+
+Find additional info about the workflow, tips for troubleshooting, in the /documentation folder
