@@ -3,7 +3,7 @@
 ## status
 
 ![Update Covid 19 dashboard](https://github.com/swb-ief/etl-pipeline/workflows/Update%20Covid%2019%20dashboard/badge.svg)
-![R_proc](https://github.com/swb-ief/etl-pipeline/actions/workflows/Run_rt_calcs.yml/badge.svg)](https://github.com/swb-ief/etl-pipeline/actions/workflows/Run_rt_calcs.yml)
+[![R_proc](https://github.com/swb-ief/etl-pipeline/actions/workflows/Run_rt_calcs.yml/badge.svg)](https://github.com/swb-ief/etl-pipeline/actions/workflows/Run_rt_calcs.yml)
 
 # Flow
 
