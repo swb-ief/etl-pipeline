@@ -9,7 +9,7 @@ from tasks.districts.DownloadFileTask import DownloadFileTask
 class FetchMumbaiWardsTask(luigi.Task):
     def requires(self):
         return DownloadFileTask(
-            file_url='http://stopcoronavirus.mcgm.gov.in/assets/docs/Dashboard.pdf')
+            file_url='https://stopcoronavirus.mcgm.gov.in/assets/docs/Dashboard.pdf')
 
     def run(self):
         # We can also create a backup of the just downloaded PDF here
