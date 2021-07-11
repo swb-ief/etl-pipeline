@@ -15,7 +15,7 @@ class DownloadFileTask(luigi.Task):
         return self._temp_file
 
     def run(self):
-        response = requests.get(self.file_url)
+        response = requests.get(self.file_url, verify=False)
         with open(self.output().path, mode='wb') as output_file:
             output_file.write(response.content)
 
