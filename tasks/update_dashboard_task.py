@@ -91,8 +91,7 @@ class UpdateDashboardTask(luigi.Task):
 
     def requires(self):
         return {
-            'ward_data': FetchWardDataTask(),
-            'state_district_data': FetchCovid19IndiaDataTask()
+            'ward_data': FetchWardDataTask() #,'state_district_data': FetchCovid19IndiaDataTask()
         }
 
     def run(self):
@@ -103,19 +102,24 @@ class UpdateDashboardTask(luigi.Task):
         # repository = GSheetRepository(config['google sheets']['url production'])
         repository = AWSFileRepository(config['aws']['bucket production'])
 
-        fetch_covid19_india_task = self.input()['state_district_data']
+        #fetch_covid19_india_task = self.input()['state_district_data']
         fetch_wards_task = self.input()['ward_data']
 
-        with fetch_covid19_india_task.open('r') as json_file:
-            all_covid19india_data = json.load(json_file)
+        #with fetch_covid19_india_task.open('r') as json_file:
+        #    all_covid19india_data = json.load(json_file)
+        states_covid19india_data = pd.read_csv("https://api.covid19india.org/csv/latest/states.csv", parse_dates=["Date"])
+        districts_covid19india_data = pd.read_csv("https://api.covid19india.org/csv/latest/districts.csv", parse_dates=["Date"])
+        
+        states_covid19india_data.columns = ['date', 'state', 'confirmed', 'recovered', 'deceased', 'other', 'tested']
+        districts_covid19india_data.columns = ['date', 'state', 'district', 'confirmed', 'recovered', 'deceased', 'other', 'tested']
 
         all_ward_data = pd.read_csv(fetch_wards_task.path, parse_dates=['date'])
 
         # cleanup
-        fetch_covid19_india_task.remove()
+        #fetch_covid19_india_task.remove()
         fetch_wards_task.remove()
 
-        state_data, district_data = ExtractCovid19IndiaData().process(all_covid19india_data)
+        state_data, district_data = ExtractCovid19IndiaData().process(states_covid19india_data, districts_covid19india_data)
 
         # not the best location to create this, but it's ok for now
         if not repository.exists(self.storage_hospitalizations):
