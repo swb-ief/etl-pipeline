@@ -110,8 +110,10 @@ class UpdateDashboardTask(luigi.Task):
         states_covid19india_data = pd.read_csv("https://api.covid19india.org/csv/latest/states.csv", parse_dates=["Date"])
         districts_covid19india_data = pd.read_csv("https://api.covid19india.org/csv/latest/districts.csv", parse_dates=["Date"])
         
-        states_covid19india_data.columns = ['date', 'state', 'confirmed', 'recovered', 'deceased', 'other', 'tested']
-        districts_covid19india_data.columns = ['date', 'state', 'district', 'confirmed', 'recovered', 'deceased', 'other', 'tested']
+        states_covid19india_data.columns = ['date', 'state', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.other', 'total.tested']
+        states_covid19india_data['tested'] = states_covid19india_data['total.tested']
+        districts_covid19india_data.columns = ['date', 'state', 'district', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.other', 'total.tested']
+        districts_covid19india_data['tested'] = districts_covid19india_data['total.tested']
 
         all_ward_data = pd.read_csv(fetch_wards_task.path, parse_dates=['date'])
 
