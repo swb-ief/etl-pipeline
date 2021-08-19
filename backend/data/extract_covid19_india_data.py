@@ -98,4 +98,6 @@ class ExtractCovid19IndiaData:
 
         df_state = pd.DataFrame(state_list)
         df_district = pd.DataFrame(district_list)
+        print(df_state.columns)
+        print(df_district.columns)
         return df_state, df_district
