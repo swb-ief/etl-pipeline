@@ -20,6 +20,7 @@ class ExtractCovid19IndiaData:
         df_state = df_state.sort_values(by=["state", "date"]).reset_index(drop=True)
         
         df_district = districts_raw.copy()
+        df_district['district']  = df_district.apply(lambda x: x['state']+' - Other' if x['district']=='Unknown' else x['district'], axis=1)
         df_district = df_district.sort_values(by=["state", "district", "date"]).reset_index(drop=True)
 
         collist = ['confirmed', 'recovered', 'deceased', 'other', 'tested']
