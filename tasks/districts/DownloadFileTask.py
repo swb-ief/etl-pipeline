@@ -15,7 +15,9 @@ class DownloadFileTask(luigi.Task):
         return self._temp_file
 
     def run(self):
-        response = requests.get(self.file_url, verify=False)
+        headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36'}
+        response = requests.get("https://stopcoronavirus.mcgm.gov.in/assets/docs/Dashboard.pdf", headers=headers, verify=False)
+        #response = requests.get(self.file_url, verify=False)
         with open(self.output().path, mode='wb') as output_file:
             output_file.write(response.content)
 
