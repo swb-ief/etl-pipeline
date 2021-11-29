@@ -15,8 +15,7 @@ class DownloadFileTask(luigi.Task):
         return self._temp_file
 
     def run(self):
-        proxylist = {"https": "https://103.47.67.154:8080"}
-        response = requests.get(self.file_url, verify='tasks/districts/mumbaiwards_consolidated.pem', proxies=proxylist)
+        response = requests.get(self.file_url, verify='tasks/districts/mumbaiwards_consolidated.pem')
         with open(self.output().path, mode='wb') as output_file:
             output_file.write(response.content)
 
