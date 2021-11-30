@@ -214,12 +214,16 @@ def scrape_mumbai_pdf(source_file_path):
     df = _extract_wards_data_from_page(positive_cases_pdf_page)
     
     # sealed buildings/floors
-    sealed_building_pdf_page = find_sealed_building_breakdown_page(pdf)
-    building_df=_extract__data_from_page_sealed(sealed_building_pdf_page, 0, 'total.sealedbuildings')
-    sealed_floor_pdf_page = find_sealed_floor_breakdown_page(pdf)
-    floor_df=_extract__data_from_page_sealed(sealed_floor_pdf_page, 0, 'total.sealedfloors')
-    
-    # combine all data
-    full_df=df.merge(building_df.merge(floor_df, how='outer',on='ward'), how='outer', on='ward')
+    try:
+        sealed_building_pdf_page = find_sealed_building_breakdown_page(pdf)
+        building_df=_extract__data_from_page_sealed(sealed_building_pdf_page, 0, 'total.sealedbuildings')
+        sealed_floor_pdf_page = find_sealed_floor_breakdown_page(pdf)
+        floor_df=_extract__data_from_page_sealed(sealed_floor_pdf_page, 0, 'total.sealedfloors')
 
+        # combine all data
+        full_df=df.merge(building_df.merge(floor_df, how='outer',on='ward'), how='outer', on='ward')
+        
+    except ValueError: # older versions of the PDF do not contain the sealed buildings/wards page in the format this code has been developed for
+        full_df = df
+        
     return full_df
