@@ -109,7 +109,11 @@ class UpdateDashboardTask(luigi.Task):
         #    all_covid19india_data = json.load(json_file)
         
         states_covid19india_data = pd.read_csv("https://api.covid19tracker.in/data/csv/latest/states.csv", parse_dates=["Date"])
+        states_covid19india_data['other'] = None
+        states_covid19india_data['tested'] = None
         districts_covid19india_data = pd.read_csv("https://api.covid19tracker.in/data/csv/latest/districts.csv", parse_dates=["Date"])
+        districts_covid19india_data['other'] = None
+        districts_covid19india_data['tested'] = None
         
         # read population data
         states_pop = pd.read_csv("backend/data/static_states_data.csv")[['state', 'population']]
