@@ -222,4 +222,4 @@ def scrape_mumbai_pdf(source_file_path):
     # combine all data
     full_df=df.merge(building_df.merge(floor_df, how='outer',on='ward'), how='outer', on='ward')
 
-    return df
+    return full_df
