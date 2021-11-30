@@ -112,7 +112,6 @@ class UpdateDashboardTask(luigi.Task):
         states_covid19india_data['other'] = None
         states_covid19india_data['tested'] = None
         districts_covid19india_data = pd.read_csv("https://api.covid19tracker.in/data/csv/latest/districts.csv", parse_dates=["Date"])
-        districts_covid19india_data['other'] = None
         districts_covid19india_data['tested'] = None
         
         # read population data
