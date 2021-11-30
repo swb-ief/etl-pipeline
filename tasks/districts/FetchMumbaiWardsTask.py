@@ -3,25 +3,13 @@ from datetime import date
 import luigi
 
 from backend.data.extract_mumbai_wards_pdf import scrape_mumbai_pdf
-#from tasks.districts.DownloadFileTask import DownloadFileTask
-from backend.repository import AWSFileRepository
-from backend.config import get_config
+from tasks.districts.DownloadFileTask import DownloadFileTask
 
 
 class FetchMumbaiWardsTask(luigi.Task):
     def requires(self):
-        self._temp_file = luigi.LocalTarget(is_tmp=True)
-        dashboard_storage = 'mumbai_dashboard.pdf'
-        config = get_config()
-        repository = AWSFileRepository(config['aws']['bucket production'])
-
-        if repository.exists(dashboard_storage):
-            repository._download_file(self._temp_file.path, config['aws']['bucket production'], dashboard_storage)
-        
-        if self._temp_file.exists():
-            return self._temp_file
-        else:
-            return False
+        return DownloadFileTask(
+            file_url='https://stopcoronavirus.mcgm.gov.in/assets/docs/Dashboard.pdf')
 
     def run(self):
         # We can also create a backup of the just downloaded PDF here
