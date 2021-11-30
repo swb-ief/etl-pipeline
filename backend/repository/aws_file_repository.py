@@ -1,5 +1,6 @@
 import pandas as pd
 from backend.repository import Repository
+import re
 
 import logging
 import boto3
@@ -27,7 +28,10 @@ class AWSFileRepository(Repository):
 
     @staticmethod
     def _convert_to_filename(storage_location):
-        return f'{storage_location}.csv'
+        if len(storage_location.split("."))==1:
+            return f'{storage_location}.csv'
+        else:
+            return storage_location
 
     def store_dataframe(self, df: pd.DataFrame, storage_location: str, allow_create: bool,
                         store_index: bool = False) -> None:
