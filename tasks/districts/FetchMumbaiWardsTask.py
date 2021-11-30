@@ -16,7 +16,7 @@ class FetchMumbaiWardsTask(luigi.Task):
         repository = AWSFileRepository(config['aws']['bucket production'])
 
         if repository.exists(dashboard_storage):
-            repository._download_file(self._temp_file.path(), config['aws']['bucket production'], dashboard_storage)
+            repository._download_file(self._temp_file.path, config['aws']['bucket production'], dashboard_storage)
         
         if self._temp_file.exists():
             return self._temp_file
