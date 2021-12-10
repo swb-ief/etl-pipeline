@@ -143,63 +143,16 @@ def find_ward_wise_new_cases_page(pdf):
     raise ValueError(f'PDF does not contain a page with {ward_page_title}')
     
     
-def find_sealed_building_breakdown_page(pdf):
+def find_page_general(pdf, title):
     title_box = (0, 0, 800, 70)
-    ward_page_title = 'Ward-wise Sealed Buildings (SBs)/Micro-containment zones'
+    page_title = title
+
     for page in pdf.pages:
         title = page.within_bbox(title_box).extract_text()
-        if title is not None and ward_page_title.lower() in title.lower():
+        if title is not None and page_title.lower() in title.lower():
             return page
-    raise ValueError(f'PDF does not contain a page with {ward_page_title}')
-    
-    
-def find_sealed_floor_breakdown_page(pdf):
-    title_box = (0, 0, 800, 70)
-    ward_page_title = 'Ward-wise Sealed Floors (SFs)'
-    for page in pdf.pages:
-        title = page.within_bbox(title_box).extract_text()
-        if title is not None and ward_page_title.lower() in title.lower():
-            return page
-    raise ValueError(f'PDF does not contain a page with {ward_page_title}')
-    
-    
-def _extract__data_from_page_sealed(positive_cases_pdf_page, top_factor, column_name) -> pd.DataFrame:
-    outer_boundary = 705
-    
-    # identify top left corner of district names
-    x0, top = identify_wardnames_top_left(positive_cases_pdf_page, initial_bbox=(330, 80, 420, 200))
-    
-    wardbox = (x0, top-top_factor, x0+40, top+425)
-    confirmedbox = (x0+40, top-top_factor, outer_boundary, top+425)
-    # switching to our naming convention
-    boxes = {
-        'ward': wardbox,  # ward abbreviation
-        column_name: confirmedbox
-    }# cases
-    data = dict()
-    for key, box in boxes.items():
-        raw_data = positive_cases_pdf_page.within_bbox(box).extract_text()
-        # due to shifting sizes the totals rows sometimes gets included
-        # because we know there are only 24 wards we can cut it of by limiting our selves to 24
-        data[key] = raw_data.split('\n')[:24]
-        # In a similar way we could actually search for the correct page that
-    # contains 'Ward-wise breakdown of positive cases' instead of hard coded page numbers
-    
-    df = pd.DataFrame(data)
-    numeric_columns = [column_name]
-    for column in numeric_columns:
-        data[column] = pd.to_numeric(df[column])
-    return df
 
-
-def scrape_mumbai_sealed_details_pdf(source_file_path):
-    """
-    :param source_file_path: 
-    :remarks:
-    """
-    pdf = _read_pdf(source_file_path)
-    
-    return full_df
+    raise ValueError(f'PDF does not contain a page with {page_title}')
 
 
 def scrape_mumbai_pdf(source_file_path):
@@ -209,21 +162,34 @@ def scrape_mumbai_pdf(source_file_path):
     """
     pdf = _read_pdf(source_file_path)
 
+    pages_config = {
+    "sealed_buildings":{
+      "title": "Ward-wise Sealed Buildings (SBs)/Micro-containment zones",
+      "top_factor": 10,
+      "column_name": 'total.sealedbuildings',
+    },
+    "sealed_floors":{
+      "title": 'Ward-wise Sealed Floors (SFs)',
+      "top_factor": 0,
+      "column_name": 'total.sealedfloors',
+        }
+    }
+
     positive_cases_pdf_page = find_ward_wise_breakdown_page(pdf)
     # new_cases_page = find_ward_wise_new_cases_page(pdf)
-    df = _extract_wards_data_from_page(positive_cases_pdf_page)
+    full_df = _extract_wards_data_from_page(positive_cases_pdf_page)
     
     # sealed buildings/floors
     try:
-        sealed_building_pdf_page = find_sealed_building_breakdown_page(pdf)
-        building_df=_extract__data_from_page_sealed(sealed_building_pdf_page, 0, 'total.sealedbuildings')
-        sealed_floor_pdf_page = find_sealed_floor_breakdown_page(pdf)
-        floor_df=_extract__data_from_page_sealed(sealed_floor_pdf_page, 0, 'total.sealedfloors')
+        for page in pages_config:
+            pdf_page = find_page_general(pdf,pages_config[page]['title'])
+            df = _extract__data_from_page(pdf_page, pages_config[page]['top_factor'], pages_config[page]['column_name'])
 
-        # combine all data
-        full_df=df.merge(building_df.merge(floor_df, how='outer',on='ward'), how='outer', on='ward')
+            full_df=full_df.merge(df, how='outer',on='ward')
+
+        return full_df
         
     except ValueError: # older versions of the PDF do not contain the sealed buildings/wards page in the format this code has been developed for
-        full_df = df
+        full_df = full_df
         
     return full_df
