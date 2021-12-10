@@ -154,6 +154,43 @@ def find_page_general(pdf, title):
 
     raise ValueError(f'PDF does not contain a page with {page_title}')
 
+def _extract__data_from_page_general(positive_cases_pdf_page, top_factor, column_name) -> pd.DataFrame:
+    outer_boundary = 720
+    
+    # identify top left corner of district names
+    x0, top = identify_wardnames_top_left(positive_cases_pdf_page, initial_bbox)
+    
+    wardbox = (x0, top-top_factor, x0+50, top+420)
+    confirmedbox = (x0+30, top-top_factor, outer_boundary, top+420)
+
+    # switching to our naming convention
+    boxes = {
+        'ward': wardbox,  # ward abbreviation
+        column_name: confirmedbox
+    }# cases
+
+    data = dict()
+    for key, box in boxes.items():
+        raw_data = positive_cases_pdf_page.within_bbox(box).extract_text()
+        # due to shifting sizes the totals rows sometimes gets included
+        # because we know there are only 24 wards we can cut it of by limiting our selves to 24
+        data[key] = raw_data.split('\n')[:24]
+
+        # In a similar way we could actually search for the correct page that
+    # contains 'Ward-wise breakdown of positive cases' instead of hard coded page numbers
+    date_box = (50, 70, 200, 120)
+    raw_date = positive_cases_pdf_page.within_bbox(date_box).extract_text().strip()
+    date = datetime.strptime(raw_date, '%b %d, %Y')
+
+    df = pd.DataFrame(data)
+
+    numeric_columns = [column_name]
+    for column in numeric_columns:
+        data[column] = pd.to_numeric(df[column])
+
+    return df
+
+
 
 def scrape_mumbai_pdf(source_file_path):
     """
@@ -183,7 +220,7 @@ def scrape_mumbai_pdf(source_file_path):
     try:
         for page in pages_config:
             pdf_page = find_page_general(pdf,pages_config[page]['title'])
-            df = _extract__data_from_page(pdf_page, pages_config[page]['top_factor'], pages_config[page]['column_name'])
+            df = _extract__data_from_page_general(pdf_page, pages_config[page]['top_factor'], pages_config[page]['column_name'])
 
             full_df=full_df.merge(df, how='outer',on='ward')
 
