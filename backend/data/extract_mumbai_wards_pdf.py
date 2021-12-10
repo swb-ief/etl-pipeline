@@ -158,7 +158,7 @@ def _extract__data_from_page_general(positive_cases_pdf_page, top_factor, column
     outer_boundary = 720
     
     # identify top left corner of district names
-    x0, top = identify_wardnames_top_left(positive_cases_pdf_page, initial_bbox)
+    x0, top = identify_wardnames_top_left(positive_cases_pdf_page, initial_bbox=(350, 50, 425, 450))
     
     wardbox = (x0, top-top_factor, x0+50, top+420)
     confirmedbox = (x0+30, top-top_factor, outer_boundary, top+420)
