@@ -521,7 +521,7 @@ def scrape_mumbai_pdf(source_file_path):
         full_df_2=pd.merge(full_one_column, full_facilities, how='outer', on=['metric', 'date', 'metric_type'])
         full_df_2=pd.merge(full_df_2, full_tracing, how='outer', on=['metric', 'date', 'metric_type'])
 
-        return full_df, full_df_2
+        return full_df
         
     except ValueError: # older versions of the PDF do not contain the sealed buildings/wards page in the format this code has been developed for
         full_df = full_df
