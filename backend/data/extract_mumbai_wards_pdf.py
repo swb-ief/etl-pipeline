@@ -190,6 +190,243 @@ def _extract__data_from_page_general(positive_cases_pdf_page, top_factor, column
 
     return df
 
+def _extract_data_from_page(positive_cases_pdf_page, x0, top, graph_name) -> pd.DataFrame:
+    #total_discharged_boundary = 0
+    #discharged_deaths_boundary = 660
+    #deaths_active_boundary = 710
+    
+    # identify top left corner of district names
+    #x0, top = identify_wardnames_top_left(positive_cases_pdf_page)
+    
+
+    if graph_name=='COVID19 Case Analysis' or graph_name=='COVID19 Bed Management':  
+        metricbox = (x0, top, x0+140, top+325)
+        countbox = (x0+140, top, x0+200, top+325)
+    
+    if graph_name=='Containment Measures':
+        metricbox = (x0, top, x0+180, top+200)
+        countbox = (x0+190, top, x0+245, top+200)
+        
+    if graph_name=='Quarantine Stats':
+        metricbox = (x0, top, x0+150, top+75)
+        countbox = (x0+180, top, x0+245, top+75)
+
+    # switching to our naming convention
+    boxes = {
+        'metric': metricbox,  # ward abbreviation
+        'count': countbox
+    }# cases
+
+    data = dict()
+    for key, box in boxes.items():
+        raw_data = positive_cases_pdf_page.within_bbox(box).extract_text()
+        # due to shifting sizes the totals rows sometimes gets included
+        # because we know there are only 24 wards we can cut it of by limiting our selves to 24
+        data[key] = raw_data.split('\n')[:24]
+        
+    if graph_name=='COVID19 Bed Management':
+        data['metric']=['Bed Capacity (DCHC+DCH+CCC2)',
+              'Bed (DCHC+DCH+CCC2) Occupied',
+              'Bed (DCHC+DCH+CCC2) Available',
+              'DCH & DCHC Bed Capacity',
+              'DCH & DCHC Bed Occupied',
+              'DCH & DCHC Bed Available',
+              'O2 Bed Capacity',
+              'O2 Bed Occupied',
+              'O2 Bed Available',
+              'ICU Bed Capacity',
+              'ICU Bed Occupied',
+              'ICU Bed Available',
+              'Ventilator Bed Capacity',
+              'Ventilator Bed Occupied',
+              'Ventilator Bed Available']
+        
+    if graph_name=='Containment Measures':
+        data['metric']=['Active Containment Zones – Slums & Chawls',
+              'Released Containment Zones – Slums & Chawls',
+              'Active Sealed Buildings/micro-containment zones',
+              'Released Sealed Buildings/micro-containment zones',
+              'Active Sealed Floors']
+        
+    if graph_name=='Quarantine Stats':
+        data['metric']=['Total Quarantine Completed',
+              'Currently in Home Quarantine']
+
+        # In a similar way we could actually search for the correct page that
+    # contains 'Ward-wise breakdown of positive cases' instead of hard coded page numbers
+    date_box = (770, 50, 875, 80)
+    raw_date = positive_cases_pdf_page.within_bbox(date_box).extract_text().strip()
+    date = datetime.strptime(raw_date, '%b %d, %Y')
+
+    numeric_columns = ['count']
+    
+    for n in range(len(data['count'])):
+        data['count'][n]=data['count'][n].replace(',','').replace(')','').replace('–','').lstrip().strip()
+          
+    for column in numeric_columns:
+        data[column] = pd.to_numeric(data[column], errors='coerce')
+    
+    df = pd.DataFrame(data)
+
+    df['date'] = date
+    df['metric_type'] = graph_name
+
+    return df
+
+def _extract_data_from_page_facilities(positive_cases_pdf_page, x0, top, graph_name) -> pd.DataFrame:
+
+    if graph_name=='CCC1 Facilities':  
+        metricbox = (x0, top, x0+100, top+140)
+        countbox2 = (x0+120, top, x0+180, top+140)
+        countbox3 = (x0+180, top, x0+250, top+140)
+        countbox4 = (x0+255, top, x0+310, top+140)
+
+    if graph_name=='CCC2 Facilities':  
+        metricbox = (x0, top, x0+100, top+110)
+        countbox2 = (x0+100, top, x0+160, top+110)
+        countbox3 = (x0+160, top, x0+230, top+110)
+        countbox4 = (x0+235, top, x0+310, top+110)
+
+    # switching to our naming convention
+    boxes = {
+        'metric': metricbox,  # ward abbreviation
+        'Facilities(#)': countbox2,
+        'Bed Capacity': countbox3,
+        'Occupancy': countbox4
+    }# cases
+
+    data = dict()
+    for key, box in boxes.items():
+        raw_data = positive_cases_pdf_page.within_bbox(box).extract_text()
+        # due to shifting sizes the totals rows sometimes gets included
+        # because we know there are only 24 wards we can cut it of by limiting our selves to 24
+        data[key] = raw_data.split('\n')[:24]
+
+    if graph_name=='CCC1 Facilities':
+        data['metric']=['Total CCC1 Facilities', 
+                        'Active CCC1 Facilities', 
+                        'Buffer CCC1 Facilities', 
+                        'Reserve CCC1 Facilities']
+    if graph_name=='CCC2 Facilities':
+        data['metric']=['Total CCC2 Facilities', 
+                        'Active CCC2 Facilities', 
+                        'Buffer CCC2 Facilities', 
+                        'Reserve CCC2 Facilities']
+
+        # In a similar way we could actually search for the correct page that
+    # contains 'Ward-wise breakdown of positive cases' instead of hard coded page numbers
+    date_box = (770, 50, 875, 80)
+    raw_date = positive_cases_pdf_page.within_bbox(date_box).extract_text().strip()
+    date = datetime.strptime(raw_date, '%b %d, %Y')
+
+    data
+
+    numeric_columns = ['Facilities(#)',
+                        'Bed Capacity',
+                        'Occupancy']
+    for column in numeric_columns:
+        for n in range(len(data[column])):
+            data[column][n]=data[column][n].replace(',','').replace(')','').replace('–','').lstrip().strip()
+
+    for column in numeric_columns:
+        data[column] = pd.to_numeric(data[column], errors='coerce')
+
+    df = pd.DataFrame(data)
+
+    df['date'] = date
+    df['metric_type'] = graph_name
+
+    return df
+
+def _extract_data_from_page_tracing(positive_cases_pdf_page, x0, top, graph_name) -> pd.DataFrame:
+
+    metricbox = (x0, top, x0+100, top+80)
+    countbox2 = (x0+120, top, x0+180, top+80)
+    countbox3 = (x0+180, top, x0+250, top+80)
+
+    # switching to our naming convention
+    boxes = {
+        'metric': metricbox,  # ward abbreviation
+        'Past 24hrs': countbox2,
+        'Cumulative': countbox3,
+    }# cases
+
+    data = dict()
+    for key, box in boxes.items():
+        raw_data = positive_cases_pdf_page.within_bbox(box).extract_text()
+        # due to shifting sizes the totals rows sometimes gets included
+        # because we know there are only 24 wards we can cut it of by limiting our selves to 24
+        data[key] = raw_data.split('\n')[:24]
+
+        # In a similar way we could actually search for the correct page that
+    # contains 'Ward-wise breakdown of positive cases' instead of hard coded page numbers
+    date_box = (770, 50, 875, 80)
+    raw_date = positive_cases_pdf_page.within_bbox(date_box).extract_text().strip()
+    date = datetime.strptime(raw_date, '%b %d, %Y')
+
+
+    numeric_columns = ['Past 24hrs',
+                        'Cumulative']
+    for column in numeric_columns:
+        for n in range(len(data[column])):
+            data[column][n]=data[column][n].replace(',','').replace(')','').replace('–','').lstrip().strip()
+
+    for column in numeric_columns:
+        data[column] = pd.to_numeric(data[column], errors='coerce')
+
+    df = pd.DataFrame(data)
+
+    df['date'] = date
+    df['metric_type'] = graph_name
+
+    return df
+
+def _extract_ward_positive_data(positive_cases_pdf_page,initial_bbox=(95, 450, 900, 470)) -> pd.DataFrame:
+    
+    wardbox = initial_bbox
+    countbox1 = (initial_bbox[0],initial_bbox[1]+20,initial_bbox[2],initial_bbox[3]+20)
+    countbox2 = (initial_bbox[0],initial_bbox[1]+30,initial_bbox[2],initial_bbox[3]+30)
+    countbox3 = (initial_bbox[0],initial_bbox[1]+40,initial_bbox[2],initial_bbox[3]+40)
+
+    # switching to our naming convention
+    boxes = {
+        'ward': wardbox,  # ward abbreviation
+        'Positive': countbox1,  # cases
+        'Days to double': countbox2,  # Discharged column
+        'Weekly Growth Rate': countbox3,  # deaths column
+    }
+
+    data = dict()
+    for key, box in boxes.items():
+        raw_data = positive_cases_pdf_page.within_bbox(box).extract_text()
+        # due to shifting sizes the totals rows sometimes gets included
+        # because we know there are only 24 wards we can cut it of by limiting our selves to 24
+        data[key] = raw_data.split(' ')[:24]
+
+        # In a similar way we could actually search for the correct page that
+    # contains 'Ward-wise breakdown of positive cases' instead of hard coded page numbers
+    date_box = (770, 50, 875, 80)
+    raw_date = positive_cases_pdf_page.within_bbox(date_box).extract_text().strip()
+    date = datetime.strptime(raw_date, '%b %d, %Y')
+
+
+    numeric_columns = ['Positive', 'Days to double', 'Weekly Growth Rate']
+    for column in numeric_columns:
+        for n in range(len(data[column])):
+            data[column][n]=data[column][n].replace(',','').replace('%','').replace('–','').lstrip().strip()
+
+    for column in numeric_columns:
+        data[column] = pd.to_numeric(data[column], errors='coerce')
+            
+    df = pd.DataFrame(data)
+
+    # not available in sheet, but making it consistent with states and districts
+    #df['date'] = date
+    #df['district'] = 'Mumbai'
+    #df['state'] = 'MH'
+
+    return df
+
 
 
 def scrape_mumbai_pdf(source_file_path):
@@ -212,9 +449,45 @@ def scrape_mumbai_pdf(source_file_path):
         }
     }
 
+
+    tables_config = {
+        "COVID19 Case Analysis":{'type':'one column',
+        "x0": 10,
+        "top": 125,
+        },
+        "COVID19 Bed Management":{'type':'one column',
+        "x0": 210,
+        "top": 125
+        },
+        "Containment Measures":{'type':'one column',
+        "x0": 715,
+        "top": 260,
+        },
+        "Quarantine Stats":{'type':'one column',
+        "x0": 715,
+        "top": 180,
+        },
+        "CCC1 Facilities":{'type':'facilities',
+        "x0": 410,
+        "top": 150,
+        },
+        "CCC2 Facilities":{'type':'facilities',
+        "x0": 410,
+        "top": 325,
+        },
+        "Contact Tracing":{'type':'tracing',
+        "x0": 710,
+        "top": 100,
+        }
+    }
+
     positive_cases_pdf_page = find_ward_wise_breakdown_page(pdf)
     # new_cases_page = find_ward_wise_new_cases_page(pdf)
     full_df = _extract_wards_data_from_page(positive_cases_pdf_page)
+
+    full_one_column=pd.DataFrame(columns=['metric','count','date','metric_type'])
+    full_facilities=pd.DataFrame(columns=['metric','Facilities(#)','Bed Capacity','Occupancy','date','metric_type'])
+    full_tracing=pd.DataFrame(columns=['metric','Past 24hrs','Cumulative','date','metric_type'])
     
     # sealed buildings/floors
     try:
@@ -223,8 +496,32 @@ def scrape_mumbai_pdf(source_file_path):
             df = _extract__data_from_page_general(pdf_page, pages_config[page]['top_factor'], pages_config[page]['column_name'])
 
             full_df=full_df.merge(df, how='outer',on='ward')
+        
+        title='Mumbai COVID19 status at a glance'
+        page=find_page_general(pdf,title)
+        positive_df = _extract_ward_positive_data(page)
 
-        return full_df
+        full_df=full_df.merge(positive_df, how='outer',on='ward')
+
+        for key in tables_config:
+            table_type=tables_config[key]['type']
+            x0=tables_config[key]['x0']
+            top=tables_config[key]['top']
+            graph_name=key
+            if table_type=='one column':
+                df=_extract_data_from_page(page, x0, top, graph_name)
+                full_one_column=full_one_column.append(df)
+            if table_type=='facilities':
+                df=_extract_data_from_page_facilities(page, x0, top, graph_name)
+                full_facilities=full_facilities.append(df)
+            if table_type=='tracing':
+                df=_extract_data_from_page_tracing(page, x0, top, graph_name)
+                full_tracing=full_tracing.append(df)
+
+        full_df_2=pd.merge(full_one_column, full_facilities, how='outer', on=['metric', 'date', 'metric_type'])
+        full_df_2=pd.merge(full_df_2, full_tracing, how='outer', on=['metric', 'date', 'metric_type'])
+
+        return full_df, full_df_2
         
     except ValueError: # older versions of the PDF do not contain the sealed buildings/wards page in the format this code has been developed for
         full_df = full_df
