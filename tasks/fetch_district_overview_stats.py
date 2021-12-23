@@ -14,7 +14,7 @@ from tasks.districts import FetchMumbaiOverallTask
 log = logging.getLogger(__name__)
 
 
-class FetchWardDataTask(luigi.Task):
+class FetchDistrictOverviewTask(luigi.Task):
     def requires(self):
         return {
             'Mumbai': FetchMumbaiOverallTask(),
