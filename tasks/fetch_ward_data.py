@@ -33,13 +33,13 @@ class FetchWardDataTask(luigi.Task):
             all_wards = repository.get_dataframe(ward_storage_location)
             all_wards = all_wards.set_index(['state', 'district', 'ward', 'date'])
         else:
-            all_wards = pd.DataFrame()
+            all_wards = None
             
         if repository.exists(overall_storage_location):
             overall_df = repository.get_dataframe(overall_storage_location)
             overall_df = overall_df.set_index(['date', 'metric', 'metric_type'])
         else:
-            overall_df = pd.DataFrame()
+            overall_df = None
 
         for district, paths in self.input().items():
             ward_task = paths[0]
