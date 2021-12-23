@@ -25,7 +25,6 @@ class FetchWardDataTask(luigi.Task):
         # as in it should continue processing all the other wards even if a few failed.
 
         ward_storage_location = 'raw_ward_data'
-        overall_storage_location = 'raw_mumbai_overall_data'
         config = get_config()
         repository = AWSFileRepository(config['aws']['bucket production'])
 
@@ -34,25 +33,13 @@ class FetchWardDataTask(luigi.Task):
             all_wards = all_wards.set_index(['state', 'district', 'ward', 'date'])
         else:
             all_wards = None
-            
-        if repository.exists(overall_storage_location):
-            overall_df = repository.get_dataframe(overall_storage_location)
-            overall_df = overall_df.set_index(['date', 'metric', 'metric_type'])
-        else:
-            overall_df = None
 
-        for district, paths in self.input().items():
-            ward_task = paths[0]
-            overall_task = paths[1]
+        for district, ward_task in self.input().items():
             log.info(f'Processing: {district}')
 
             with ward_task.open('r') as json_file:
                 ward_task = pd.read_csv(json_file, parse_dates=['date'])
                 ward_task = ward_task.set_index(['state', 'district', 'ward', 'date'])
-            
-            with overall_task.open('r') as overall_json_file:
-                overall_task = pd.read_csv(overall_json_file, parse_dates=['date'])
-                overall_task = overall_task.set_index(['date', 'metric', 'metric_type'])
 
             # This needs to support overwriting existing data as well as adding new data
             # TODO make a test for it
@@ -60,20 +47,13 @@ class FetchWardDataTask(luigi.Task):
                 all_wards = ward_task
             else:
                 all_wards = all_wards.combine_first(ward_task)  # update old values and add new values
-                
-            if overall_df is None:
-                overall_df = overall_task
-            else:
-                overall_df = overall_df.combine_first(overall_task) 
 
         # cleanup
         for task in self.input().values():
-            task[0].remove()
-            task[1].remove()
+            task.remove()
 
         # store the raw data, no imputation done yet
         repository.store_dataframe(all_wards, ward_storage_location, allow_create=True, store_index=True)
-        repository.store_dataframe(overall_df, overall_storage_location, allow_create=True, store_index=True)
 
         # impute delta's atleast for Mumbai this is needed it only provides totals
         delta_needed_for = ['tested', 'confirmed', 'recovered', 'deceased', 'active', 'other']
