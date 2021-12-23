@@ -458,27 +458,12 @@ def _extract_ward_positive_data(positive_cases_pdf_page,initial_bbox=(95, 450, 9
     return df
 
 
-
-def scrape_mumbai_pdf(source_file_path):
+def scrape_mumbai_pdf_overall(source_file_path):
     """
     :param source_file_path: 
     :remarks:
     """
     pdf = _read_pdf(source_file_path)
-
-    pages_config = {
-    "sealed_buildings":{
-      "title": "Ward-wise Sealed Buildings (SBs)/Micro-containment zones",
-      "top_factor": 10,
-      "column_name": 'total.sealedbuildings',
-    },
-    "sealed_floors":{
-      "title": 'Ward-wise Sealed Floors (SFs)',
-      "top_factor": 0,
-      "column_name": 'total.sealedfloors',
-        }
-    }
-
 
     tables_config = {
         "COVID19 Case Analysis":{'type':'one column',
@@ -511,38 +496,11 @@ def scrape_mumbai_pdf(source_file_path):
         }
     }
 
-    positive_cases_pdf_page = find_ward_wise_breakdown_page(pdf)
-    # new_cases_page = find_ward_wise_new_cases_page(pdf)
-    
-
     full_one_column=pd.DataFrame(columns=['metric','count','date','metric_type'])
     full_facilities=pd.DataFrame(columns=['metric','num.facilities','bed.capacity','occupancy','date','metric_type'])
     full_tracing=pd.DataFrame(columns=['metric','past.24hrs','cumulative','date','metric_type'])
-    full_df = pd.DataFrame()
     # sealed buildings/floors
-    try:
-        full_df = _extract_wards_data_from_page(positive_cases_pdf_page)
-        for page in pages_config:
-            pdf_page = find_page_general(pdf,pages_config[page]['title'])
-            df = _extract__data_from_page_general(pdf_page, pages_config[page]['top_factor'], pages_config[page]['column_name'])
-
-            full_df=full_df.merge(df, how='outer',on='ward')
-        
-        title='Mumbai COVID19 status at a glance'
-        page=find_page_general(pdf,title)
-        positive_df = _extract_ward_positive_data(page)
-
-        full_df=full_df.merge(positive_df, how='outer',on='ward')
-
-    except ValueError: # older versions of the PDF do not contain the sealed buildings/wards page in the format this code has been developed for
-        full_df = full_df
-        missing_columns = [x for x in ['ward', 'total.confirmed', 'total.recovered', 'total.deceased',
-                                       'total.active', 'total.other', 'total.tested', 'date', 'district',
-                                       'state', 'total.sealedbuildings', 'total.sealedfloors', 'positive',
-                                       'days.to.double', 'weekly.growth.rate'] if x not in full_df.columns]
-        for col in missing_columns:
-            full_df[col]=None
-        
+            
     try:
         title='Mumbai COVID19 status at a glance'
         page=find_page_general(pdf,title)
@@ -572,4 +530,54 @@ def scrape_mumbai_pdf(source_file_path):
                                             'bed.capacity', 'occupancy', 'past.24hrs', 'cumulative'])
         
     
-    return full_df, full_df_2
+    return full_df_2
+
+def scrape_mumbai_pdf(source_file_path):
+    """
+    :param source_file_path: 
+    :remarks:
+    """
+    pdf = _read_pdf(source_file_path)
+
+    pages_config = {
+    "sealed_buildings":{
+      "title": "Ward-wise Sealed Buildings (SBs)/Micro-containment zones",
+      "top_factor": 10,
+      "column_name": 'total.sealedbuildings',
+    },
+    "sealed_floors":{
+      "title": 'Ward-wise Sealed Floors (SFs)',
+      "top_factor": 0,
+      "column_name": 'total.sealedfloors',
+        }
+    }
+
+    positive_cases_pdf_page = find_ward_wise_breakdown_page(pdf)
+    # new_cases_page = find_ward_wise_new_cases_page(pdf)
+    
+    full_df = pd.DataFrame()
+    # sealed buildings/floors
+    try:
+        full_df = _extract_wards_data_from_page(positive_cases_pdf_page)
+        for page in pages_config:
+            pdf_page = find_page_general(pdf,pages_config[page]['title'])
+            df = _extract__data_from_page_general(pdf_page, pages_config[page]['top_factor'], pages_config[page]['column_name'])
+
+            full_df=full_df.merge(df, how='outer',on='ward')
+        
+        title='Mumbai COVID19 status at a glance'
+        page=find_page_general(pdf,title)
+        positive_df = _extract_ward_positive_data(page)
+
+        full_df=full_df.merge(positive_df, how='outer',on='ward')
+
+    except ValueError: # older versions of the PDF do not contain the sealed buildings/wards page in the format this code has been developed for
+        full_df = full_df
+        missing_columns = [x for x in ['ward', 'total.confirmed', 'total.recovered', 'total.deceased',
+                                       'total.active', 'total.other', 'total.tested', 'date', 'district',
+                                       'state', 'total.sealedbuildings', 'total.sealedfloors', 'positive',
+                                       'days.to.double', 'weekly.growth.rate'] if x not in full_df.columns]
+        for col in missing_columns:
+            full_df[col]=None
+    
+    return full_df
