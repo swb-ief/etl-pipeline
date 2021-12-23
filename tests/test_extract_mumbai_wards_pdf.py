@@ -17,7 +17,13 @@ class TestExtractMumbaiWardsPDF(unittest.TestCase):
                          'MH']
 
         sample = os.path.join(THIS_DIR, 'samples/mumbai_dashboard_2020_01_02.pdf')
-        result = scrape_mumbai_pdf(sample)[0]
+        mumbai_output = scrape_mumbai_pdf(sample)
+        
+        if len(mumbai_output)>1:
+            result = mumbai_output[0]
+        else:
+            result = mumbai_output
+            
         result_first = result.iloc[0].values
         result_last = result.iloc[-1].values
 
