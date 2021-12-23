@@ -58,8 +58,11 @@ class FetchDistrictOverviewTask(luigi.Task):
         # impute delta's atleast for Mumbai this is needed it only provides totals
         delta_needed_for = ['count']
         group_by_cols = ['date', 'metric', 'metric_type']
-        overall_df = interpolate_values(overall_df, group_by_cols, delta_needed_for)
-        overall_df = create_delta_cols(overall_df, group_by_cols, delta_needed_for)
+        try:
+            overall_df = interpolate_values(overall_df, group_by_cols, delta_needed_for)
+            overall_df = create_delta_cols(overall_df, group_by_cols, delta_needed_for)
+        except:
+            pass
 
         # add population
         overall_df.to_csv(self.output().path, index=True)
