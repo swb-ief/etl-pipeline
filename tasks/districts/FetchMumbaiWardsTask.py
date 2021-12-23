@@ -23,4 +23,4 @@ class FetchMumbaiWardsTask(luigi.Task):
         return luigi.LocalTarget(f'mumbai_{date.today()}.csv'), luigi.LocalTarget(f'mumbai_overall_{date.today()}.csv')  # TODO this can fail if the run is very close 23:59
 
     def complete(self):
-        return self.output().exists()
+        return self.output()[0].exists() & self.output()[1].exists()
