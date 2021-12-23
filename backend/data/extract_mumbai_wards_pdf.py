@@ -21,7 +21,7 @@ def identify_wardnames_top_left(positive_cases_pdf_page, initial_bbox=(240, 80, 
         
     obtain visual debugging tips from https://github.com/jsvine/pdfplumber
     
-    Contributor: aswinjayan94
+    Contributors: aswinjayan94, bcbowers, nozziel
     """
     
     x0 = initial_bbox[0]
@@ -290,9 +290,9 @@ def _extract_data_from_page_facilities(positive_cases_pdf_page, x0, top, graph_n
     # switching to our naming convention
     boxes = {
         'metric': metricbox,  # ward abbreviation
-        'Facilities(#)': countbox2,
-        'Bed Capacity': countbox3,
-        'Occupancy': countbox4
+        'num.facilities': countbox2,
+        'bed.capacity': countbox3,
+        'occupancy': countbox4
     }# cases
 
     data = dict()
@@ -321,9 +321,9 @@ def _extract_data_from_page_facilities(positive_cases_pdf_page, x0, top, graph_n
 
     data
 
-    numeric_columns = ['Facilities(#)',
-                        'Bed Capacity',
-                        'Occupancy']
+    numeric_columns = ['num.facilities',
+                        'bed.capacity',
+                        'occupancy']
     for column in numeric_columns:
         for n in range(len(data[column])):
             data[column][n]=data[column][n].replace(',','').replace(')','').replace('–','').lstrip().strip()
@@ -347,8 +347,8 @@ def _extract_data_from_page_tracing(positive_cases_pdf_page, x0, top, graph_name
     # switching to our naming convention
     boxes = {
         'metric': metricbox,  # ward abbreviation
-        'Past 24hrs': countbox2,
-        'Cumulative': countbox3,
+        'past.24hrs': countbox2,
+        'cumulative': countbox3,
     }# cases
 
     data = dict()
@@ -365,8 +365,8 @@ def _extract_data_from_page_tracing(positive_cases_pdf_page, x0, top, graph_name
     date = datetime.strptime(raw_date, '%b %d, %Y')
 
 
-    numeric_columns = ['Past 24hrs',
-                        'Cumulative']
+    numeric_columns = ['past.24hrs',
+                        'cumulative']
     for column in numeric_columns:
         for n in range(len(data[column])):
             data[column][n]=data[column][n].replace(',','').replace(')','').replace('–','').lstrip().strip()
@@ -391,9 +391,9 @@ def _extract_ward_positive_data(positive_cases_pdf_page,initial_bbox=(95, 450, 9
     # switching to our naming convention
     boxes = {
         'ward': wardbox,  # ward abbreviation
-        'Positive': countbox1,  # cases
-        'Days to double': countbox2,  # Discharged column
-        'Weekly Growth Rate': countbox3,  # deaths column
+        'positive': countbox1,  # cases
+        'days.to.double': countbox2,  # Discharged column
+        'weekly.growth.rate': countbox3,  # deaths column
     }
 
     data = dict()
@@ -410,7 +410,7 @@ def _extract_ward_positive_data(positive_cases_pdf_page,initial_bbox=(95, 450, 9
     date = datetime.strptime(raw_date, '%b %d, %Y')
 
 
-    numeric_columns = ['Positive', 'Days to double', 'Weekly Growth Rate']
+    numeric_columns = ['positive', 'days.to.double', 'weekly.growth.rate']
     for column in numeric_columns:
         for n in range(len(data[column])):
             data[column][n]=data[column][n].replace(',','').replace('%','').replace('–','').lstrip().strip()
@@ -486,8 +486,8 @@ def scrape_mumbai_pdf(source_file_path):
     full_df = _extract_wards_data_from_page(positive_cases_pdf_page)
 
     full_one_column=pd.DataFrame(columns=['metric','count','date','metric_type'])
-    full_facilities=pd.DataFrame(columns=['metric','Facilities(#)','Bed Capacity','Occupancy','date','metric_type'])
-    full_tracing=pd.DataFrame(columns=['metric','Past 24hrs','Cumulative','date','metric_type'])
+    full_facilities=pd.DataFrame(columns=['metric','num.facilities','bed.capacity','occupancy','date','metric_type'])
+    full_tracing=pd.DataFrame(columns=['metric','past.24hrs','cumulative','date','metric_type'])
     
     # sealed buildings/floors
     try:
