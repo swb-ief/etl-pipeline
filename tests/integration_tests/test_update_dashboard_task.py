@@ -41,7 +41,7 @@ class TestUpdateDashboardTask(unittest.TestCase):
         ]]
 
         def mock_exists(self, storage_name):
-            if storage_name == 'raw_ward_data':
+            if storage_name in ['raw_ward_data', 'raw_district_overview_stats']:
                 return False
             return True
 

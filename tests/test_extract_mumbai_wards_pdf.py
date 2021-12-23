@@ -17,7 +17,10 @@ class TestExtractMumbaiWardsPDF(unittest.TestCase):
                          'MH']
 
         sample = os.path.join(THIS_DIR, 'samples/mumbai_dashboard_2020_01_02.pdf')
-        result = scrape_mumbai_pdf(sample)
+        mumbai_output = scrape_mumbai_pdf(sample)
+        
+        result = mumbai_output[['ward', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.active', 'total.other', 'total.tested', 'date', 'district', 'state']]
+            
         result_first = result.iloc[0].values
         result_last = result.iloc[-1].values
 
@@ -36,7 +39,11 @@ class TestExtractMumbaiWardsPDF(unittest.TestCase):
                          'MH']
 
         sample = os.path.join(THIS_DIR, 'samples/mumbai_dashboard_2020_01_04.pdf')
-        result = scrape_mumbai_pdf(sample)
+        
+        mumbai_output = scrape_mumbai_pdf(sample)
+        
+        result = mumbai_output[['ward', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.active', 'total.other', 'total.tested', 'date', 'district', 'state']]
+            
         result_first = result.iloc[0].values
         result_last = result.iloc[-1].values
 
@@ -55,7 +62,11 @@ class TestExtractMumbaiWardsPDF(unittest.TestCase):
         expected_last = ['B', '2195', '1995', '144', '49', 0, np.nan, pd.to_datetime('2021-01-18 00:00:00'), 'Mumbai',
                          'MH']
         sample = os.path.join(THIS_DIR, 'samples/mumbai_dashboard_2021_01_20.pdf')
-        result = scrape_mumbai_pdf(sample)
+        
+        mumbai_output = scrape_mumbai_pdf(sample)
+        
+        result = mumbai_output[['ward', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.active', 'total.other', 'total.tested', 'date', 'district', 'state']]
+            
         result_first = result.iloc[0].values
         result_last = result.iloc[-1].values
 
@@ -74,7 +85,11 @@ class TestExtractMumbaiWardsPDF(unittest.TestCase):
         expected_last = ['B', '2302', '2084', '146', '65', 0, np.nan, pd.to_datetime('2021-02-25 00:00:00'), 'Mumbai',
                          'MH']
         sample = os.path.join(THIS_DIR, 'samples/mumbai_dashboard_2021_02_27.pdf')
-        result = scrape_mumbai_pdf(sample)
+        
+        mumbai_output = scrape_mumbai_pdf(sample)
+        
+        result = mumbai_output[['ward', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.active', 'total.other', 'total.tested', 'date', 'district', 'state']]
+            
         result_first = result.iloc[0].values
         result_last = result.iloc[-1].values
 
@@ -93,7 +108,11 @@ class TestExtractMumbaiWardsPDF(unittest.TestCase):
         expected_last = ['B', '2321', '2097', '146', '71', 0, np.nan, pd.to_datetime('2021-02-28 00:00:00'), 'Mumbai',
                          'MH']
         sample = os.path.join(THIS_DIR, 'samples/mumbai_dashboard_2021_02_28.pdf')
-        result = scrape_mumbai_pdf(sample)
+        
+        mumbai_output = scrape_mumbai_pdf(sample)
+        
+        result = mumbai_output[['ward', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.active', 'total.other', 'total.tested', 'date', 'district', 'state']]
+            
         result_first = result.iloc[0].values
         result_last = result.iloc[-1].values
 

@@ -1,2 +1,3 @@
 from .FetchMumbaiWardsTask import FetchMumbaiWardsTask
+from .FetchMumbaiOverallTask import FetchMumbaiOverallTask
 from .DownloadFileTask import DownloadFileTask
