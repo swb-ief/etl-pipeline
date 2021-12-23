@@ -68,7 +68,8 @@ class FetchWardDataTask(luigi.Task):
 
         # cleanup
         for task in self.input().values():
-            task.remove()
+            task[0].remove()
+            task[1].remove()
 
         # store the raw data, no imputation done yet
         repository.store_dataframe(all_wards, ward_storage_location, allow_create=True, store_index=True)
