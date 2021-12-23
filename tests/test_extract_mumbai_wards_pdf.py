@@ -19,10 +19,7 @@ class TestExtractMumbaiWardsPDF(unittest.TestCase):
         sample = os.path.join(THIS_DIR, 'samples/mumbai_dashboard_2020_01_02.pdf')
         mumbai_output = scrape_mumbai_pdf(sample)
         
-        if len(mumbai_output)>1:
-            result = mumbai_output[0][['ward', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.active', 'total.other', 'total.tested', 'date', 'district', 'state']]
-        else:
-            result = mumbai_output[['ward', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.active', 'total.other', 'total.tested', 'date', 'district', 'state']]
+        result = mumbai_output[['ward', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.active', 'total.other', 'total.tested', 'date', 'district', 'state']]
             
         result_first = result.iloc[0].values
         result_last = result.iloc[-1].values
@@ -45,10 +42,7 @@ class TestExtractMumbaiWardsPDF(unittest.TestCase):
         
         mumbai_output = scrape_mumbai_pdf(sample)
         
-        if len(mumbai_output)>1:
-            result = mumbai_output[0][['ward', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.active', 'total.other', 'total.tested', 'date', 'district', 'state']]
-        else:
-            result = mumbai_output[['ward', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.active', 'total.other', 'total.tested', 'date', 'district', 'state']]
+        result = mumbai_output[['ward', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.active', 'total.other', 'total.tested', 'date', 'district', 'state']]
             
         result_first = result.iloc[0].values
         result_last = result.iloc[-1].values
@@ -71,10 +65,7 @@ class TestExtractMumbaiWardsPDF(unittest.TestCase):
         
         mumbai_output = scrape_mumbai_pdf(sample)
         
-        if len(mumbai_output)>1:
-            result = mumbai_output[0][['ward', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.active', 'total.other', 'total.tested', 'date', 'district', 'state']]
-        else:
-            result = mumbai_output[['ward', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.active', 'total.other', 'total.tested', 'date', 'district', 'state']]
+        result = mumbai_output[['ward', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.active', 'total.other', 'total.tested', 'date', 'district', 'state']]
             
         result_first = result.iloc[0].values
         result_last = result.iloc[-1].values
@@ -97,10 +88,7 @@ class TestExtractMumbaiWardsPDF(unittest.TestCase):
         
         mumbai_output = scrape_mumbai_pdf(sample)
         
-        if len(mumbai_output)>1:
-            result = mumbai_output[0][['ward', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.active', 'total.other', 'total.tested', 'date', 'district', 'state']]
-        else:
-            result = mumbai_output[['ward', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.active', 'total.other', 'total.tested', 'date', 'district', 'state']]
+        result = mumbai_output[['ward', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.active', 'total.other', 'total.tested', 'date', 'district', 'state']]
             
         result_first = result.iloc[0].values
         result_last = result.iloc[-1].values
@@ -123,10 +111,7 @@ class TestExtractMumbaiWardsPDF(unittest.TestCase):
         
         mumbai_output = scrape_mumbai_pdf(sample)
         
-        if len(mumbai_output)>1:
-            result = mumbai_output[0][['ward', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.active', 'total.other', 'total.tested', 'date', 'district', 'state']]
-        else:
-            result = mumbai_output[['ward', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.active', 'total.other', 'total.tested', 'date', 'district', 'state']]
+        result = mumbai_output[['ward', 'total.confirmed', 'total.recovered', 'total.deceased', 'total.active', 'total.other', 'total.tested', 'date', 'district', 'state']]
             
         result_first = result.iloc[0].values
         result_last = result.iloc[-1].values
