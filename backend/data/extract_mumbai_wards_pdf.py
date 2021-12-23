@@ -19,7 +19,7 @@ def identify_wardnames_top_left(positive_cases_pdf_page, initial_bbox=(240, 80, 
         x1 - distance of right side of bbox from left side of page
         y1 - distance of bottom of bbox from top of page
         
-    obtain visual debugging tips from https://github.com/jsvine/pdfplumber
+    visual debugging tips at https://github.com/jsvine/pdfplumber
     
     Contributors: aswinjayan94, bcbowers, nozziel
     """
@@ -160,8 +160,8 @@ def _extract__data_from_page_general(positive_cases_pdf_page, top_factor, column
     # identify top left corner of district names
     x0, top = identify_wardnames_top_left(positive_cases_pdf_page, initial_bbox=(350, 50, 425, 450))
     
-    wardbox = (x0, top-top_factor, x0+50, top+420)
-    confirmedbox = (x0+30, top-top_factor, outer_boundary, top+420)
+    wardbox = (x0, top-top_factor, x0+50, top+425)
+    confirmedbox = (x0+30, top-top_factor, outer_boundary, top+425)
 
     # switching to our naming convention
     boxes = {
@@ -273,19 +273,49 @@ def _extract_data_from_page(positive_cases_pdf_page, x0, top, graph_name) -> pd.
 
     return df
 
-def _extract_data_from_page_facilities(positive_cases_pdf_page, x0, top, graph_name) -> pd.DataFrame:
 
+def get_text_coordinate(positive_cases_pdf_page, x0, y0, width, height, text):
+    
+    # check if original bbox has the required text
+    if positive_cases_pdf_page.within_bbox((x0, y0, x0+width, y0+height)).extract_text()!=text:
+        raise Exception("Specified initial bbox doesn't contain the specified text")
+        
+    x = x0
+    y = y0    
+    
+    # keep shifting x coordinate of box until text is no longer captured in the bbox
+    while positive_cases_pdf_page.within_bbox((x, y, x+width, y+height)).extract_text()==text:
+        x+=5
+    # final x coordinate
+    x-=5
+    
+    # keep shifting y coordinate of box until text is no longer captured in the bbox
+    while positive_cases_pdf_page.within_bbox((x, y, x+width, y+height)).extract_text()==text:
+        y+=2
+    # final y coordinate
+    y-=2
+    
+    # return coordinates
+    return x, y
+    
+
+def _extract_data_from_page_facilities(positive_cases_pdf_page, x0, top, graph_name) -> pd.DataFrame:
+    # x0 490, top 70
+    # get coordinates of top left of 'CCC1 Facilities' heading
+    x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, width=170, height=45, text='CCC1 Facilities')
+        
     if graph_name=='CCC1 Facilities':  
-        metricbox = (x0, top, x0+100, top+140)
-        countbox2 = (x0+120, top, x0+180, top+140)
-        countbox3 = (x0+180, top, x0+250, top+140)
-        countbox4 = (x0+255, top, x0+310, top+140)
+        metricbox = (x-100, y+70, x-100 +80, y+70 +115)
+        countbox2 = (x-100 +80, y+70, x-100 +80+50, y+70 +115)
+        countbox3 = (x-100 +80+50, y+70, x-100 +80+50+80, y+70 +115)
+        countbox4 = (x-100 +80+50+80, y+70, x-100 +80+50+80+70, y+70 +115)
 
     if graph_name=='CCC2 Facilities':  
-        metricbox = (x0, top, x0+100, top+110)
-        countbox2 = (x0+100, top, x0+160, top+110)
-        countbox3 = (x0+160, top, x0+230, top+110)
-        countbox4 = (x0+235, top, x0+310, top+110)
+        metricbox = (x-100, y+242, x-100 +80, y+242 +109)
+        countbox2 = (x-100+80, y+242, x-100 +80+50, y+242 +109)
+        countbox3 = (x-100 +80+50, y+242, x-100 +80+50+80, y+242 +109)
+        countbox4 = (x-100 +80+50+80, y+242, x-100 +80+50+80+70, y+242 +109)
+        
 
     # switching to our naming convention
     boxes = {
@@ -468,12 +498,12 @@ def scrape_mumbai_pdf(source_file_path):
         "top": 180,
         },
         "CCC1 Facilities":{'type':'facilities',
-        "x0": 410,
-        "top": 150,
+        "x0": 490,
+        "top": 70,
         },
         "CCC2 Facilities":{'type':'facilities',
-        "x0": 410,
-        "top": 325,
+        "x0": 490,
+        "top": 70,
         },
         "Contact Tracing":{'type':'tracing',
         "x0": 710,
@@ -483,14 +513,15 @@ def scrape_mumbai_pdf(source_file_path):
 
     positive_cases_pdf_page = find_ward_wise_breakdown_page(pdf)
     # new_cases_page = find_ward_wise_new_cases_page(pdf)
-    full_df = _extract_wards_data_from_page(positive_cases_pdf_page)
+    
 
     full_one_column=pd.DataFrame(columns=['metric','count','date','metric_type'])
     full_facilities=pd.DataFrame(columns=['metric','num.facilities','bed.capacity','occupancy','date','metric_type'])
     full_tracing=pd.DataFrame(columns=['metric','past.24hrs','cumulative','date','metric_type'])
-    
+    full_df = pd.DataFrame()
     # sealed buildings/floors
     try:
+        full_df = _extract_wards_data_from_page(positive_cases_pdf_page)
         for page in pages_config:
             pdf_page = find_page_general(pdf,pages_config[page]['title'])
             df = _extract__data_from_page_general(pdf_page, pages_config[page]['top_factor'], pages_config[page]['column_name'])
@@ -503,7 +534,21 @@ def scrape_mumbai_pdf(source_file_path):
 
         full_df=full_df.merge(positive_df, how='outer',on='ward')
 
+    except ValueError: # older versions of the PDF do not contain the sealed buildings/wards page in the format this code has been developed for
+        full_df = full_df
+        missing_columns = [x for x in ['ward', 'total.confirmed', 'total.recovered', 'total.deceased',
+                                       'total.active', 'total.other', 'total.tested', 'date', 'district',
+                                       'state', 'total.sealedbuildings', 'total.sealedfloors', 'positive',
+                                       'days.to.double', 'weekly.growth.rate'] if x not in full_df.columns]
+        for col in missing_columns:
+            full_df[col]=None
+        
+    try:
+        title='Mumbai COVID19 status at a glance'
+        page=find_page_general(pdf,title)
+        
         for key in tables_config:
+            print(key)
             table_type=tables_config[key]['type']
             x0=tables_config[key]['x0']
             top=tables_config[key]['top']
@@ -521,10 +566,10 @@ def scrape_mumbai_pdf(source_file_path):
         full_df_2=pd.merge(full_one_column, full_facilities, how='outer', on=['metric', 'date', 'metric_type'])
         full_df_2=pd.merge(full_df_2, full_tracing, how='outer', on=['metric', 'date', 'metric_type'])
 
-        return full_df, full_df_2
+    except:
         
-    except ValueError: # older versions of the PDF do not contain the sealed buildings/wards page in the format this code has been developed for
-        full_df = full_df
-        full_df_2 = full_df
+        full_df_2 = pd.DataFrame(columns = ['metric', 'count', 'date', 'metric_type', 'num.facilities', 
+                                            'bed.capacity', 'occupancy', 'past.24hrs', 'cumulative'])
         
+    
     return full_df, full_df_2
