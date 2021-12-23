@@ -2,11 +2,11 @@ from datetime import date
 
 import luigi
 
-from backend.data.extract_mumbai_wards_pdf import scrape_mumbai_pdf
+from backend.data.extract_mumbai_wards_pdf import scrape_mumbai_pdf_overall
 from tasks.districts.DownloadFileTask import DownloadFileTask
 
 
-class FetchMumbaiWardsTask(luigi.Task):
+class FetchMumbaiOverallTask(luigi.Task):
     def requires(self):
         return DownloadFileTask(
             file_url='https://stopcoronavirus.mcgm.gov.in/assets/docs/Dashboard.pdf')
