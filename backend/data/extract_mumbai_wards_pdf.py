@@ -501,11 +501,16 @@ def scrape_mumbai_pdf_overall(source_file_path):
     full_tracing=pd.DataFrame(columns=['metric','past.24hrs','cumulative','date','metric_type'])
     # sealed buildings/floors
             
-    try:
-        title='Mumbai COVID19 status at a glance'
-        page=find_page_general(pdf,title)
-        
-        for key in tables_config:
+    title='Mumbai COVID19 status at a glance'
+    page=find_page_general(pdf,title)
+    
+    full_df_2 = pd.DataFrame(columns = ['metric', 'count', 'date', 'metric_type', 'num.facilities', 
+                                        'bed.capacity', 'occupancy', 'past.24hrs', 'cumulative'])
+    
+    full_df_2 = full_df_2.set_index(['date', 'metric', 'metric_type'])
+    
+    for key in tables_config:
+        try:
             print(key)
             table_type=tables_config[key]['type']
             x0=tables_config[key]['x0']
@@ -513,24 +518,19 @@ def scrape_mumbai_pdf_overall(source_file_path):
             graph_name=key
             if table_type=='one column':
                 df=_extract_data_from_page(page, x0, top, graph_name)
-                full_one_column=full_one_column.append(df)
+                full_df_2=full_df_2.combine_first(df.set_index(['date', 'metric', 'metric_type']))
             if table_type=='facilities':
                 df=_extract_data_from_page_facilities(page, x0, top, graph_name)
-                full_facilities=full_facilities.append(df)
+                full_df_2=full_df_2.combine_first(df.set_index(['date', 'metric', 'metric_type']))
             if table_type=='tracing':
                 df=_extract_data_from_page_tracing(page, x0, top, graph_name)
-                full_tracing=full_tracing.append(df)
-
-        full_df_2=pd.merge(full_one_column, full_facilities, how='outer', on=['metric', 'date', 'metric_type'])
-        full_df_2=pd.merge(full_df_2, full_tracing, how='outer', on=['metric', 'date', 'metric_type'])
-
-    except:
-        
-        full_df_2 = pd.DataFrame(columns = ['metric', 'count', 'date', 'metric_type', 'num.facilities', 
-                                            'bed.capacity', 'occupancy', 'past.24hrs', 'cumulative'])
-        
+                full_df_2=full_df_2.combine_first(df.set_index(['date', 'metric', 'metric_type']))
+        except:
+            print('Skipping '+key)
+            
+    full_df_final = full_df_2.reset_index(drop=False)
     
-    return full_df_2
+    return full_df_final
 
 def scrape_mumbai_pdf(source_file_path):
     """
