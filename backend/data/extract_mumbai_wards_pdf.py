@@ -274,7 +274,7 @@ def _extract_data_from_page(positive_cases_pdf_page, x0, top, graph_name) -> pd.
     return df
 
 
-def get_text_coordinate(positive_cases_pdf_page, x0, y0, width, height, text):
+def get_text_coordinate(positive_cases_pdf_page, x0, y0, width, height, text, xstep=5, ystep=2):
     
     # check if original bbox has the required text
     if positive_cases_pdf_page.within_bbox((x0, y0, x0+width, y0+height)).extract_text()!=text:
@@ -285,15 +285,15 @@ def get_text_coordinate(positive_cases_pdf_page, x0, y0, width, height, text):
     
     # keep shifting x coordinate of box until text is no longer captured in the bbox
     while positive_cases_pdf_page.within_bbox((x, y, x+width, y+height)).extract_text()==text:
-        x+=5
+        x+=xstep
     # final x coordinate
-    x-=5
+    x-=xstep
     
     # keep shifting y coordinate of box until text is no longer captured in the bbox
     while positive_cases_pdf_page.within_bbox((x, y, x+width, y+height)).extract_text()==text:
-        y+=2
+        y+=ystep
     # final y coordinate
-    y-=2
+    y-=ystep
     
     # return coordinates
     return x, y
@@ -330,26 +330,18 @@ def _extract_data_from_page_facilities(positive_cases_pdf_page, x0, top, graph_n
         raw_data = positive_cases_pdf_page.within_bbox(box).extract_text()
         # due to shifting sizes the totals rows sometimes gets included
         # because we know there are only 24 wards we can cut it of by limiting our selves to 24
-        data[key] = raw_data.split('\n')[:24]
-
-    if graph_name=='CCC1 Facilities':
-        data['metric']=['Total CCC1 Facilities', 
-                        'Active CCC1 Facilities', 
-                        'Buffer CCC1 Facilities', 
-                        'Reserve CCC1 Facilities']
-    if graph_name=='CCC2 Facilities':
-        data['metric']=['Total CCC2 Facilities', 
-                        'Active CCC2 Facilities', 
-                        'Buffer CCC2 Facilities', 
-                        'Reserve CCC2 Facilities']
+        data[key] = raw_data.split('\n')
+        
+    data['metric'] = [x for x in data['metric'] if x.lower() in ['total', 'active', 'buffer', 'reserve']]
+        
+    for i in range(len(data['metric'])):
+        data['metric'][i] = data['metric'][i]+ ' ' + graph_name
 
         # In a similar way we could actually search for the correct page that
     # contains 'Ward-wise breakdown of positive cases' instead of hard coded page numbers
     date_box = (770, 50, 875, 80)
     raw_date = positive_cases_pdf_page.within_bbox(date_box).extract_text().strip()
     date = datetime.strptime(raw_date, '%b %d, %Y')
-
-    data
 
     numeric_columns = ['num.facilities',
                         'bed.capacity',
@@ -411,13 +403,15 @@ def _extract_data_from_page_tracing(positive_cases_pdf_page, x0, top, graph_name
 
     return df
 
-def _extract_ward_positive_data(positive_cases_pdf_page,initial_bbox=(95, 450, 900, 470)) -> pd.DataFrame:
+def _extract_ward_positive_data(positive_cases_pdf_page, wards_corner_initial=(10, 450)) -> pd.DataFrame:
     
-    wardbox = initial_bbox
-    countbox1 = (initial_bbox[0],initial_bbox[1]+20,initial_bbox[2],initial_bbox[3]+20)
-    countbox2 = (initial_bbox[0],initial_bbox[1]+30,initial_bbox[2],initial_bbox[3]+30)
-    countbox3 = (initial_bbox[0],initial_bbox[1]+40,initial_bbox[2],initial_bbox[3]+40)
-
+    x, y = get_text_coordinate(positive_cases_pdf_page, wards_corner_initial[0], wards_corner_initial[1], width=40, height=18, text='Wards', xstep=1, ystep=1)
+    
+    wardbox = (x +75, y -3, x +72+818, y -3+16)
+    countbox1 = (x +75, y -3+16, x +72+818, y -3+16+16)
+    countbox2 = (x +75, y -3+16+16-1, x +72+818, y -3+16+16+16)
+    countbox3 = (x +75, y -3+16+16+16-1, x +72+818, y -3+16+16+16+16)
+    
     # switching to our naming convention
     boxes = {
         'ward': wardbox,  # ward abbreviation
@@ -449,6 +443,7 @@ def _extract_ward_positive_data(positive_cases_pdf_page,initial_bbox=(95, 450, 9
         data[column] = pd.to_numeric(data[column], errors='coerce')
             
     df = pd.DataFrame(data)
+    df['date'] = date
 
     # not available in sheet, but making it consistent with states and districts
     #df['date'] = date
@@ -555,29 +550,40 @@ def scrape_mumbai_pdf(source_file_path):
     positive_cases_pdf_page = find_ward_wise_breakdown_page(pdf)
     # new_cases_page = find_ward_wise_new_cases_page(pdf)
     
-    full_df = pd.DataFrame()
-    # sealed buildings/floors
-    try:
-        full_df = _extract_wards_data_from_page(positive_cases_pdf_page)
-        for page in pages_config:
-            pdf_page = find_page_general(pdf,pages_config[page]['title'])
-            df = _extract__data_from_page_general(pdf_page, pages_config[page]['top_factor'], pages_config[page]['column_name'])
-
-            full_df=full_df.merge(df, how='outer',on='ward')
-        
-        title='Mumbai COVID19 status at a glance'
-        page=find_page_general(pdf,title)
-        positive_df = _extract_ward_positive_data(page)
-
-        full_df=full_df.merge(positive_df, how='outer',on='ward')
-
-    except ValueError: # older versions of the PDF do not contain the sealed buildings/wards page in the format this code has been developed for
-        full_df = full_df
-        missing_columns = [x for x in ['ward', 'total.confirmed', 'total.recovered', 'total.deceased',
+    full_df = pd.DataFrame(columns = ['ward', 'total.confirmed', 'total.recovered', 'total.deceased',
                                        'total.active', 'total.other', 'total.tested', 'date', 'district',
                                        'state', 'total.sealedbuildings', 'total.sealedfloors', 'positive',
-                                       'days.to.double', 'weekly.growth.rate'] if x not in full_df.columns]
-        for col in missing_columns:
-            full_df[col]=None
+                                       'days.to.double', 'weekly.growth.rate'])
     
-    return full_df
+    full_df = full_df.set_index(['date', 'state', 'district', 'ward'])
+    # sealed buildings/floors
+    try:
+        df1 = _extract_wards_data_from_page(positive_cases_pdf_page)
+        full_df = full_df.combine_first(df1.set_index(['date', 'state', 'district', 'ward']))
+    except: # older versions of the PDF do not contain the sealed buildings/wards page in the format this code has been developed for
+        print("Skipping extraction of main stats")
+    
+    for page in pages_config:
+        try:
+            pdf_page = find_page_general(pdf,pages_config[page]['title'])
+            df = _extract__data_from_page_general(pdf_page, pages_config[page]['top_factor'], pages_config[page]['column_name'])
+            df['state']='MH'
+            df['district']='Mumbai'
+            df['date'] = full_df.index[0][0]
+            full_df = full_df.combine_first(df.set_index(['date', 'state', 'district', 'ward']))
+        except:
+            print("Skipping extraction of sealed building/floors")
+    
+    try:
+        title='Mumbai COVID19 status at a glance'
+        page=find_page_general(pdf,title)
+        positive_df = _extract_ward_positive_data(page) 
+        positive_df['state']='MH'
+        positive_df['district']='Mumbai'
+        full_df = full_df.combine_first(positive_df.set_index(['date', 'state', 'district', 'ward']))
+    except:
+        print("Skipping extraction of page 2 ward-wise stats")
+        
+    full_df_final = full_df.reset_index(drop=False)
+        
+    return full_df_final
