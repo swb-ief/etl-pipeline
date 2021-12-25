@@ -2,6 +2,7 @@ import pdfplumber
 from datetime import datetime
 import pandas as pd
 import numpy as np
+import re
 
 def _read_pdf(source_file_path):
     return pdfplumber.open(source_file_path)
@@ -332,7 +333,7 @@ def _extract_data_from_page_facilities(positive_cases_pdf_page, x0, top, graph_n
         # because we know there are only 24 wards we can cut it of by limiting our selves to 24
         data[key] = raw_data.split('\n')
         
-    data['metric'] = [x for x in data['metric'] if x.lower() in ['total', 'active', 'buffer', 'reserve']]
+    data['metric'] = [x for x in data['metric'] if re.search('total|active|buffer|reserve', x.lower())]
         
     for i in range(len(data['metric'])):
         data['metric'][i] = data['metric'][i]+ ' ' + graph_name
