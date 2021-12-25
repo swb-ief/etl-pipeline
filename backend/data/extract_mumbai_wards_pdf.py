@@ -33,7 +33,7 @@ def identify_wardnames_top_left(positive_cases_pdf_page, initial_bbox=(240, 80, 
     checkdata = positive_cases_pdf_page.within_bbox(checkbox).extract_text()
     checklist = set(checkdata.split('\n')[:24])
     # check which wards extracted above belong to the list below (it's very likely that you'll find at least one of the wards specified below)
-    checkagainstlist = set(['RC', 'KW', 'PN', 'RS', 'KE'])
+    checkagainstlist = checklist
     # Number of wards common to checklist and checkagainstlist
     initiallen = len(checklist.intersection(checkagainstlist))
     
@@ -161,8 +161,8 @@ def _extract__data_from_page_general(positive_cases_pdf_page, top_factor, column
     # identify top left corner of district names
     x0, top = identify_wardnames_top_left(positive_cases_pdf_page, initial_bbox=(350, 50, 425, 450))
     
-    wardbox = (x0, top-top_factor, x0+50, top+425)
-    confirmedbox = (x0+30, top-top_factor, outer_boundary, top+425)
+    wardbox = (x0, top-top_factor, x0+35, top+425)
+    confirmedbox = (x0+35, top-top_factor, outer_boundary, top+425)
 
     # switching to our naming convention
     boxes = {
@@ -537,12 +537,12 @@ def scrape_mumbai_pdf(source_file_path):
 
     pages_config = {
     "sealed_buildings":{
-      "title": "Ward-wise Sealed Buildings (SBs)/Micro-containment zones",
+      "title": "Ward-wise Sealed Buildings",
       "top_factor": 10,
       "column_name": 'total.sealedbuildings',
     },
     "sealed_floors":{
-      "title": 'Ward-wise Sealed Floors (SFs)',
+      "title": 'Ward-wise Sealed Floors',
       "top_factor": 0,
       "column_name": 'total.sealedfloors',
         }
