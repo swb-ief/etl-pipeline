@@ -16,8 +16,12 @@ def create_delta_cols( df,group_by_cols, delta_needed_for_cols):
     df = df.sort_values(index_cols) # this may not be strictly needed. Does DF already sort by index?
 
     for column in delta_needed_for_cols:
-        df[f'delta.{column}'] = df.groupby(group_by_cols)[f'total.{column}'].diff().fillna(
-            0)
+        if len(group_by_cols)>0:
+            df[f'delta.{column}'] = df.groupby(group_by_cols)[f'total.{column}'].diff().fillna(
+                0)
+        else:
+            df[f'delta.{column}'] = df[f'total.{column}'].diff().fillna(
+                0)
     df = df.set_index(index_cols)
 
     return df
