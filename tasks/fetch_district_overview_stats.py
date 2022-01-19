@@ -73,7 +73,7 @@ class FetchDistrictOverviewTask(luigi.Task):
         data_mini2 = data_mini.pivot(index='date', columns='metric', values='value')
 
         # impute delta's atleast for Mumbai this is needed it only provides totals
-        delta_needed_for = ['total.deaths', 'total.discharged', 'total.tests', 'total.active', 'total.positive']
+        delta_needed_for = ['deaths', 'discharged', 'tests', 'active', 'positive']
         group_by_cols = ['date']
         try:
             data_mini2 = interpolate_values(data_mini2, group_by_cols, delta_needed_for)
