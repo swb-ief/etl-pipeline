@@ -79,6 +79,7 @@ class FetchDistrictOverviewTask(luigi.Task):
             data_mini2 = interpolate_values_generic(data_mini2, group_by_cols, delta_needed_for)
             data_mini2 = create_delta_cols(data_mini2, group_by_cols, delta_needed_for)
         except:
+            print("error in delta/interpolate")
             pass
         
         # add population
