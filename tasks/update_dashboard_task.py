@@ -181,6 +181,8 @@ class UpdateDashboardTask(luigi.Task):
             hospitalizations=hospitalizations_updated,
             grouping_columns=['state', 'district', 'ward']
         )
+        
+        district_overview_data = district_overview_data.set_index(['date'])
 
         self.update_population_sheets(state_data, district_data, repository)
 
