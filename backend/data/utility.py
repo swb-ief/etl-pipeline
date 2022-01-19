@@ -103,7 +103,7 @@ def interpolate_values_generic(df, group_by_cols, delta_needed_for_cols):
     
     r = pd.date_range(start=df_cp.date.min(), end=df_cp.date.max())
     complete_df = pd.DataFrame({"date": r})
-    complete_df['date'] = complete_df['date'].apply(lambda x: x.strftime("%Y-%m-%d"))
+    #complete_df['date'] = complete_df['date'].apply(lambda x: x.strftime("%Y-%m-%d"))
     complete_df = complete_df.merge(df_cp, on=['date'], how='left')
 
     # fill missing values with linearly interpolated values, and round interpolated values to the nearest integer
