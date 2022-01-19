@@ -56,7 +56,7 @@ class FetchWardDataTask(luigi.Task):
         repository.store_dataframe(all_wards, ward_storage_location, allow_create=True, store_index=True)
 
         # impute delta's atleast for Mumbai this is needed it only provides totals
-        delta_needed_for = ['tested', 'confirmed', 'recovered', 'deceased', 'active', 'other', 'sealedbuildings', 'sealedfloors']
+        delta_needed_for = ['tested', 'confirmed', 'recovered', 'deceased', 'active', 'other']
         group_by_cols = ['state', 'district', 'ward']
         all_wards = interpolate_values(all_wards, group_by_cols, delta_needed_for)
         all_wards = create_delta_cols(all_wards, group_by_cols, delta_needed_for)
