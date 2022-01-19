@@ -2,7 +2,7 @@ import logging
 from datetime import date
 
 from backend.data import get_static_ward_data
-from backend.data.utility import create_delta_cols, interpolate_values
+from backend.data.utility import create_delta_cols, interpolate_values_generic
 
 import luigi
 import pandas as pd
@@ -73,10 +73,10 @@ class FetchDistrictOverviewTask(luigi.Task):
         data_mini2 = data_mini.pivot(index='date', columns='metric', values='value')
 
         # impute delta's atleast for Mumbai this is needed it only provides totals
-        delta_needed_for = ['deaths', 'discharged', 'tests', 'active', 'positive']
-        group_by_cols = ['date']
+        delta_needed_for = ['deaths', 'discharged', 'tests', 'positive']
+        group_by_cols = []
         try:
-            data_mini2 = interpolate_values(data_mini2, group_by_cols, delta_needed_for)
+            data_mini2 = interpolate_values_generic(data_mini2, group_by_cols, delta_needed_for)
             data_mini2 = create_delta_cols(data_mini2, group_by_cols, delta_needed_for)
         except:
             pass
