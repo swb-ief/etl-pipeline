@@ -91,9 +91,9 @@ class UpdateDashboardTask(luigi.Task):
        'contact.traced.high.risk', 'contact.traced.low.risk',
        'containment.zones.active.micro.sealed.buildings',
        'containment.zones.active.slums.chawls', 'currently.quarantined.home',
-       'floors.sealed','total.active', 'total.contact.traced']
-    #, 'delta.deaths',
-    #   'delta.discharged', 'delta.positive', 'delta.tests'
+       'floors.sealed','total.active', 'total.contact.traced', 'delta.deaths',
+       'delta.discharged', 'delta.positive', 'delta.tests']
+    
     # Not yet added R generated metrics mean.mean, CI_lower.mean, CI_upper.mean, doubling.time
 
     state_keys = ['date', 'state']
