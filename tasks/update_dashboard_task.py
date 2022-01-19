@@ -88,7 +88,7 @@ class UpdateDashboardTask(luigi.Task):
 
     state_columns_needed_by_dashboard = state_keys + metrics_needed_by_dashboard
     district_columns_needed_by_dashboard = district_keys + metrics_needed_by_dashboard
-    ward_columns_needed_by_dashboard = ward_keys + metrics_needed_by_dashboard + ['delta.sealedbuildings', 'delta.sealedfloors']
+    ward_columns_needed_by_dashboard = ward_keys + metrics_needed_by_dashboard + ['total.sealedbuildings', 'total.sealedfloors']
 
     def requires(self):
         return {
