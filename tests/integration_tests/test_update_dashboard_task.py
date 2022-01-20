@@ -25,7 +25,7 @@ class TestUpdateDashboardTask(unittest.TestCase):
             UpdateDashboardTask.storage_hospitalizations: (307, 2),
             UpdateDashboardTask.storage_states: (9790, metrics_count + 2),  # + 2 date, state
             UpdateDashboardTask.storage_districts: (156697, metrics_count + 3),  # +3 date, state, district
-            UpdateDashboardTask.storage_wards: (24, metrics_count + 4)  # +4 date, state, district, wards
+            UpdateDashboardTask.storage_wards: (24, metrics_count + 6)  # +4 date, state, district, wards
         }
 
         storage_prefix = 'test_update_run_'
