@@ -16,8 +16,12 @@ def create_delta_cols( df,group_by_cols, delta_needed_for_cols):
     df = df.sort_values(index_cols) # this may not be strictly needed. Does DF already sort by index?
 
     for column in delta_needed_for_cols:
-        df[f'delta.{column}'] = df.groupby(group_by_cols)[f'total.{column}'].diff().fillna(
-            0)
+        if len(group_by_cols)>0:
+            df[f'delta.{column}'] = df.groupby(group_by_cols)[f'total.{column}'].diff().fillna(
+                0)
+        else:
+            df[f'delta.{column}'] = df[f'total.{column}'].diff().fillna(
+                0)
     df = df.set_index(index_cols)
 
     return df
@@ -73,6 +77,45 @@ def interpolate_values(df, group_by_cols, delta_needed_for_cols):
 
     # sort again on ward/date
     complete_df.sort_values(by=group_by_cols+["date"], inplace=True)
+    complete_df = complete_df.set_index(index_cols)
+
+    return complete_df
+
+
+def interpolate_values_generic(df, group_by_cols, delta_needed_for_cols):
+    """
+    Function to interpolate values for columns specified in 'delta_needed_for_cols' list, when data for wards are missing on certain days
+    
+    df - Dataframe containing day-wise count of total confirmed/recovered/fatalities etc for each ward
+    group_by_cols - columns used to identify wards with
+    delta_needed_for_cols - columns whose values need to be interpolated
+    
+    Contributor: aswinjayan94
+    """
+   
+    # create copy of original dataframe after resetting index, and saving index names
+    index_cols = df.index.names
+    df = df.reset_index()
+    df_cp = df.copy()
+
+    # sort dataframe by date/ward
+    df_cp.sort_values(by=["date"], inplace=True)
+    
+    r = pd.date_range(start=df_cp.date.min(), end=df_cp.date.max())
+    complete_df = pd.DataFrame({"date": r})
+    #complete_df['date'] = complete_df['date'].apply(lambda x: x.strftime("%Y-%m-%d"))
+    complete_df = complete_df.merge(df_cp, on=['date'], how='left')
+
+    # fill missing values with linearly interpolated values, and round interpolated values to the nearest integer
+    for item in delta_needed_for_cols:
+        if len(group_by_cols)>0:
+            complete_df[item] = complete_df.groupby(group_by_cols)[item].transform(lambda x: x.fillna(x.interpolate()))
+        else:
+            complete_df[item] = complete_df[item].transform(lambda x: x.fillna(x.interpolate()))
+        
+        complete_df[item] = complete_df[item].apply(lambda x: round(x, 0))
+
+    # sort again on ward/date
     complete_df = complete_df.set_index(index_cols)
 
     return complete_df

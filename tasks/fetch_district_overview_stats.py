@@ -2,7 +2,7 @@ import logging
 from datetime import date
 
 from backend.data import get_static_ward_data
-from backend.data.utility import create_delta_cols, interpolate_values
+from backend.data.utility import create_delta_cols, interpolate_values_generic
 
 import luigi
 import pandas as pd
@@ -54,18 +54,36 @@ class FetchDistrictOverviewTask(luigi.Task):
 
         # store the raw data, no imputation done yet
         repository.store_dataframe(overall_df, overall_storage_location, allow_create=True, store_index=True)
+        
+        data_mini = overall_df.reset_index(drop=False)
+        
+        data_mini = data_mini.loc[data_mini['metric'].isin(['active.ccc1.facilities','active.ccc2.facilities','contact.traced.high.risk','contact.traced.low.risk',
+                                                             'total.contact.traced','containment.zones.active.slums.chawls',
+                                                             'containment.zones.active.micro.sealed.buildings','floors.sealed','bed.available.dchc.dch.ccc2',
+                                                             'bed.occupied.dchc.dch.ccc2','bed.available.dchc.dch','bed.occupied.dchc.dch','bed.available.icu',
+                                                             'bed.occupied.icu','bed.available.o2','bed.occupied.o2','bed.available.ventilator',
+                                                             'bed.occupied.ventilator','active.critical','total.deaths','total.discharged',
+                                                             'active.symptomatic','active.asymptomatic','total.tests','total.active','total.positive',
+                                                             'currently.quarantined.home'])]
+
+        data_mini['value'] = data_mini.apply(lambda x: x['past.24hrs'] if x['metric'] in ['contact.traced.high.risk', 'contact.traced.low.risk', 'total.contact.traced'] 
+                                                       else (x['num.facilities'] if x['metric'] in ['active.ccc1.facilities', 'active.ccc2.facilities'] else x['count']), axis=1)
+
+
+        data_mini2 = data_mini.pivot(index='date', columns='metric', values='value')
 
         # impute delta's atleast for Mumbai this is needed it only provides totals
-        delta_needed_for = ['count']
-        group_by_cols = ['date', 'metric', 'metric_type']
+        delta_needed_for = ['deaths', 'discharged', 'tests', 'positive']
+        group_by_cols = []
         try:
-            overall_df = interpolate_values(overall_df, group_by_cols, delta_needed_for)
-            overall_df = create_delta_cols(overall_df, group_by_cols, delta_needed_for)
+            data_mini2 = interpolate_values_generic(data_mini2, group_by_cols, list(data_mini2))
+            data_mini2 = create_delta_cols(data_mini2, group_by_cols, delta_needed_for)
         except:
+            print("error in delta/interpolate")
             pass
-
+        
         # add population
-        overall_df.to_csv(self.output().path, index=True)
+        data_mini2.to_csv(self.output().path, index=True)
 
     def output(self):
         return luigi.LocalTarget(f'district_overview_{date.today()}.csv')

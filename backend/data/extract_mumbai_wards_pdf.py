@@ -200,17 +200,26 @@ def _extract_data_from_page(positive_cases_pdf_page, x0, top, graph_name) -> pd.
     #x0, top = identify_wardnames_top_left(positive_cases_pdf_page)
     
 
-    if graph_name=='COVID19 Case Analysis' or graph_name=='COVID19 Bed Management':  
-        metricbox = (x0, top, x0+140, top+325)
-        countbox = (x0+140, top, x0+200, top+325)
+    if graph_name=='COVID19 Case Analysis':  
+        x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 110, 30, 'Total Positive', xstep=5, ystep=2)
+        metricbox = (x, y, x+138, y+310)
+        countbox = (x+138, y, x+205, y+310)
+    
+    if graph_name=='COVID19 Bed Management':  
+        x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 110, 18, 'Bed Capacity', xstep=5, ystep=2)
+        metricbox = (x, y, x+125, y+315)
+        countbox = (x+125, y, x+203, y+315)
+    
     
     if graph_name=='Containment Measures':
-        metricbox = (x0, top, x0+180, top+200)
-        countbox = (x0+190, top, x0+245, top+200)
+        x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 160, 40, 'Active Containment Zones –\nSlums & Chawls', xstep=5, ystep=2)
+        metricbox = (x, y, x+170, y+173)
+        countbox = (x+170, y, x+222, y+173)
         
     if graph_name=='Quarantine Stats':
-        metricbox = (x0, top, x0+150, top+75)
-        countbox = (x0+180, top, x0+245, top+75)
+        x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 100, 35, 'Total Quarantine \nCompleted', xstep=5, ystep=2)
+        metricbox = (x, y, x+140, y+70)
+        countbox = (x+140, y, x+215, y+70)
 
     # switching to our naming convention
     boxes = {
@@ -225,33 +234,102 @@ def _extract_data_from_page(positive_cases_pdf_page, x0, top, graph_name) -> pd.
         # because we know there are only 24 wards we can cut it of by limiting our selves to 24
         data[key] = raw_data.split('\n')[:24]
         
+    if graph_name=='COVID19 Case Analysis':
+        for i, item in enumerate(data['metric']):
+            if 'total positive' in item.lower():
+                data['metric'][i]='total.positive'
+            elif 'discharged' in item.lower():
+                data['metric'][i]='total.discharged'
+            elif '50yr' in item.lower():
+                data['metric'][i]='deaths.above.50yrs'
+            elif 'deaths' in item.lower():
+                data['metric'][i]='total.deaths'
+            elif 'active' in item.lower():
+                data['metric'][i]='total.active'
+            elif 'asymptom' in item.lower():
+                data['metric'][i]='active.asymptomatic'
+            elif 'symptom' in item.lower():
+                data['metric'][i]='active.symptomatic'
+            elif 'critical' in item.lower():
+                data['metric'][i]='active.critical'
+            elif 'tests' in item.lower():
+                data['metric'][i]='total.tests'
+            elif 'of positive' in item.lower():
+                data['metric'][i]='percentage.positive'
+                
+                
+        
     if graph_name=='COVID19 Bed Management':
-        data['metric']=['Bed Capacity (DCHC+DCH+CCC2)',
-              'Bed (DCHC+DCH+CCC2) Occupied',
-              'Bed (DCHC+DCH+CCC2) Available',
-              'DCH & DCHC Bed Capacity',
-              'DCH & DCHC Bed Occupied',
-              'DCH & DCHC Bed Available',
-              'O2 Bed Capacity',
-              'O2 Bed Occupied',
-              'O2 Bed Available',
-              'ICU Bed Capacity',
-              'ICU Bed Occupied',
-              'ICU Bed Available',
-              'Ventilator Bed Capacity',
-              'Ventilator Bed Occupied',
-              'Ventilator Bed Available']
-        
+        data['metric']=['bed.capacity.dchc.dch.ccc2',
+              'bed.occupied.dchc.dch.ccc2',
+              'bed.available.dchc.dch.ccc2',
+              'bed.capacity.dchc.dch',
+              'bed.occupied.dchc.dch',
+              'bed.available.dchc.dch',
+              'bed.capacity.o2',
+              'bed.occupied.o2',
+              'bed.available.o2',
+              'bed.capacity.icu',
+              'bed.occupied.icu',
+              'bed.available.icu',
+              'bed.capacity.ventilator',
+              'bed.occupied.ventilator',
+              'bed.available.ventilator']
+
+                
     if graph_name=='Containment Measures':
-        data['metric']=['Active Containment Zones – Slums & Chawls',
-              'Released Containment Zones – Slums & Chawls',
-              'Active Sealed Buildings/micro-containment zones',
-              'Released Sealed Buildings/micro-containment zones',
-              'Active Sealed Floors']
         
+        active_ind=0
+        released_ind=0
+        slums_ind=0
+        micro_ind=0
+        floors_ind=0
+        
+        for i, item in enumerate(data['metric']):
+            if 'slums' in item.lower():
+                slums_ind+=1
+            if 'active' in item.lower():
+                active_ind+=1
+            if 'released' in item.lower():
+                released_ind+=1
+            if 'micro' in item.lower():
+                micro_ind+=1
+            if 'floors' in item.lower():
+                floors_ind+=1
+        
+        new_metrics = [] 
+        if active_ind>0 and slums_ind>0:
+            new_metrics.append('containment.zones.active.slums.chawls')
+        if released_ind>0 and slums_ind>0:
+            new_metrics.append('containment.zones.released.slums.chawls')
+        if active_ind>0 and micro_ind>0:
+            new_metrics.append('containment.zones.active.micro.sealed.buildings')
+        if released_ind>0 and micro_ind>0:
+            new_metrics.append('containment.zones.released.micro.sealed.buildings')
+        if floors_ind>0:
+            new_metrics.append('floors.sealed')
+        
+        data['metric'] = new_metrics
+    
+    
     if graph_name=='Quarantine Stats':
-        data['metric']=['Total Quarantine Completed',
-              'Currently in Home Quarantine']
+        
+        home_ind=0
+        total_ind=0
+        
+        for i, item in enumerate(data['metric']):
+            if 'home' in item.lower():
+                home_ind+=1
+            if 'total' in item.lower():
+                total_ind+=1
+        
+        new_metrics = [] 
+        if total_ind>0:
+            new_metrics.append('total.quarantine.completed')
+        if home_ind>0:
+            new_metrics.append('currently.quarantined.home')
+        
+        data['metric'] = new_metrics
 
         # In a similar way we could actually search for the correct page that
     # contains 'Ward-wise breakdown of positive cases' instead of hard coded page numbers
@@ -336,7 +414,14 @@ def _extract_data_from_page_facilities(positive_cases_pdf_page, x0, top, graph_n
     data['metric'] = [x for x in data['metric'] if re.search('total|active|buffer|reserve', x.lower())]
         
     for i in range(len(data['metric'])):
-        data['metric'][i] = data['metric'][i]+ ' ' + graph_name
+        if 'total' in data['metric'][i].lower():
+            data['metric'][i] = 'total.' + ".".join(graph_name.lower().split())
+        if 'active' in data['metric'][i].lower():
+            data['metric'][i] = 'active.' + ".".join(graph_name.lower().split())
+        if 'buffer' in data['metric'][i].lower():
+            data['metric'][i] = 'buffer.' + ".".join(graph_name.lower().split())
+        if 'reserve' in data['metric'][i].lower():
+            data['metric'][i] = 'reserve.' + ".".join(graph_name.lower().split())
 
         # In a similar way we could actually search for the correct page that
     # contains 'Ward-wise breakdown of positive cases' instead of hard coded page numbers
@@ -381,6 +466,14 @@ def _extract_data_from_page_tracing(positive_cases_pdf_page, x0, top, graph_name
         # because we know there are only 24 wards we can cut it of by limiting our selves to 24
         data[key] = raw_data.split('\n')[:24]
 
+    for i in range(len(data['metric'])):
+        if 'total' in data['metric'][i].lower():
+            data['metric'][i] = 'total.contact.traced'
+        if 'high' in data['metric'][i].lower():
+            data['metric'][i] = 'contact.traced.high.risk'
+        if 'low' in data['metric'][i].lower():
+            data['metric'][i] = 'contact.traced.low.risk'
+            
         # In a similar way we could actually search for the correct page that
     # contains 'Ward-wise breakdown of positive cases' instead of hard coded page numbers
     date_box = (770, 50, 875, 80)
@@ -467,15 +560,15 @@ def scrape_mumbai_pdf_overall(source_file_path):
         "top": 125,
         },
         "COVID19 Bed Management":{'type':'one column',
-        "x0": 210,
-        "top": 125
+        "x0": 220,
+        "top": 120
         },
         "Containment Measures":{'type':'one column',
-        "x0": 715,
-        "top": 260,
+        "x0": 730,
+        "top": 270,
         },
         "Quarantine Stats":{'type':'one column',
-        "x0": 715,
+        "x0": 735,
         "top": 180,
         },
         "CCC1 Facilities":{'type':'facilities',

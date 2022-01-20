@@ -25,7 +25,7 @@ class TestUpdateDashboardTask(unittest.TestCase):
             UpdateDashboardTask.storage_hospitalizations: (307, 2),
             UpdateDashboardTask.storage_states: (9790, metrics_count + 2),  # + 2 date, state
             UpdateDashboardTask.storage_districts: (156697, metrics_count + 3),  # +3 date, state, district
-            UpdateDashboardTask.storage_wards: (24, metrics_count + 4)  # +4 date, state, district, wards
+            UpdateDashboardTask.storage_wards: (24, metrics_count + 6)  # +4 date, state, district, wards
         }
 
         storage_prefix = 'test_update_run_'
@@ -74,7 +74,7 @@ class TestUpdateDashboardTask(unittest.TestCase):
         class DownloadOutputMock:
             @staticmethod
             def open(*args):
-                return open(os.path.join(THIS_DIR, '../samples/mumbai_dashboard_2020_01_02.pdf'))
+                return open(os.path.join(THIS_DIR, '../samples/mumbai_dashboard_2021_11_29.pdf'))
 
             @staticmethod
             def exists():
@@ -86,7 +86,7 @@ class TestUpdateDashboardTask(unittest.TestCase):
 
             @property
             def path(self):
-                return os.path.join(THIS_DIR, '../samples/mumbai_dashboard_2020_01_02.pdf')
+                return os.path.join(THIS_DIR, '../samples/mumbai_dashboard_2021_11_29.pdf')
 
         def mock_download_task_output(self):
             return DownloadOutputMock()

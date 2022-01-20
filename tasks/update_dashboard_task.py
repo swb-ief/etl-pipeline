@@ -24,6 +24,7 @@ class UpdateDashboardTask(luigi.Task):
     storage_districts = 'Phase 2 - Districts'
     storage_states = 'Phase 2 - States'
     storage_wards = 'Phase 2 - Wards'
+    storage_districtoverview = 'Phase 2 - District Overview'
 
     # data for which we do not track a history
     storage_states_static = 'Phase 2 - States - Static data'
@@ -80,6 +81,19 @@ class UpdateDashboardTask(luigi.Task):
         'delta.deceased'
         # phase 1 name MA.21.daily.tests
     ]
+    
+    districtoverview_columns_needed_by_dashboard = ['active.asymptomatic', 'active.ccc1.facilities',
+       'active.ccc2.facilities', 'active.critical', 'active.symptomatic',
+       'bed.available.dchc.dch', 'bed.available.dchc.dch.ccc2',
+       'bed.available.icu', 'bed.available.o2', 'bed.available.ventilator',
+       'bed.occupied.dchc.dch', 'bed.occupied.dchc.dch.ccc2',
+       'bed.occupied.icu', 'bed.occupied.o2', 'bed.occupied.ventilator',
+       'contact.traced.high.risk', 'contact.traced.low.risk',
+       'containment.zones.active.micro.sealed.buildings',
+       'containment.zones.active.slums.chawls', 'currently.quarantined.home',
+       'floors.sealed','total.active', 'total.contact.traced', 'delta.deaths',
+       'delta.discharged', 'delta.positive', 'delta.tests']
+    
     # Not yet added R generated metrics mean.mean, CI_lower.mean, CI_upper.mean, doubling.time
 
     state_keys = ['date', 'state']
@@ -88,7 +102,7 @@ class UpdateDashboardTask(luigi.Task):
 
     state_columns_needed_by_dashboard = state_keys + metrics_needed_by_dashboard
     district_columns_needed_by_dashboard = district_keys + metrics_needed_by_dashboard
-    ward_columns_needed_by_dashboard = ward_keys + metrics_needed_by_dashboard
+    ward_columns_needed_by_dashboard = ward_keys + metrics_needed_by_dashboard + ['total.sealedbuildings', 'total.sealedfloors']
 
     def requires(self):
         return {
@@ -105,6 +119,7 @@ class UpdateDashboardTask(luigi.Task):
 
         #fetch_covid19_india_task = self.input()['state_district_data']
         fetch_wards_task = self.input()['ward_data']
+        fetch_districtoverview_task = self.input()['district_overview_data']
 
         #with fetch_covid19_india_task.open('r') as json_file:
         #    all_covid19india_data = json.load(json_file)
@@ -129,6 +144,7 @@ class UpdateDashboardTask(luigi.Task):
         districts_covid19india_data = districts_covid19india_data.merge(districts_pop, on=["state", "district"], how="left")
 
         all_ward_data = pd.read_csv(fetch_wards_task.path, parse_dates=['date'])
+        district_overview_data = pd.read_csv(fetch_districtoverview_task.path, parse_dates=['date'])
 
         # cleanup
         #fetch_covid19_india_task.remove()
@@ -165,6 +181,8 @@ class UpdateDashboardTask(luigi.Task):
             hospitalizations=hospitalizations_updated,
             grouping_columns=['state', 'district', 'ward']
         )
+        
+        #district_overview_data = district_overview_data.set_index(['date'])
 
         self.update_population_sheets(state_data, district_data, repository)
 
@@ -176,15 +194,18 @@ class UpdateDashboardTask(luigi.Task):
         self.states_is_valid = self._has_all_columns(state_data, self.state_columns_needed_by_dashboard)
         self.districts_is_valid = self._has_all_columns(district_data, self.district_columns_needed_by_dashboard)
         self.wards_is_valid = self._has_all_columns(ward_data, self.ward_columns_needed_by_dashboard)
+        self.districtoverview_is_valid = self._has_all_columns(district_overview_data, self.districtoverview_columns_needed_by_dashboard)
 
         states_filtered = state_data[self.state_columns_needed_by_dashboard]
         districts_filtered = district_data[self.district_columns_needed_by_dashboard]
         wards_filtered = ward_data[self.ward_columns_needed_by_dashboard]
+        districtoverview_filtered = district_overview_data[['date']+self.districtoverview_columns_needed_by_dashboard]
 
         repository.store_dataframe(hospitalizations_updated, self.storage_hospitalizations, allow_create=True)
         repository.store_dataframe(states_filtered, self.storage_states, allow_create=True)
         repository.store_dataframe(districts_filtered, self.storage_districts, allow_create=True)
         repository.store_dataframe(wards_filtered, self.storage_wards, allow_create=True)
+        repository.store_dataframe(districtoverview_filtered, self.storage_districtoverview, allow_create=True)
 
     @staticmethod
     def _has_all_columns(df: pd.DataFrame, columns: List[str]) -> bool:
