@@ -41,7 +41,7 @@ class TestUpdateDashboardTask(unittest.TestCase):
         ]]
 
         def mock_exists(self, storage_name):
-            if storage_name in ['raw_ward_data', 'raw_district_overview_stats', 'Phase 2 - District Overview']:
+            if storage_name in ['raw_ward_data', 'raw_district_overview_stats']:
                 return False
             return True
 
@@ -74,7 +74,7 @@ class TestUpdateDashboardTask(unittest.TestCase):
         class DownloadOutputMock:
             @staticmethod
             def open(*args):
-                return open(os.path.join(THIS_DIR, '../samples/mumbai_dashboard_2020_01_02.pdf'))
+                return open(os.path.join(THIS_DIR, '../samples/mumbai_dashboard_2021_11_29.pdf'))
 
             @staticmethod
             def exists():
@@ -86,7 +86,7 @@ class TestUpdateDashboardTask(unittest.TestCase):
 
             @property
             def path(self):
-                return os.path.join(THIS_DIR, '../samples/mumbai_dashboard_2020_01_02.pdf')
+                return os.path.join(THIS_DIR, '../samples/mumbai_dashboard_2021_11_29.pdf')
 
         def mock_download_task_output(self):
             return DownloadOutputMock()
