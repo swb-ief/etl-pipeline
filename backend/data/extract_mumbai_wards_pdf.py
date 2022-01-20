@@ -208,13 +208,13 @@ def _extract_data_from_page(positive_cases_pdf_page, x0, top, graph_name) -> pd.
     if graph_name=='COVID19 Bed Management':  
         x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 110, 18, 'Bed Capacity', xstep=5, ystep=2)
         metricbox = (x, y, x+125, y+315)
-        countbox = (x+125, y, x+200, y+315)
+        countbox = (x+125, y, x+203, y+315)
     
     
     if graph_name=='Containment Measures':
         x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 160, 40, 'Active Containment Zones –\nSlums & Chawls', xstep=5, ystep=2)
-        metricbox = (x, y, x+170, y+170)
-        countbox = (x+170, y, x+222, y+170)
+        metricbox = (x, y, x+170, y+173)
+        countbox = (x+170, y, x+222, y+173)
         
     if graph_name=='Quarantine Stats':
         x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 100, 35, 'Total Quarantine \nCompleted', xstep=5, ystep=2)
@@ -273,8 +273,8 @@ def _extract_data_from_page(positive_cases_pdf_page, x0, top, graph_name) -> pd.
               'bed.occupied.icu',
               'bed.available.icu',
               'bed.capacity.ventilator',
-              'bed.capacity.ventilator',
-              'bed.capacity.ventilator']
+              'bed.occupied.ventilator',
+              'bed.available.ventilator']
 
                 
     if graph_name=='Containment Measures':
