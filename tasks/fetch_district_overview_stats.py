@@ -76,7 +76,7 @@ class FetchDistrictOverviewTask(luigi.Task):
         delta_needed_for = ['deaths', 'discharged', 'tests', 'positive']
         group_by_cols = []
         try:
-            data_mini2 = interpolate_values_generic(data_mini2, group_by_cols, delta_needed_for)
+            data_mini2 = interpolate_values_generic(data_mini2, group_by_cols, list(overall_df))
             data_mini2 = create_delta_cols(data_mini2, group_by_cols, delta_needed_for)
         except:
             print("error in delta/interpolate")
