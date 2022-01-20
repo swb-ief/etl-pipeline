@@ -109,11 +109,11 @@ def interpolate_values_generic(df, group_by_cols, delta_needed_for_cols):
     # fill missing values with linearly interpolated values, and round interpolated values to the nearest integer
     for item in delta_needed_for_cols:
         if len(group_by_cols)>0:
-            complete_df[f'total.{item}'] = complete_df.groupby(group_by_cols)[f'total.{item}'].transform(lambda x: x.fillna(x.interpolate()))
+            complete_df[item] = complete_df.groupby(group_by_cols)[item].transform(lambda x: x.fillna(x.interpolate()))
         else:
-            complete_df[f'total.{item}'] = complete_df[f'total.{item}'].transform(lambda x: x.fillna(x.interpolate()))
+            complete_df[item] = complete_df[item].transform(lambda x: x.fillna(x.interpolate()))
         
-        complete_df[f'total.{item}'] = complete_df[f'total.{item}'].apply(lambda x: round(x, 0))
+        complete_df[item] = complete_df[item].apply(lambda x: round(x, 0))
 
     # sort again on ward/date
     complete_df = complete_df.set_index(index_cols)
