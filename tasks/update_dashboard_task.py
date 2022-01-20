@@ -182,7 +182,7 @@ class UpdateDashboardTask(luigi.Task):
             grouping_columns=['state', 'district', 'ward']
         )
         
-        district_overview_data = district_overview_data.set_index(['date'])
+        #district_overview_data = district_overview_data.set_index(['date'])
 
         self.update_population_sheets(state_data, district_data, repository)
 
@@ -199,7 +199,7 @@ class UpdateDashboardTask(luigi.Task):
         states_filtered = state_data[self.state_columns_needed_by_dashboard]
         districts_filtered = district_data[self.district_columns_needed_by_dashboard]
         wards_filtered = ward_data[self.ward_columns_needed_by_dashboard]
-        districtoverview_filtered = district_overview_data[self.districtoverview_columns_needed_by_dashboard]
+        districtoverview_filtered = district_overview_data[['date']+self.districtoverview_columns_needed_by_dashboard]
 
         repository.store_dataframe(hospitalizations_updated, self.storage_hospitalizations, allow_create=True)
         repository.store_dataframe(states_filtered, self.storage_states, allow_create=True)
