@@ -59,7 +59,7 @@ class FetchDistrictOverviewTask(luigi.Task):
         delta_needed_for = ['count']
         group_by_cols = ['date', 'metric', 'metric_type']
         try:
-            overall_df = interpolate_values(overall_df, group_by_cols, list(overall_df))
+            overall_df = interpolate_values(overall_df, group_by_cols, delta_needed_for)
             overall_df = create_delta_cols(overall_df, group_by_cols, delta_needed_for)
         except:
             pass
