@@ -203,7 +203,7 @@ def _extract_data_from_page(positive_cases_pdf_page, x0, top, graph_name) -> pd.
     if graph_name=='COVID19 Case Analysis':  
         x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 110, 30, 'Total Positive', xstep=5, ystep=2)
         metricbox = (x, y, x+138, y+310)
-        countbox = (x+138, y, x+200, y+310)
+        countbox = (x+138, y, x+205, y+310)
     
     if graph_name=='COVID19 Bed Management':  
         x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 110, 18, 'Bed Capacity', xstep=5, ystep=2)
