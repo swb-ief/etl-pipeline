@@ -201,23 +201,23 @@ def _extract_data_from_page(positive_cases_pdf_page, x0, top, graph_name) -> pd.
     
 
     if graph_name=='COVID19 Case Analysis':  
-        x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 110, 30, 'Total Positive', xstep=5, ystep=2)
+        x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 110, 40, 'Total Positive', xstep=5, ystep=2)
         metricbox = (x, y, x+138, y+310)
-        countbox = (x+138, y, x+205, y+310)
+        countbox = (x+138, y, x+205, y+315)
     
     if graph_name=='COVID19 Bed Management':  
-        x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 110, 18, 'Bed Capacity', xstep=5, ystep=2)
+        x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 110, 25, 'Bed Capacity', xstep=5, ystep=2, exact_matching=False)
         metricbox = (x, y, x+125, y+315)
         countbox = (x+125, y, x+203, y+315)
     
     
     if graph_name=='Containment Measures':
-        x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 160, 40, 'Active Containment Zones –\nSlums & Chawls', xstep=5, ystep=2)
+        x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 160, 40, 'Active Containment Zones –\nSlums & Chawls', xstep=5, ystep=2, exact_matching=False)
         metricbox = (x, y, x+170, y+173)
-        countbox = (x+170, y, x+222, y+173)
+        countbox = (x+170, y, x+215, y+173)
         
     if graph_name=='Quarantine Stats':
-        x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 100, 35, 'Total Quarantine \nCompleted', xstep=5, ystep=2)
+        x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 100, 35, 'Total Quarantine \nCompleted', xstep=5, ystep=2, exact_matching=False)
         metricbox = (x, y, x+140, y+70)
         countbox = (x+140, y, x+215, y+70)
 
@@ -353,23 +353,28 @@ def _extract_data_from_page(positive_cases_pdf_page, x0, top, graph_name) -> pd.
     return df
 
 
-def get_text_coordinate(positive_cases_pdf_page, x0, y0, width, height, text, xstep=5, ystep=2):
+def get_text_coordinate(positive_cases_pdf_page, x0, y0, width, height, text, xstep=5, ystep=2, exact_matching=True):
     
     # check if original bbox has the required text
-    if positive_cases_pdf_page.within_bbox((x0, y0, x0+width, y0+height)).extract_text()!=text:
+    def minimatcher(text1, text2, exmatch=exact_matching):
+        if exact_matching:
+            return text1==text2
+        return bool(re.search(re.sub("[^0-9a-zA-Z\s]+", '', re.escape(text2.lower())), re.sub("[^0-9a-zA-Z\s]+", '', re.escape(text1.lower()))))
+        
+    if not minimatcher(positive_cases_pdf_page.within_bbox((x0, y0, x0+width, y0+height)).extract_text(), text, exact_matching):
         raise Exception("Specified initial bbox doesn't contain the specified text")
         
     x = x0
     y = y0    
     
     # keep shifting x coordinate of box until text is no longer captured in the bbox
-    while positive_cases_pdf_page.within_bbox((x, y, x+width, y+height)).extract_text()==text:
+    while minimatcher(positive_cases_pdf_page.within_bbox((x, y, x+width, y+height)).extract_text(), text, exact_matching):
         x+=xstep
     # final x coordinate
     x-=xstep
     
     # keep shifting y coordinate of box until text is no longer captured in the bbox
-    while positive_cases_pdf_page.within_bbox((x, y, x+width, y+height)).extract_text()==text:
+    while minimatcher(positive_cases_pdf_page.within_bbox((x, y, x+width, y+height)).extract_text(), text, exact_matching):
         y+=ystep
     # final y coordinate
     y-=ystep
@@ -557,7 +562,7 @@ def scrape_mumbai_pdf_overall(source_file_path):
     tables_config = {
         "COVID19 Case Analysis":{'type':'one column',
         "x0": 10,
-        "top": 125,
+        "top": 115,
         },
         "COVID19 Bed Management":{'type':'one column',
         "x0": 220,
