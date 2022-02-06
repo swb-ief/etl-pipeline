@@ -212,7 +212,7 @@ def _extract_data_from_page(positive_cases_pdf_page, x0, top, graph_name) -> pd.
     
     
     if graph_name=='Containment Measures':
-        x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 160, 40, 'Active Containment Zones –\nSlums & Chawls', xstep=5, ystep=2, exact_matching=False)
+        x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 160, 50, 'Active Containment Zones –\nSlums & Chawls', xstep=5, ystep=2, exact_matching=False)
         metricbox = (x, y, x+170, y+173)
         countbox = (x+170, y, x+215, y+173)
         
