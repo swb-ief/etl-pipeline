@@ -217,7 +217,7 @@ def _extract_data_from_page(positive_cases_pdf_page, x0, top, graph_name) -> pd.
         countbox = (x+170, y, x+215, y+173)
         
     if graph_name=='Quarantine Stats':
-        x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 100, 35, 'Total Quarantine \nCompleted', xstep=5, ystep=2, exact_matching=False)
+        x, y = get_text_coordinate(positive_cases_pdf_page, x0, top, 120, 45, 'Total Quarantine \nCompleted', xstep=5, ystep=2, exact_matching=False)
         metricbox = (x, y, x+140, y+70)
         countbox = (x+140, y, x+215, y+70)
 
@@ -574,7 +574,7 @@ def scrape_mumbai_pdf_overall(source_file_path):
         },
         "Quarantine Stats":{'type':'one column',
         "x0": 735,
-        "top": 180,
+        "top": 175,
         },
         "CCC1 Facilities":{'type':'facilities',
         "x0": 490,
