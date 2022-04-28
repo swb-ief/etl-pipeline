@@ -126,7 +126,9 @@ class UpdateDashboardTask(luigi.Task):
         
         states_covid19india_data = pd.read_csv("https://api.covid19tracker.in/data/csv/latest/states.csv", parse_dates=["Date"])
         states_covid19india_data['other'] = None
-        states_covid19india_data['tested'] = None
+        states_collist_rearranged = list(states_covid19india_data)[0:5]+['other']+list(states_covid19india_data)[-2:-1]
+        states_covid19india_data = states_covid19india_data[states_collist_rearranged]
+        #states_covid19india_data['tested'] = None
         districts_covid19india_data = pd.read_csv("https://api.covid19tracker.in/data/csv/latest/districts.csv", parse_dates=["Date"])
         districts_covid19india_data['tested'] = None
         
