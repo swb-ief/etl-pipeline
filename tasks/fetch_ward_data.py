@@ -30,6 +30,8 @@ class FetchWardDataTask(luigi.Task):
 
         if repository.exists(ward_storage_location):
             all_wards = repository.get_dataframe(ward_storage_location)
+            all_wards = all_wards.drop_duplicates()
+            existing_dates = all_wards.date.apply(lambda x: x.strftime('%Y-%m-%d')).unique()
             all_wards = all_wards.set_index(['state', 'district', 'ward', 'date'])
         else:
             all_wards = None
@@ -37,9 +39,13 @@ class FetchWardDataTask(luigi.Task):
         for district, ward_task in self.input().items():
             log.info(f'Processing: {district}')
 
-            with ward_task.open('r') as json_file:
-                ward_task = pd.read_csv(json_file, parse_dates=['date'])
-                ward_task = ward_task.set_index(['state', 'district', 'ward', 'date'])
+            with ward_task.open('r') as csv_file:
+                ward_task = pd.read_csv(csv_file, parse_dates=['date'])
+                new_date = ward_task.date[0:1].apply(lambda x: x.strftime('%Y-%m-%d'))[0]
+                if new_date not in existing_dates:
+                    ward_task = ward_task.set_index(['state', 'district', 'ward', 'date'])
+                else:
+                    ward_task = pd.DataFrame()
 
             # This needs to support overwriting existing data as well as adding new data
             # TODO make a test for it
